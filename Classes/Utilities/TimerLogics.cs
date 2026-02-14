@@ -119,6 +119,15 @@ namespace InTempo.Classes.Utilities
 
         public void ResetTimerPreciso(Parte Parte)
         {
+            if(Parte == AdunanzaCorrente.Current)
+            {
+                TimeSpan temp = Parte.TempoParte - Parte.TempoScorrevole;
+                if (temp > TimeSpan.Zero)
+                {
+                    AdunanzaCorrente.TempoResiduo = AdunanzaCorrente.TempoResiduo.Add(temp);
+                }
+            }
+
             Parte.TempoScorrevole = Parte.TempoParte;
 
             if (Parte == AdunanzaCorrente.Current)
