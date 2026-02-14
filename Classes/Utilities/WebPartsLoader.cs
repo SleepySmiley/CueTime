@@ -33,9 +33,29 @@ namespace InTempo.Classes.Utilities
         private const int WeekPageTimeoutMs = 6000;
         private const int DetailPageTimeoutMs = 7000;
 
-        // Cache: LocalAppData
-        private static readonly string CacheDir =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InTime", "cache");
+        // ==========================================================
+        // Cache: LocalAppData (ROBUSTO)
+        // ==========================================================
+
+        private static readonly string CacheDir = BuildCacheDir();
+
+        private static string BuildCacheDir()
+        {
+            // In alcuni ambienti può tornare null/empty: evitiamo crash nello static initializer
+            var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            if (string.IsNullOrWhiteSpace(basePath))
+                basePath = Path.GetTempPath(); // fallback sicuro (mai null)
+
+            return Path.Combine(basePath, "InTime", "cache");
+        }
+
+        // Marker pulizia settimanale (DEVE stare DOPO CacheDir)
+        private static readonly string CachePurgeMarkerPath =
+            Path.Combine(CacheDir, "_last_weekly_purge.txt");
+
+        // Lock per evitare doppie pulizie in multi-thread
+        private static readonly object CachePurgeLock = new object();
 
         // TTL cache settimanale
         private const int CacheTtlDays = 8;
@@ -91,6 +111,9 @@ namespace InTempo.Classes.Utilities
         static WebPartsLoader()
         {
             try { Directory.CreateDirectory(CacheDir); } catch { }
+
+            // ✅ Pulizia automatica: 1 volta a settimana (alla prima esecuzione della settimana)
+            EnsureWeeklyCachePurge();
         }
 
         public static string GetCacheFolderPath() => CacheDir;
@@ -157,7 +180,6 @@ namespace InTempo.Classes.Utilities
 
             return stock;
         }
-
 
         public static async Task<ObservableCollection<Parte>> CaricaInfrasettimanaleAsync(
             bool bypassCache = false)
@@ -228,8 +250,6 @@ namespace InTempo.Classes.Utilities
                         string html = File.ReadAllText(detailCache);
                         var doc = LoadHtml(html);
                         var art = FindArticleNode(doc);
-                        // Se trovato in cache, ritorna qui. 
-                        // IsLoading verrà settato a false dal chiamante (CaricaInfrasettimanaleAsync) subito dopo.
                         if (art != null) return art;
                     }
                     catch { }
@@ -510,7 +530,6 @@ namespace InTempo.Classes.Utilities
 
             return new ObservableCollection<Parte>(result);
         }
-
 
         private static bool IsAllowedMinistryPart(string title)
         {
@@ -948,5 +967,47 @@ namespace InTempo.Classes.Utilities
             return ExtractWeekendSongs_2_3_FromWtStudyHtml(wtHtml);
         }
 
+        // ==========================================================
+        // ✅ Pulizia cache: 1 volta a settimana
+        // ==========================================================
+        private static void EnsureWeeklyCachePurge()
+        {
+            try
+            {
+                lock (CachePurgeLock)
+                {
+                    Directory.CreateDirectory(CacheDir);
+
+                    var (year, week) = GetIsoWeek(DateTime.Now);
+                    string token = $"{year}-{week:D2}"; // es: 2026-07
+
+                    string last = "";
+                    if (File.Exists(CachePurgeMarkerPath))
+                    {
+                        try { last = (File.ReadAllText(CachePurgeMarkerPath) ?? "").Trim(); }
+                        catch { last = ""; }
+                    }
+
+                    // Se è cambiata la settimana, svuota TUTTA la cache
+                    if (!string.Equals(last, token, StringComparison.Ordinal))
+                    {
+                        try
+                        {
+                            if (Directory.Exists(CacheDir))
+                                Directory.Delete(CacheDir, true);
+                        }
+                        catch { /* ignora */ }
+
+                        try { Directory.CreateDirectory(CacheDir); } catch { /* ignora */ }
+
+                        try { File.WriteAllText(CachePurgeMarkerPath, token); } catch { /* ignora */ }
+                    }
+                }
+            }
+            catch
+            {
+                // Non bloccare mai l'app per la cache
+            }
+        }
     }
 }
