@@ -65,7 +65,17 @@ namespace InTempo.Classes.NonAbstract
         {
             get
             {
-                string segno = _tempoResiduo >= TimeSpan.Zero ? "+" : "-";
+                string segno = "";
+
+                if (TempoResiduo > TimeSpan.Zero)
+                {
+                    segno = "-";
+                }
+                else if (TempoResiduo < TimeSpan.Zero)
+                {
+                    segno = "+";
+                }
+
                 return $"{segno}{_tempoResiduo:mm\\:ss}";
             }
         }
