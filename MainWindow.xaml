@@ -17,6 +17,8 @@
         Title="InTempo" Height="500" Width="800" Loaded="Window_Loaded">
 
     <Grid>
+        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -123,6 +125,26 @@
                 </DataGrid.Columns>
             </DataGrid>
         </materialDesign:Card>
+
+        <materialDesign:Card Grid.Row="1"
+                     UniformCornerRadius="14"
+                     Padding="4"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Background="Transparent"
+                     materialDesign:ElevationAssist.Elevation="Dp0"
+                     Panel.ZIndex="10"
+                     IsHitTestVisible="False">
+            <ProgressBar x:Name="prgbar"
+                 Style="{StaticResource MaterialDesignCircularProgressBar}"
+                 Value="50"
+                 IsIndeterminate="True"
+                 Width="30" Height="30"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Visibility="Visible"/>
+        </materialDesign:Card>
+
 
         <Grid Grid.Row="2" Margin="16">
             <Grid.ColumnDefinitions>

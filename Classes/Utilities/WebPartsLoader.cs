@@ -14,6 +14,7 @@ using HtmlAgilityPack;
 
 using System.Drawing;
 
+// Assicurati che questi namespace esistano nel tuo progetto
 using InTempo.Classes.NonAbstract;
 using System.Formats.Nrbf;
 
@@ -25,6 +26,8 @@ namespace InTempo.Classes.Utilities
         private const string BaseUrl = "https://wol.jw.org";
         private const int SONG_MIN = 5;
 
+        // Propieta' Completed
+        public static bool IsLoading { get; private set; } = true;
 
         // Timeouts
         private const int WeekPageTimeoutMs = 6000;
@@ -113,15 +116,23 @@ namespace InTempo.Classes.Utilities
             bool preferStudyForWeekend = true,
             bool bypassCache = false)
         {
+            // Resetto a true all'inizio dell'operazione
+            IsLoading = true;
+
             var stock = BuildWeekendStock();
 
             // Se non vuoi usare lo studio WT (o vuoi evitare web), torno stock puro
             if (!preferStudyForWeekend)
+            {
+                // ✅ FIX: Imposto IsLoading a false anche se esco subito
+                IsLoading = false;
                 return stock;
+            }
 
             try
             {
                 // Prendo SOLO cantico 2 e 3 dallo Studio Torre di Guardia
+                // (Questo metodo gestisce internamente la cache: se trova il file, lo usa)
                 var (song2, song3) = await CaricaCanticiFineSettimana_2_3_Async(bypassCache).ConfigureAwait(false);
 
                 const string tipo = "Fine settimana";
@@ -137,6 +148,12 @@ namespace InTempo.Classes.Utilities
             {
                 // Fallback: se qualcosa va storto, rimane stock
             }
+            finally
+            {
+                // ✅ FIX: Assicuro che IsLoading diventi false sia in caso di successo (Web/Cache) 
+                // sia in caso di errore (Fallback su Stock)
+                IsLoading = false;
+            }
 
             return stock;
         }
@@ -145,10 +162,27 @@ namespace InTempo.Classes.Utilities
         public static async Task<ObservableCollection<Parte>> CaricaInfrasettimanaleAsync(
             bool bypassCache = false)
         {
-            HtmlNode article = await GetMeetingArticleAsync(MeetingKind.Midweek, bypassCache, preferStudyForWeekend: true)
-                .ConfigureAwait(false);
+            // Resetto a true all'inizio
+            IsLoading = true;
 
-            return ParseMidweekFromMwbArticle(article);
+            try
+            {
+                // GetMeetingArticleAsync controlla la cache. Se il file esiste, lo carica e ritorna subito.
+                HtmlNode article = await GetMeetingArticleAsync(MeetingKind.Midweek, bypassCache, preferStudyForWeekend: true)
+                    .ConfigureAwait(false);
+
+                // ✅ FIX: Se siamo qui, abbiamo l'articolo (da web o da cache).
+                // Possiamo dire che il caricamento "pesante" è finito.
+                IsLoading = false;
+
+                return ParseMidweekFromMwbArticle(article);
+            }
+            catch
+            {
+                // In caso di errore critico, assicuriamoci di sbloccare lo stato di caricamento
+                IsLoading = false;
+                throw; // Rilanciamo l'errore per farlo gestire alla UI se necessario
+            }
         }
 
         // ==========================================================
@@ -194,6 +228,8 @@ namespace InTempo.Classes.Utilities
                         string html = File.ReadAllText(detailCache);
                         var doc = LoadHtml(html);
                         var art = FindArticleNode(doc);
+                        // Se trovato in cache, ritorna qui. 
+                        // IsLoading verrà settato a false dal chiamante (CaricaInfrasettimanaleAsync) subito dopo.
                         if (art != null) return art;
                     }
                     catch { }
@@ -294,7 +330,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_INTRO_COMMENTS,
                         TimeSpan.FromMinutes(mIntro),
                         "Apertura",
-                        System.Windows.Media.   Brushes.DimGray,
+                        System.Windows.Media.Brushes.DimGray,
                         TimeSpan.FromMinutes(mIntro),
                         null));
 

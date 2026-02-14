@@ -27,11 +27,14 @@ namespace InTempo
             InitializeComponent();
             LogicTimer = new TimerLogics(DatiAdunanza);
             DataContext = this;
+         
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await DatiAdunanza.SelectedAdunanza();
+
+            Caricamento();
         }
 
         private void BtnAvanti_Click(object sender, RoutedEventArgs e)
@@ -145,6 +148,18 @@ namespace InTempo
             }
 
             if (wasRunning) LogicTimer.StartTimer();
+        }
+
+        public void Caricamento()
+        {
+            if(WebPartsLoader.IsLoading)
+            {
+                prgbar.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                prgbar.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }
