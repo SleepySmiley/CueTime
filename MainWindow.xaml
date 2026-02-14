@@ -95,7 +95,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </materialDesign:DataGridTextColumn>
 
-                    <materialDesign:DataGridTextColumn Header="Durata" Binding="{Binding TempoParte, StringFormat=mm\\:ss}" Width="Auto" IsReadOnly="True">
+                    <materialDesign:DataGridTextColumn Header="Durata" Binding="{Binding TempoParteLabel}" Width="Auto" IsReadOnly="True">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="VerticalAlignment" Value="Center"/>
@@ -105,7 +105,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </materialDesign:DataGridTextColumn>
 
-                    <materialDesign:DataGridTextColumn Header="Timer" Binding="{Binding TempoScorrevole, StringFormat=mm\\:ss}" Width="Auto" IsReadOnly="True">
+                    <materialDesign:DataGridTextColumn Header="Timer" Binding="{Binding TempoScorrevoleLabel}" Width="Auto" IsReadOnly="True">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="VerticalAlignment" Value="Center"/>
@@ -167,7 +167,7 @@
 
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock Text="TEMPO RESIDUO" FontSize="10" FontWeight="Bold" Opacity="0.5"/>
-                <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString, StringFormat={}{0:mm\\:ss}}" 
+                <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString}" 
                            FontSize="20" 
                            FontWeight="Medium"
                            Foreground="{Binding LogicTimer.TempoResiduoBrush}"/>

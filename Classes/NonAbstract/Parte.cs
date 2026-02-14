@@ -45,6 +45,7 @@ namespace InTempo.Classes.NonAbstract
                 {
                     _tempoParte = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(TempoParteLabel));
                 }
             }
         }
@@ -87,11 +88,14 @@ namespace InTempo.Classes.NonAbstract
                 {
                     _tempoScorrevole = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(TempoScorrevoleLabel));
                 }
             }
         }
 
-        //Proprieta per gestire il colore della riga 
+        public string TempoParteLabel => FormatTotalMinutes(TempoParte);
+        public string TempoScorrevoleLabel => FormatTotalMinutes(TempoScorrevole);
+
         private bool _isCurrent;
         public bool IsCurrent
         {
@@ -106,7 +110,6 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-
         public Parte(string nome, TimeSpan t, string tipo, Brush colore, TimeSpan tempoScorrevole, int? numeroParte)
         {
             NomeParte = nome;
@@ -115,6 +118,17 @@ namespace InTempo.Classes.NonAbstract
             ColoreParte = colore;
             TempoScorrevole = tempoScorrevole;
             NumeroParte = numeroParte;
+        }
+
+        private static string FormatTotalMinutes(TimeSpan ts)
+        {
+            var sign = ts < TimeSpan.Zero ? "-" : "";
+            ts = ts.Duration();
+
+            int totalMinutes = (int)ts.TotalMinutes;
+            int seconds = ts.Seconds;
+
+            return $"{sign}{totalMinutes}:{seconds:00}";
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

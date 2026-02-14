@@ -27,7 +27,7 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-        private int _currentParte = 0;
+        private int _currentParteIndex = 0;
         private Parte? _current;
         public Parte? Current
         {
@@ -72,20 +72,17 @@ namespace InTempo.Classes.NonAbstract
         {
             get
             {
-                string segno = "";
+                var ts = TempoResiduo;
+                var sign = ts > TimeSpan.Zero ? "-" : ts < TimeSpan.Zero ? "+" : "";
+                ts = ts.Duration();
 
-                if (TempoResiduo > TimeSpan.Zero)
-                {
-                    segno = "-";
-                }
-                else if (TempoResiduo < TimeSpan.Zero)
-                {
-                    segno = "+";
-                }
+                int totalMinutes = (int)ts.TotalMinutes;
+                int seconds = ts.Seconds;
 
-                return $"{segno}{_tempoResiduo:mm\\:ss}";
+                return $"{sign}{totalMinutes}:{seconds:00}";
             }
         }
+
 
         public async Task SelectedAdunanza()
         {
@@ -105,8 +102,8 @@ namespace InTempo.Classes.NonAbstract
 
             if (Parti.Count > 0)
             {
-                _currentParte = 0;
-                Current = Parti[_currentParte];
+                _currentParteIndex = 0;
+                Current = Parti[_currentParteIndex];
             }
         }
 
@@ -119,44 +116,58 @@ namespace InTempo.Classes.NonAbstract
 
         public void Avanti()
         {
-            if (_currentParte >= Parti.Count - 1)
+            if (Parti.Count == 0)
             {
+                Current = null;
+                _currentParteIndex = 0;
                 return;
             }
-            else if (Current != null)
-            {
-                // Sottraggo il tempo della parte che ho skippato al tempo residuo 
-                // CORREZIONE: Se ho risparmiato tempo (scorre > 0), lo AGGIUNGO al residuo.
-                // Se ero in ritardo (scorre < 0), il timer ha già scalato il residuo, quindi non faccio nulla.
-                if (Current.TempoScorrevole > TimeSpan.Zero)
-                {
-                    TempoResiduo += Current.TempoScorrevole;
-                }
 
-                _currentParte++;
-                Current = Parti[_currentParte];
+            int idx = Current != null ? Parti.IndexOf(Current) : -1;
+            if (idx < 0)
+            {
+                _currentParteIndex = 0;
+                Current = Parti[0];
+                return;
             }
+
+            if (idx >= Parti.Count - 1)
+                return;
+
+            if (Current!.TempoScorrevole > TimeSpan.Zero)
+                TempoResiduo += Current.TempoScorrevole;
+
+            _currentParteIndex = idx + 1;
+            Current = Parti[_currentParteIndex];
         }
 
         public void Indietro()
         {
-            if (_currentParte <= 0)
+            if (Parti.Count == 0)
             {
+                Current = null;
+                _currentParteIndex = 0;
                 return;
             }
-            else
+
+            int idx = Current != null ? Parti.IndexOf(Current) : -1;
+            if (idx < 0)
             {
-                _currentParte--;
-
-                // Riaggiungo il tempo della parte skippata al tempo residuo
-                // CORREZIONE: Inverto la logica di Avanti. Se avevo aggiunto tempo, ora lo tolgo.
-                if (Parti[_currentParte].TempoScorrevole > TimeSpan.Zero)
-                {
-                    TempoResiduo -= Parti[_currentParte].TempoScorrevole;
-                }
-
-                Current = Parti[_currentParte];
+                _currentParteIndex = 0;
+                Current = Parti[0];
+                return;
             }
+
+            if (idx <= 0)
+                return;
+
+            _currentParteIndex = idx - 1;
+
+            if (Parti[_currentParteIndex].TempoScorrevole > TimeSpan.Zero)
+                TempoResiduo -= Parti[_currentParteIndex].TempoScorrevole;
+
+            Current = Parti[_currentParteIndex];
         }
+
     }
 }
