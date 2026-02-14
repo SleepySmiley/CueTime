@@ -1,0 +1,273 @@
+﻿<Window x:Class="InTempo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:InTempo"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="6*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.2*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label 
+                Content="{Binding DatiAdunanza.Current.NomeParte}" 
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                FontSize="25"
+                FontWeight="SemiBold"
+                Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
+
+            <TextBlock Grid.Column="1"
+       Text="{Binding DatiAdunanza.Current.TempoScorrevole, StringFormat=mm\\:ss}"
+       HorizontalAlignment="Center"
+       VerticalAlignment="Center"
+       FontSize="25"
+       FontWeight="SemiBold"
+       Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.2*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.18*"/>
+                    <ColumnDefinition Width="0.9*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="btnOptions" 
+                        Content="O"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Grid.Column="0"/>
+
+
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.5*"/>
+                        <ColumnDefinition Width="0.5*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="Tempo Residuo:" 
+                           HorizontalAlignment="Stretch" 
+                           VerticalAlignment="Stretch" 
+                           HorizontalContentAlignment="Left"
+                           VerticalContentAlignment="Center"
+                           Grid.Column="0" 
+                           FontSize="13" 
+                           Foreground="Black"/>
+
+                    <Label VerticalContentAlignment="Center" 
+                           HorizontalContentAlignment="Left" 
+                           Grid.Column="1">
+
+
+
+                        <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString, StringFormat={}{0:mm\\:ss}}" 
+                                   TextAlignment="Left"
+                                   FontSize="13" 
+                                   Foreground="{Binding LogicTimer.TempoResiduoBrush}"/>
+                    </Label>
+                </Grid>
+
+               
+            </Grid>
+
+            <Button x:Name="BtnAvanti"
+                    Width="50" Height="50"
+                    Grid.Column="3"
+                    Style="{StaticResource MaterialDesignFloatingActionButton}"
+                    Click="BtnAvanti_Click">
+                <iconPacks:PackIconMaterial Kind="ChevronRight" Width="24" Height="24"/>
+            </Button>
+
+            <Button x:Name="BtnPausaRiprendi"
+                    Width="50" Height="50"
+                    Grid.Column="2"
+                    Style="{StaticResource MaterialDesignFloatingActionButton}"
+                    Click="BtnPausaRiprendi_Click">
+                <iconPacks:PackIconMaterial Kind="Pause" Width="24" Height="24"/>
+            </Button>
+
+            <Button x:Name="BtnIndietro"
+                    Width="50" Height="50"
+                    Grid.Column="1"
+                    Style="{StaticResource MaterialDesignFloatingActionButton}"
+                    Click="BtnIndietro_Click">
+                <iconPacks:PackIconMaterial Kind="ChevronLeft" Width="24" Height="24"/>
+            </Button>
+        </Grid>
+
+        <DataGrid x:Name="DataGridAdunanza"
+                  ItemsSource="{Binding DatiAdunanza.Parti}"
+                  AutoGenerateColumns="False"
+                  Grid.Row="1"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeRows="False"
+                  CanUserSortColumns="False"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow"
+                  materialDesign:DataGridAssist.SelectedCellBorderBrush="Transparent">
+
+            <DataGrid.Resources>
+                <!-- MaterialDesign: niente evidenza su selezione e hover -->
+                <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.Selected" Color="Transparent" />
+                <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.RowHoverBackground" Color="Transparent" />
+
+                <!-- fallback WPF -->
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+
+                <Style x:Key="CellaBloccata" TargetType="DataGridCell">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                </Style>
+            </DataGrid.Resources>
+
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="#"
+                                    Binding="{Binding NumeroParte}"
+                                    Width="0.5*"
+                                    CellStyle="{StaticResource CellaBloccata}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding ColoreParte}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Titolo"
+                                    Binding="{Binding NomeParte}"
+                                    Width="5*"
+                                    CellStyle="{StaticResource CellaBloccata}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding ColoreParte}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Durata"
+                                    Binding="{Binding TempoParte}"
+                                    Width="*"
+                                    CellStyle="{StaticResource CellaBloccata}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding ColoreParte}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Timer"
+                                    Binding="{Binding TempoScorrevole}"
+                                    Width="*"
+                                    CellStyle="{StaticResource CellaBloccata}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding ColoreParte}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+
+                <DataGridTemplateColumn Width="60">
+
+
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconMaterial Kind="DotsVertical"
+                                                        Width="18"
+                                                        Height="18"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="#c1c1c1"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+
+                    <!-- SOLO per questa colonna: niente outline + contenuto centrato (no stretch) -->
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTemplateColumn.CellStyle>
+
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="btnOptions"
+                                    Width="28"
+                                    Height="28"
+                                    Padding="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Focusable="False"
+                                    IsTabStop="False"
+                                    FocusVisualStyle="{x:Null}"
+                                    BorderThickness="0"
+                                    PreviewMouseLeftButtonDown="btnOptions_PreviewMouseLeftButtonDown">
+
+                                <iconPacks:PackIconMaterial Kind="DotsVertical"
+                                                            Width="18"
+                                                            Height="18"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"/>
+
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem x:Name="MenuItemReset" Header="Reset" Click="MenuItemReset_Click"/>
+                                        <MenuItem x:Name="MenuItemAggiungi" Header="Aggiungi Parte" Click="MenuItemAggiungi_Click"/>
+                                        <MenuItem x:Name="MenuItemEllimina" Header="Ellimina Parte" Click="MenuItemEllimina_Click"/>
+                                        <MenuItem x:Name="MenuItemModifica" Header="Modifica Parte" Click="MenuItemModifica_Click"/>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </Grid>
+</Window>

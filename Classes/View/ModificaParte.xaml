@@ -1,0 +1,130 @@
+﻿<Window x:Class="InTempo.Classes.View.ModificaParte"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:media="clr-namespace:System.Windows.Media;assembly=PresentationCore"
+        mc:Ignorable="d"
+        Title="Gestione Parte" Height="420" Width="450"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize"
+        Background="White">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
+        <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
+        <SolidColorBrush x:Key="TextLight" Color="#757575"/>
+        <SolidColorBrush x:Key="TextDark" Color="#212121"/>
+
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="0,5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Background="{TemplateBinding Background}">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="LabelStyle">
+            <Setter Property="Foreground" Value="{StaticResource TextLight}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,15,0,5"/>
+        </Style>
+
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource PrimaryDarkColor}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource PrimaryDarkColor}" Padding="20">
+            <TextBlock Text="Nuova Parte" Foreground="White" FontSize="20" FontWeight="SemiBold"/>
+        </Border>
+
+        <StackPanel Grid.Row="1" Margin="30,10">
+
+            <TextBlock Text="NUMERO (OPZIONALE)" Style="{StaticResource LabelStyle}"/>
+            <TextBox x:Name="TxtNumero" Style="{StaticResource ModernTextBox}" Text="{Binding NumeroParte}"/>
+
+            <TextBlock Text="TITOLO PARTE" Style="{StaticResource LabelStyle}"/>
+            <TextBox x:Name="TxtNome" Style="{StaticResource ModernTextBox}" Text="{Binding NomeParte}"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="DURATA (MM:SS)" Style="{StaticResource LabelStyle}"/>
+                    <TextBox x:Name="TxtDurata" Style="{StaticResource ModernTextBox}" Text="{Binding TempoParte}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="COLORE" Style="{StaticResource LabelStyle}"/>
+
+                    <ComboBox x:Name="CmbColore" 
+                        Margin="0,5,0,0" 
+                        Padding="5" 
+                        BorderThickness="0,0,0,1"
+                        SelectedValuePath="Tag"
+                        SelectedValue="{Binding ColoreParte}">
+                        <ComboBoxItem Content="Nero"  Foreground="Black" Tag="{x:Static media:Brushes.Black}"/>
+                        <ComboBoxItem Content="Rosso" Foreground="Red"   Tag="{x:Static media:Brushes.Red}"/>
+                        <ComboBoxItem Content="Blu"   Foreground="Blue"  Tag="{x:Static media:Brushes.Blue}"/>
+                        <ComboBoxItem Content="Verde" Foreground="Green" Tag="{x:Static media:Brushes.Green}"/>
+
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+        <Grid Grid.Row="2" Margin="30,0,30,30">
+            <Button x:Name="BtnFatto" Content="SALVA PARTE" Style="{StaticResource ModernButton}" Height="45" Click="BtnFatto_Click"/>
+        </Grid>
+    </Grid>
+</Window>
