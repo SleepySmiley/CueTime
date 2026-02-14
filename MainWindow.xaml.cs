@@ -104,6 +104,20 @@ namespace InTempo
         private void MenuItemEllimina_Click(object sender, RoutedEventArgs e)
         {
             var parteSelezionata = GetParteFromButton(sender);
+            if(parteSelezionata == DatiAdunanza.Current)
+            {
+                
+                if (DatiAdunanza.Parti[0] == DatiAdunanza.Current)
+                {
+                   DatiAdunanza.Avanti();
+                }
+                else
+                {
+                    DatiAdunanza.Indietro();
+                }
+                DatiAdunanza.Parti.Remove(parteSelezionata);
+                return;
+            }
             if (parteSelezionata != null)
             {
                 DatiAdunanza.TempoResiduo += parteSelezionata.TempoParte;

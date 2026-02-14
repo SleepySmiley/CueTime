@@ -21,7 +21,7 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-        private string _nomeParte;
+        private string _nomeParte = string.Empty;
         public string NomeParte
         {
             get => _nomeParte;
@@ -49,7 +49,7 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-        private string _tipoParte;
+        private string _tipoParte = string.Empty;
         public string TipoParte
         {
             get => _tipoParte;
@@ -63,7 +63,7 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-        private Brush _coloreParte;
+        private Brush _coloreParte = Brushes.Black;
         public Brush ColoreParte
         {
             get => _coloreParte;
@@ -90,6 +90,22 @@ namespace InTempo.Classes.NonAbstract
                 }
             }
         }
+
+        //Proprieta per gestire il colore della riga 
+        private bool _isCurrent;
+        public bool IsCurrent
+        {
+            get => _isCurrent;
+            set
+            {
+                if (_isCurrent != value)
+                {
+                    _isCurrent = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
 
         public Parte(string nome, TimeSpan t, string tipo, Brush colore, TimeSpan tempoScorrevole, int? numeroParte)
         {

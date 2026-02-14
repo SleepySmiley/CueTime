@@ -61,6 +61,18 @@
                       GridLinesVisibility="Horizontal"
                       BorderThickness="0"
                       Background="{DynamicResource MaterialDesignPaper}">
+                
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                <Setter Property="Background" Value="#332196F3"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+
 
                 <DataGrid.Columns>
                     <materialDesign:DataGridTextColumn Header="#" Binding="{Binding NumeroParte}" Width="Auto" IsReadOnly="True">

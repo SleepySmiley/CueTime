@@ -29,19 +29,26 @@ namespace InTempo.Classes.NonAbstract
 
         private int _currentParte = 0;
         private Parte? _current;
-
         public Parte? Current
         {
             get => _current;
             set
             {
-                if (_current != value)
-                {
-                    _current = value;
-                    OnPropertyChanged();
-                }
+                if (ReferenceEquals(_current, value))
+                    return;
+
+                if (_current != null)
+                    _current.IsCurrent = false;
+
+                _current = value;
+
+                if (_current != null)
+                    _current.IsCurrent = true;
+
+                OnPropertyChanged();
             }
         }
+
 
         private TimeSpan _tempoResiduo;
         public TimeSpan TempoResiduo
