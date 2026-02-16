@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dd="urn:gong-wpf-dragdrop"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:InTempo"
@@ -59,9 +60,20 @@
                       SelectionUnit="FullRow"
                       HeadersVisibility="Column"
                       GridLinesVisibility="Horizontal"
+                      CanUserSortColumns="False"
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="False"
                       BorderThickness="0"
-                      Background="{DynamicResource MaterialDesignPaper}">
-                
+                      Background="{DynamicResource MaterialDesignPaper}"
+                      dd:DragDrop.IsDragSource="True"
+                      dd:DragDrop.IsDropTarget="True"
+                      dd:DragDrop.UseDefaultDragAdorner="True"
+                      dd:DragDrop.DefaultDragAdornerOpacity="0.8"
+                      dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
+                      dd:DragDrop.DragDirectlySelectedOnly="True"
+                      dd:DragDrop.SelectDroppedItems="True">
+
+
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
