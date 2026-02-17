@@ -1,0 +1,22 @@
+﻿RiunioniGenerale Astratta
+
+Adunanze:
+infrasettimanale concreta
+finesettimana concreta
+sorvegliante infrasettimanale deriva da infrasttimanale
+sorvegliante finesettimana deriva da finesettimanale
+commemorazione concreta
+adunanza speciale concreta 
++ adunanza a scelta dell'utente concreta 
+
+
+
+Impostazioni: 
+
+-Tempo residuo / Tempo finale 
+
+-Data e ora di inizio
+
+-Chiaro / Scuro
+
+-

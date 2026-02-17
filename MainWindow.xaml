@@ -208,6 +208,23 @@
                     <iconPacks:PackIconMaterial Kind="SkipNext" Width="24" Height="24"/>
                 </Button>
             </StackPanel>
+
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+
+                <Button Width="40" 
+                        Height="40" 
+                        ToolTip="Impostazioni"
+                        Padding="0"
+                        materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click">
+
+                    <iconPacks:PackIconMaterial Kind="Cog" 
+                                    Width="22" 
+                                    Height="22" 
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Center"/>
+                </Button>
+
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

@@ -66,7 +66,7 @@ namespace InTempo
         // --- GESTIONE MENU SEMPLIFICATA ---
 
         // Funzione helper per recuperare la riga cliccata
-        private Parte GetParteFromButton(object sender)
+        private Parte? GetParteFromButton(object sender)
         {
             if (sender is Button btn && btn.Tag is Parte parte)
             {
@@ -182,6 +182,12 @@ namespace InTempo
             {
                 prgbar.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Classes.View.Impostazioni finestra = new Classes.View.Impostazioni();
+            finestra.ShowDialog();
         }
     }
 }
