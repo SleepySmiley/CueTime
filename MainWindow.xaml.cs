@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace InTempo
 {
@@ -12,6 +13,7 @@ namespace InTempo
         public Adunanza DatiAdunanza { get; set; } = new Adunanza();
         public TimerLogics LogicTimer { get; set; }
         private bool _isPaused = true;
+
 
         // Proprietà per cambiare l'icona Play/Pausa
         public string IconaStatoTimer

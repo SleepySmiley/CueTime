@@ -111,11 +111,11 @@
                           materialDesign:HintAssist.Hint="Giorno"
                           Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                           VerticalAlignment="Bottom">
-                                    <ComboBoxItem Content="Lunedì"/>
-                                    <ComboBoxItem Content="Martedì"/>
-                                    <ComboBoxItem Content="Mercoledì"/>
-                                    <ComboBoxItem Content="Giovedì"/>
-                                    <ComboBoxItem Content="Venerdì"/>
+                                    <ComboBoxItem Content="Lunedì" Tag="1"/>
+                                    <ComboBoxItem Content="Martedì" Tag="2"/>
+                                    <ComboBoxItem Content="Mercoledì" Tag="3"/>
+                                    <ComboBoxItem Content="Giovedì" Tag="4"/>
+                                    <ComboBoxItem Content="Venerdì" Tag="5"/>
                                 </ComboBox>
 
                                 <materialDesign:TimePicker x:Name="TimePickerInfra"
@@ -146,8 +146,8 @@
                           materialDesign:HintAssist.Hint="Giorno"
                           Style="{StaticResource MaterialDesignFloatingHintComboBox}"
                           VerticalAlignment="Bottom">
-                                    <ComboBoxItem Content="Sabato"/>
-                                    <ComboBoxItem Content="Domenica"/>
+                                    <ComboBoxItem Content="Sabato" Tag="6"/>
+                                    <ComboBoxItem Content="Domenica" Tag="0"/>
                                 </ComboBox>
 
                                 <materialDesign:TimePicker x:Name="TimePickerFine"
