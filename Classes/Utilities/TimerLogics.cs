@@ -142,5 +142,18 @@ namespace InTempo.Classes.Utilities
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        //metodo per resettare tutti i timer e far ripartire un aduannza da zero 
+        public void ResetCompleto()
+        {
+            foreach (var parte in AdunanzaCorrente.Parti)
+            {
+                parte.TempoScorrevole = parte.TempoParte;
+            }
+            AdunanzaCorrente.Current = AdunanzaCorrente.Parti.FirstOrDefault();
+            AdunanzaCorrente.TempoResiduo = TimeSpan.Zero;
+            CheckColorParte();
+            CheckColorTempoResiduo();
+        }
     }
 }

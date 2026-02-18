@@ -40,9 +40,14 @@
                        TextTrimming="CharacterEllipsis"/>
 
             <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
-                <TextBlock Text="{Binding DatiAdunanza.Current.TempoScorrevole, StringFormat=mm\\:ss}"
+                <TextBlock x:Name="txtTimer" Text="{Binding DatiAdunanza.Current.TempoScorrevole, StringFormat=mm\\:ss}"
                            FontWeight="Bold"
                            Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
+            </Viewbox>
+            <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
+                <TextBlock x:Name="txtOrologio" 
+               FontWeight="Bold"
+               Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
             </Viewbox>
         </Grid>
 

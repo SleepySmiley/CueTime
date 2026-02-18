@@ -27,9 +27,11 @@ namespace InTempo
         public MainWindow()
         {
             InitializeComponent();
+            AvviaOrologio();
             LogicTimer = new TimerLogics(DatiAdunanza);
             DataContext = this;
-         
+
+            
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -51,19 +53,16 @@ namespace InTempo
 
         private void BtnPausaRiprendi_Click(object sender, RoutedEventArgs e)
         {
-            if (_isPaused)
-            {
-                LogicTimer.StartTimer();
-                _isPaused = false;
-                IconaStatoTimer = "Pause"; // Cambio icona in Pausa
-            }
-            else
-            {
-                LogicTimer.StopTimer();
-                _isPaused = true;
-                IconaStatoTimer = "Play"; // Cambio icona in Play
-            }
+            SetStatoAdunanza(_isPaused);
         }
+
+        public void StopOrologio()
+        {
+            Orologio.Stop();
+            txtOrologio.Visibility = Visibility.Collapsed;
+            txtTimer.Visibility = Visibility.Visible;
+        }
+
 
         // --- GESTIONE MENU SEMPLIFICATA ---
 
@@ -191,5 +190,81 @@ namespace InTempo
             Classes.View.Impostazioni finestra = new Classes.View.Impostazioni();
             finestra.ShowDialog();
         }
+
+        // Logica orologio
+        DispatcherTimer Orologio {  get; set; } = new DispatcherTimer();
+        private void AvviaOrologio()
+        {
+          
+            Orologio.Interval = TimeSpan.FromSeconds(1);
+
+            Orologio.Tick += Timer_Tick;
+            txtTimer.Visibility = Visibility.Collapsed;
+            txtOrologio.Visibility = Visibility.Visible;
+
+            Orologio.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            var now = DateTime.Now;
+            txtOrologio.Text = now.ToString("HH:mm:ss");
+
+            // INFRAs
+            if (now.DayOfWeek == App.Settings.Infrasettimanale.GiornoSettimana &&
+                now.Hour == App.Settings.Infrasettimanale.OraInizio.Hour &&
+                now.Minute == App.Settings.Infrasettimanale.OraInizio.Minute)
+            {
+              SetStatoAdunanza(true);
+            }
+
+            // FINE SETTIMANA
+            else if (now.DayOfWeek == App.Settings.FineSettimana.GiornoSettimana &&
+                     now.Hour == App.Settings.FineSettimana.OraInizio.Hour &&
+                     now.Minute == App.Settings.FineSettimana.OraInizio.Minute)
+            {
+                SetStatoAdunanza(true);
+            }
+        }
+
+        // UNICO metodo che gestisce tutto: UI + orologio + timer adunanza + stato/icona
+        private void SetStatoAdunanza(bool avvia)
+        {
+            if (avvia)
+            {
+                // Se è già avviata, non fare nulla
+                if (!_isPaused) return;
+
+                _isPaused = false;
+                IconaStatoTimer = "Pause";
+
+                // Passo da orologio -> timer adunanza
+                Orologio.Stop();
+                txtOrologio.Visibility = Visibility.Collapsed;
+                txtTimer.Visibility = Visibility.Visible;
+
+                LogicTimer.StartTimer();
+            }
+            else
+            {
+                // Se è già ferma, non fare nulla
+                if (_isPaused) return;
+
+                _isPaused = true;
+                IconaStatoTimer = "Play";
+
+                // Stop = adunanza conclusa => stop + reset completo
+                LogicTimer.StopTimer();
+                LogicTimer.ResetCompleto();
+
+                // Torno a orologio
+                txtTimer.Visibility = Visibility.Collapsed;
+                txtOrologio.Visibility = Visibility.Visible;
+
+                Orologio.Start();
+            }
+        }
+
+
     }
 }
