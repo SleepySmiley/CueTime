@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InTempo.Classes.Utilities.Monitors;
+using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,14 +10,14 @@ namespace InTempo.Classes.View
 
     public partial class Impostazioni : Window
     {
-
         public Impostazioni()
         {
             InitializeComponent();
-
+            this.DataContext = this;
             TimePickerFine.SelectedTime = App.Settings.FineSettimana.OraInizio;
             TimePickerInfra.SelectedTime = App.Settings.Infrasettimanale.OraInizio;
             SelezioneGiorno();
+            SelezionaMonitorScelto();
         }
 
         private void BtnSalva_Click(object sender, RoutedEventArgs e)
@@ -24,6 +25,7 @@ namespace InTempo.Classes.View
             PrendiGiorno(CmbGiornoInfra.SelectedItem as ComboBoxItem);
             PrendiGiorno(CmbGiornoFine.SelectedItem as ComboBoxItem);
             PrendiOrario();
+            SalvaMonitor();
             this.DialogResult = true;
             this.Close();
         }
@@ -119,6 +121,34 @@ namespace InTempo.Classes.View
                 }
             }
 
+        }
+
+        public void SelezionaMonitorScelto()
+        {
+            string NomeMonitorSalvato = App.Settings.MonitorScelto.Nome;
+
+            foreach(var monitor in GestoreMonitor.Monitors)
+            {
+                if(monitor.Nome == NomeMonitorSalvato)
+                {
+                    cmbSchermi.SelectedItem = monitor;
+                    break;
+                }
+            }
+
+
+        }
+
+        public void SalvaMonitor()
+        {
+            if(cmbSchermi.SelectedItem is Utilities.Monitors.Monitor monitorSelezionato)
+                {
+                    App.Settings.MonitorScelto = monitorSelezionato;
+                }
+                else
+                {
+                    throw new ArgumentException("Monitor selezionato non valido");
+            }
         }
 
     }

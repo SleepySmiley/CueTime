@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InTempo.Classes.View"
+        xmlns:utilMonitors="clr-namespace:InTempo.Classes.Utilities.Monitors"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
@@ -59,9 +60,17 @@
                     <Grid Margin="16">
                         <StackPanel>
                             <TextBlock Text="Comportamento Applicazione" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
+                            <Label Content="Scegliere schermo secondario"
+                                   HorizontalAlignment="Left"/>
+                            <ComboBox x:Name="cmbSchermi" 
+                                      Width="160"
+                                      HorizontalAlignment="Left" 
+                                      Margin="4,0,0,0"
+                                      
+                                      ItemsSource="{Binding Source={x:Static utilMonitors:GestoreMonitor.Monitors}}"
+                                      
+                                      DisplayMemberPath="Nome" />
 
-                            <CheckBox Content="Avvia timer automaticamente" IsChecked="True" Margin="0,5"/>
-                            <CheckBox Content="Mostra sempre in primo piano" Margin="0,5"/>
 
                         </StackPanel>
                     </Grid>
