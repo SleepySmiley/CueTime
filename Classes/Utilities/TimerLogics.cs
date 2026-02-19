@@ -55,6 +55,7 @@ namespace InTempo.Classes.Utilities
             if (!isRunning)
             {
                 isRunning = true;
+                AggiornaGrafica(); // Aggiorna subito la grafica per evitare ritardi visivi
                 timer.Start();
             }
         }
@@ -154,6 +155,18 @@ namespace InTempo.Classes.Utilities
             AdunanzaCorrente.TempoResiduo = TimeSpan.Zero;
             CheckColorParte();
             CheckColorTempoResiduo();
+        }
+
+        public void AggiornaGrafica()
+        {
+            // 1. Ricalcola i colori per sicurezza
+            CheckColorParte();
+            CheckColorTempoResiduo();
+
+            // 2. Forza lo XAML a rileggere i dati in questo esatto millisecondo
+            OnPropertyChanged(nameof(AdunanzaCorrente));
+            OnPropertyChanged(nameof(TimerBrush));
+            OnPropertyChanged(nameof(TempoResiduoBrush));
         }
     }
 }

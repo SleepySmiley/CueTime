@@ -1,5 +1,6 @@
 ﻿using InTempo.Classes.NonAbstract;
 using InTempo.Classes.Utilities;
+using InTempo.Classes.View;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,8 @@ namespace InTempo
         public Adunanza DatiAdunanza { get; set; } = new Adunanza();
         public TimerLogics LogicTimer { get; set; }
         private bool _isPaused = true;
+
+        private FinestraTimer _finestratimer;
 
 
         // Proprietà per cambiare l'icona Play/Pausa
@@ -31,7 +34,10 @@ namespace InTempo
             LogicTimer = new TimerLogics(DatiAdunanza);
             DataContext = this;
 
-            
+            //Creiamo la finestra secondaria iniziando con l'orologio
+            _finestratimer = new FinestraTimer(Orologio, LogicTimer);
+            _finestratimer.Show();
+
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -44,11 +50,13 @@ namespace InTempo
         private void BtnAvanti_Click(object sender, RoutedEventArgs e)
         {
             DatiAdunanza.Avanti();
+            LogicTimer.AggiornaGrafica();
         }
 
         private void BtnIndietro_Click(object sender, RoutedEventArgs e)
         {
             DatiAdunanza.Indietro();
+            LogicTimer.AggiornaGrafica();
         }
 
         private void BtnPausaRiprendi_Click(object sender, RoutedEventArgs e)
@@ -240,6 +248,7 @@ namespace InTempo
 
                 // Passo da orologio -> timer adunanza
                 Orologio.Stop();
+                _finestratimer.CambiaVista(1, ""); // Passo alla vista timer
                 txtOrologio.Visibility = Visibility.Collapsed;
                 txtTimer.Visibility = Visibility.Visible;
 
@@ -256,6 +265,7 @@ namespace InTempo
                 // Stop = adunanza conclusa => stop + reset completo
                 LogicTimer.StopTimer();
                 LogicTimer.ResetCompleto();
+                _finestratimer.CambiaVista(4, "");
 
                 // Torno a orologio
                 txtTimer.Visibility = Visibility.Collapsed;
@@ -265,6 +275,9 @@ namespace InTempo
             }
         }
 
-
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _finestratimer.Close();
+        }
     }
 }

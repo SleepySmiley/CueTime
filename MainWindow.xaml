@@ -15,7 +15,7 @@
         TextOptions.TextRenderingMode="Auto"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="InTempo" Height="500" Width="800" Loaded="Window_Loaded">
+        Title="InTempo" Height="500" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
 
     <Grid>
         

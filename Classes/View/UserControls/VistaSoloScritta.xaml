@@ -1,0 +1,9 @@
+﻿<UserControl x:Class="InTempo.Classes.View.UserControls.VistaSoloScritta"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Viewbox>
+            <TextBlock x:Name="TxtTimer" Text="Scritta" FontWeight="Bold" Foreground="White"/>
+        </Viewbox>
+    </Grid>
+</UserControl>

@@ -1,6 +1,7 @@
 ﻿using InTempo.Classes.Utilities.Monitors;
 using System;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -153,24 +154,28 @@ namespace InTempo.Classes.View
 
         private void btnIdentifica_Click(object sender, RoutedEventArgs e)
         {
-            int indice = 1;
-
-            // Usiamo la tua lista statica
             foreach (var monitor in GestoreMonitor.Monitors)
             {
-                // Creiamo la finestra passandole il numero da mostrare
-                FinestraIdentifica finestra = new FinestraIdentifica(indice.ToString());
+                // Estraiamo solo i numeri dal nome del monitor (es. da "\\.\DISPLAY2" tiriamo fuori "2")
+                string numeroVero = Regex.Match(monitor.Nome, @"\d+").Value;
 
-                // La posizioniamo e ridimensioniamo in base all'AreaTotale del tuo oggetto Monitor
-                finestra.Left = monitor.AreaTotale.Left;
-                finestra.Top = monitor.AreaTotale.Top;
-                finestra.Width = monitor.AreaTotale.Width;
-                finestra.Height = monitor.AreaTotale.Height;
+                // Se per qualche motivo strano non trova numeri, mettiamo un "?" di sicurezza
+                if (string.IsNullOrEmpty(numeroVero))
+                {
+                    numeroVero = "?";
+                }
 
-                // Mostriamo la finestra (senza bloccare il resto dell'app)
-                finestra.Show();
+                // Creiamo la finestra passandole il numero reale
+                FinestraIdentifica fin = new FinestraIdentifica(numeroVero);
 
-                indice++;
+                // La posizioniamo
+                fin.Left = monitor.AreaTotale.Left;
+                fin.Top = monitor.AreaTotale.Top;
+                fin.Width = monitor.AreaTotale.Width;
+                fin.Height = monitor.AreaTotale.Height;
+
+                // Mostriamo la finestra
+                fin.Show();
             }
         }
     }
