@@ -151,6 +151,28 @@ namespace InTempo.Classes.View
             }
         }
 
+        private void btnIdentifica_Click(object sender, RoutedEventArgs e)
+        {
+            int indice = 1;
+
+            // Usiamo la tua lista statica
+            foreach (var monitor in GestoreMonitor.Monitors)
+            {
+                // Creiamo la finestra passandole il numero da mostrare
+                FinestraIdentifica finestra = new FinestraIdentifica(indice.ToString());
+
+                // La posizioniamo e ridimensioniamo in base all'AreaTotale del tuo oggetto Monitor
+                finestra.Left = monitor.AreaTotale.Left;
+                finestra.Top = monitor.AreaTotale.Top;
+                finestra.Width = monitor.AreaTotale.Width;
+                finestra.Height = monitor.AreaTotale.Height;
+
+                // Mostriamo la finestra (senza bloccare il resto dell'app)
+                finestra.Show();
+
+                indice++;
+            }
+        }
     }
 
 }

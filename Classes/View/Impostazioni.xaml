@@ -60,17 +60,24 @@
                     <Grid Margin="16">
                         <StackPanel>
                             <TextBlock Text="Comportamento Applicazione" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                            <Label Content="Scegliere schermo secondario"
-                                   HorizontalAlignment="Left"/>
-                            <ComboBox x:Name="cmbSchermi" 
-                                      Width="160"
-                                      HorizontalAlignment="Left" 
-                                      Margin="4,0,0,0"
-                                      
-                                      ItemsSource="{Binding Source={x:Static utilMonitors:GestoreMonitor.Monitors}}"
-                                      
-                                      DisplayMemberPath="Nome" />
+                            <Label Content="Scegliere schermo secondario" HorizontalAlignment="Left"/>
 
+                            <StackPanel Orientation="Horizontal" Margin="4,0,0,0">
+
+                                <ComboBox x:Name="cmbSchermi" 
+                                          Width="160"
+                                          HorizontalAlignment="Left" 
+                                          ItemsSource="{Binding Source={x:Static utilMonitors:GestoreMonitor.Monitors}}"
+                                          DisplayMemberPath="Nome" 
+                                          VerticalAlignment="Center"/>
+
+                                <Button x:Name="btnIdentifica" Content="Identifica"
+                                        Margin="16,0,0,0"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        ToolTip="Mostra un numero per identificare gli schermi fisici"
+                                        VerticalAlignment="Center" Click="btnIdentifica_Click"/>
+
+                            </StackPanel>
 
                         </StackPanel>
                     </Grid>
