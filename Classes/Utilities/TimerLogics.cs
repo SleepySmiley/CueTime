@@ -8,7 +8,7 @@ namespace InTempo.Classes.Utilities
 {
     public class TimerLogics : INotifyPropertyChanged
     {
-        private DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render);
         public Adunanza AdunanzaCorrente { get; }
 
         private bool isRunning = false;
@@ -73,7 +73,7 @@ namespace InTempo.Classes.Utilities
         public TimerLogics(Adunanza adunanzaCorrente)
         {
             AdunanzaCorrente = adunanzaCorrente;
-            timer.Interval = TimeSpan.FromMilliseconds(200);
+            timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
             CheckColorParte();
             CheckColorTempoResiduo();

@@ -200,11 +200,11 @@ namespace InTempo
         }
 
         // Logica orologio
-        DispatcherTimer Orologio {  get; set; } = new DispatcherTimer();
+        DispatcherTimer Orologio {  get; set; } = new DispatcherTimer(DispatcherPriority.Render);
         private void AvviaOrologio()
         {
           
-            Orologio.Interval = TimeSpan.FromSeconds(1);
+            Orologio.Interval = TimeSpan.FromMilliseconds(100);
 
             Orologio.Tick += Timer_Tick;
             txtTimer.Visibility = Visibility.Collapsed;
