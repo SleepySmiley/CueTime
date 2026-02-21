@@ -9,15 +9,15 @@
 
         <Viewbox Grid.Row="0">
             <TextBlock x:Name="TxtTimer" 
-                       Text="00:00" 
-                       Foreground="White" 
+                       Text="{Binding TimerLogics.AdunanzaCorrente.Current.TempoScorrevole, StringFormat={}{0:mm\\:ss}}" 
+                       Foreground="{Binding TimerLogics.TimerBrush}" 
                        FontWeight="Bold"/>
         </Viewbox>
 
         <Viewbox Grid.Row="1">
             <TextBlock x:Name="TxtMessaggio" 
-                       Text="Il tuo messaggio qui" 
-                       Foreground="Yellow"/>
+                       Text="{Binding Text}" 
+                       Foreground="White"/>
         </Viewbox>
     </Grid>
 </UserControl>

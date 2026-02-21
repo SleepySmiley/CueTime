@@ -1,5 +1,7 @@
-﻿using System;
+﻿using InTempo.Classes.Utilities;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,8 +22,9 @@ namespace InTempo.Classes.View
         public string Titolo { get; set; }
         public string Testo { get; set; }
 
-        public bool Ritorno { get; set; } = true;
+        public int TipologiaFinestra { get; set; }
 
+        private FinestraTimer _finestratimer;
 
 
 
@@ -49,6 +52,9 @@ namespace InTempo.Classes.View
             }
             Titolo = TitoloPassato;
             Testo = TestoPassato;
+            DataContext = this;
+            txtTesto.IsReadOnly = true;
+            TipologiaFinestra = 0;
 
         }
 
@@ -59,38 +65,90 @@ namespace InTempo.Classes.View
             Testo = TestoPassato;
             BtnPredefinito1.Content = TestoBtn1;
             BtnPredefinito2.Content = TestoBtn2;
+            DataContext = this;
+            txtTesto.IsReadOnly = true;
+            TipologiaFinestra = 1;
         }
 
-        public FinestraPopUP(string TitoloPassato, int bottoni)
+        public FinestraPopUP(string TitoloPassato, string TestoBtn1, string TestoBtn2, FinestraTimer finestraDaPassare)
         {
             InitializeComponent();
             Titolo = TitoloPassato;
             Testo = "";
-            switch(bottoni)
-            {
-                case 1:
-                    BtnPredefinito2.Visibility = Visibility.Visible;
-                    BtnPredefinito1 .Visibility = Visibility.Collapsed;
-                    break;
-                case 2:
-                    BtnPredefinito1.Visibility = Visibility.Visible;
-                    BtnPredefinito2.Visibility = Visibility.Visible;
-                    break;
-                default:
-                    FinestraPopUP Errore = new FinestraPopUP("Errore", "Il numero di bottoni è errato, deve essere 0, 1 o 2", 1);
-                    Errore.ShowDialog();
-                    break;
-            }
+            DataContext = this;
+            BtnPredefinito1.Content = TestoBtn1;
+            BtnPredefinito2.Content = TestoBtn2;
+            TipologiaFinestra = 2;
+            _finestratimer = finestraDaPassare;
+
         }
 
         private void BtnPredefinito2_Click(object sender, RoutedEventArgs e)
         {
-            Ritorno = true;
+            if(TipologiaFinestra == 0)
+            {
+                DialogResult = true;
+                Close();
+            }
+            else if(TipologiaFinestra == 1)
+            {
+                DialogResult = true;
+                Close();
+            }
+            else if(TipologiaFinestra == 2)
+            {
+                string input = txtTesto.Text;
+
+                _finestratimer.CambiaVista(2, input);
+
+            }
+
         }
 
         private void BtnPredefinito1_Click(object sender, RoutedEventArgs e)
         {
-            Ritorno = false;
+            if (TipologiaFinestra == 0)
+            {
+                DialogResult = false;
+                Close();
+            }
+            else if (TipologiaFinestra == 1)
+            {
+                DialogResult = false;
+                Close();
+            }
+            else if (TipologiaFinestra == 2)
+            {
+                string input = txtTesto.Text;
+
+                _finestratimer.CambiaVista(3, input);
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if(TipologiaFinestra == 2)
+            {
+                if (TimerLogics.IsRunning)
+                    _finestratimer.CambiaVista(1, "");
+                else
+                    _finestratimer.CambiaVista(4, "");
+            }
+               
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void BtnChiudiIcona_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
         }
     }
 }

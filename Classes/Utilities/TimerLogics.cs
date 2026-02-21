@@ -11,8 +11,7 @@ namespace InTempo.Classes.Utilities
         private DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render);
         public Adunanza AdunanzaCorrente { get; }
 
-        private bool isRunning = false;
-        public bool IsRunning => isRunning; // Esposto per controllo esterno
+        public static bool IsRunning { get; private set; } = false;
 
         private string _testoSchermoPrincipale = "00:00:00";
 
@@ -81,9 +80,9 @@ namespace InTempo.Classes.Utilities
 
         public void StartTimer()
         {
-            if (!isRunning)
+            if (!IsRunning)
             {
-                isRunning = true;
+                IsRunning = true;
                 AggiornaGrafica(); // Aggiorna subito la grafica per evitare ritardi visivi
                 timer.Start();
             }
@@ -91,10 +90,10 @@ namespace InTempo.Classes.Utilities
 
         public void StopTimer()
         {
-            if (isRunning)
+            if (IsRunning)
             {
                 timer.Stop();
-                isRunning = false;
+                IsRunning = false;
             }
         }
 

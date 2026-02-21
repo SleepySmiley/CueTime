@@ -16,13 +16,14 @@
         
         Title="FinestraPopUP" Width="450" 
         SizeToContent="Height"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        Topmost="True">
-
+        Topmost="True" 
+        Closing="Window_Closing"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <materialDesign:Card Margin="16" 
                          UniformCornerRadius="12" 
                          Background="{DynamicResource MaterialDesignPaper}"
@@ -35,37 +36,58 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Label x:Name="lblTitolo" 
-                   Grid.Row="0"
-                   Content="{Binding Titolo}" 
-                   FontSize="20" 
-                   FontWeight="SemiBold" 
-                   Margin="24,24,24,16"/>
+            <Grid Grid.Row="0" Margin="24,24,24,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="txbTesto" 
+                <Button x:Name="BtnChiudiIcona"
+                        Grid.Column="0"
+                        Style="{StaticResource MaterialDesignToolButton}"
+                        Foreground="{DynamicResource MaterialDesignBody}"
+                        Width="30" Height="30"
+                        Padding="0"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center"
+                        Click="BtnChiudiIcona_Click"
+                        ToolTip="Chiudi">
+                    <materialDesign:PackIcon Kind="Close" Width="20" Height="20"/>
+                </Button>
+
+                <Label x:Name="lblTitolo" 
+                       Grid.Column="1"
+                       Content="{Binding Titolo}" 
+                       FontSize="20" 
+                       FontWeight="SemiBold" 
+                       VerticalAlignment="Center"
+                       Padding="0"/>
+            </Grid>
+
+            <TextBox x:Name="txtTesto" 
                        Grid.Row="1" 
                        Text="{Binding Testo}" 
                        TextWrapping="Wrap" 
                        Margin="24,0,24,24" 
                        FontSize="15" 
-                       Opacity="0.8"/>
+                       Opacity="0.8"
+                       Foreground="Black"/>
 
             <StackPanel Grid.Row="2" 
                         Orientation="Horizontal" 
-                        HorizontalAlignment="Right"
+                        HorizontalAlignment="Center"
                         Margin="24,0,24,24">
 
                 <Button x:Name="BtnPredefinito1" 
                         Content="Cancel" 
-                        Width="120"
-                        
+                        MinWidth="120"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
                         materialDesign:ButtonAssist.CornerRadius="15"
                         Margin="0,0,8,0" Click="BtnPredefinito1_Click"/>
 
                 <Button x:Name="BtnPredefinito2" 
                         Content="OK" 
-                        Width="120"
+                        MinWidth="120"
                         materialDesign:ButtonAssist.CornerRadius="15" Click="BtnPredefinito2_Click"/>
 
             </StackPanel>

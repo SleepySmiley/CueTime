@@ -1,4 +1,5 @@
-﻿using System;
+﻿using InTempo.Classes.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -18,14 +19,18 @@ namespace InTempo.Classes.View.UserControls
     /// </summary>
     public partial class VistaMista : UserControl
     {
+        public TimerLogics TimerLogics { get; set; }
 
+        public string Text { get; set; }
 
-
-
-        public VistaMista(string Testo)
+        public VistaMista(string Testo, TimerLogics Timer)
         {
             InitializeComponent();
-           
+            Text = Testo;
+            TimerLogics = Timer;
+            this.DataContext = this;
+
+            
         }
     }
 }

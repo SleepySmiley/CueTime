@@ -169,5 +169,7 @@ namespace InTempo.Classes.NonAbstract
             Current = Parti[_currentParteIndex];
         }
 
+       
+
     }
 }

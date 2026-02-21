@@ -225,7 +225,8 @@
                         Width="150" 
                         Height="40"
                         ToolTip="Commento Schermo"
-                        Click="btnCommentoSchermo_Click"/>
+                        Click="btnCommentoSchermo_Click"
+                        IsEnabled="False"/>
 
 
 

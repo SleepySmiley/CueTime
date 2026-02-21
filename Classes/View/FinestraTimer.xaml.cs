@@ -58,7 +58,7 @@ namespace InTempo.Classes.View
                     ContenitorePrincipale.Content = new VistaSoloTimer(); 
                     break;
                 case 2:
-                    ContenitorePrincipale.Content = new VistaMista(testoPersonalizzato);
+                    ContenitorePrincipale.Content = new VistaMista(testoPersonalizzato, logicaTimer);
                     break;
                 case 3:
                     ContenitorePrincipale.Content = new VistaSoloScritta(testoPersonalizzato);

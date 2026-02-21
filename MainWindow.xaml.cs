@@ -95,7 +95,7 @@ namespace InTempo
             var parteSelezionata = GetParteFromButton(sender);
             if (parteSelezionata == null) return;
 
-            bool wasRunning = LogicTimer.IsRunning;
+            bool wasRunning = TimerLogics.IsRunning;
             LogicTimer.StopTimer();
 
             int indice = DatiAdunanza.Parti.IndexOf(parteSelezionata);
@@ -147,10 +147,10 @@ namespace InTempo
             var parteSelezionata = GetParteFromButton(sender);
             if (parteSelezionata == null) return;
 
-            bool wasRunning = LogicTimer.IsRunning;
+            bool wasRunning = TimerLogics.IsRunning;
             LogicTimer.StopTimer();
 
-            Classes.View.ModificaParte finestra = new Classes.View.ModificaParte(parteSelezionata);
+            ModificaParte finestra = new ModificaParte(parteSelezionata);
 
             if (finestra.ShowDialog() == true)
             {
@@ -243,13 +243,20 @@ namespace InTempo
                 _finestratimer.CambiaVista(1, ""); // Passo alla vista timer
                 txtOrologio.Visibility = Visibility.Collapsed;
                 txtTimer.Visibility = Visibility.Visible;
-
+                btnCommentoSchermo.IsEnabled = true;
                 LogicTimer.StartTimer();
             }
             else
             {
                 // Se è già ferma, non fare nulla
                 if (_isPaused) return;
+                
+                FinestraPopUP Avvertimento = new FinestraPopUP("Attenzione", "Sei sicuro di voler fermare il timer? \nL'adunanza verrà conclusa e resettata.",2);
+                Avvertimento.ShowDialog();
+                if(Avvertimento.DialogResult != true)
+                {
+                    return;
+                }
 
                 _isPaused = true;
                 IconaStatoTimer = "Play";
@@ -262,6 +269,7 @@ namespace InTempo
                 // Torno a orologio
                 txtTimer.Visibility = Visibility.Collapsed;
                 txtOrologio.Visibility = Visibility.Visible;
+                btnCommentoSchermo.IsEnabled = false;
 
                 Orologio.Start();
             }
@@ -274,7 +282,7 @@ namespace InTempo
 
         private void btnCommentoSchermo_Click(object sender, RoutedEventArgs e)
         {
-            FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi", 1);
+            FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi","Tutto Schermo","Parziale", _finestratimer);
             MessaggioOratore.ShowDialog();
         }
     }
