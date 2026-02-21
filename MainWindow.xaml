@@ -46,8 +46,9 @@
             </Viewbox>
             <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
                 <TextBlock x:Name="txtOrologio" 
-               FontWeight="Bold"
-               Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
+                           FontWeight="Bold"
+                           Text="{Binding LogicTimer.TestoSchermoPrincipale}"
+                           Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
             </Viewbox>
         </Grid>
 

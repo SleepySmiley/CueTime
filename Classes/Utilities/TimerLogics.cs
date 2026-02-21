@@ -14,6 +14,35 @@ namespace InTempo.Classes.Utilities
         private bool isRunning = false;
         public bool IsRunning => isRunning; // Esposto per controllo esterno
 
+        private string _testoSchermoPrincipale = "00:00:00";
+
+        public string TestoSchermoPrincipale
+        {
+            get => _testoSchermoPrincipale;
+            set
+            {
+                if (_testoSchermoPrincipale != value)
+                {
+                    _testoSchermoPrincipale = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private Brush? _orologioBrush = Brushes.White;
+        public Brush? OrologioBrush
+        {
+            get => _orologioBrush;
+            set
+            {
+                if (_orologioBrush != value)
+                {
+                    _orologioBrush = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private Brush? _timerBrush;
         public Brush? TimerBrush
         {
@@ -44,7 +73,7 @@ namespace InTempo.Classes.Utilities
         public TimerLogics(Adunanza adunanzaCorrente)
         {
             AdunanzaCorrente = adunanzaCorrente;
-            timer.Interval = TimeSpan.FromSeconds(1);
+            timer.Interval = TimeSpan.FromMilliseconds(200);
             timer.Tick += Timer_Tick;
             CheckColorParte();
             CheckColorTempoResiduo();
@@ -168,5 +197,91 @@ namespace InTempo.Classes.Utilities
             OnPropertyChanged(nameof(TimerBrush));
             OnPropertyChanged(nameof(TempoResiduoBrush));
         }
+
+        public bool CalcolaStatoOrologio(DateTime now, bool isPaused)
+        {
+            DateTime? orarioInizio = OttieniOrarioInizioAdunanzaOggi(now);
+
+            if (isPaused)
+            {
+                TestoSchermoPrincipale = GeneraTestoSchermo(now, orarioInizio);
+                AggiornaColoreOrologio(now, orarioInizio);
+            }
+
+            if (orarioInizio.HasValue && isPaused)
+            {
+                TimeSpan tempoMancante = orarioInizio.Value - now;
+
+                if (tempoMancante.TotalSeconds <= 0 && tempoMancante.TotalSeconds > -5)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false; 
+                }
+            }
+            return false;
+        }
+
+        private DateTime? OttieniOrarioInizioAdunanzaOggi(DateTime now)
+        {
+            if (now.DayOfWeek == App.Settings.Infrasettimanale.GiornoSettimana)
+            {
+                return new DateTime(now.Year, now.Month, now.Day,
+                                    App.Settings.Infrasettimanale.OraInizio.Hour,
+                                    App.Settings.Infrasettimanale.OraInizio.Minute, 0);
+            }
+
+            if (now.DayOfWeek == App.Settings.FineSettimana.GiornoSettimana)
+            {
+                return new DateTime(now.Year, now.Month, now.Day,
+                                    App.Settings.FineSettimana.OraInizio.Hour,
+                                    App.Settings.FineSettimana.OraInizio.Minute, 0);
+            }
+
+            return null;
+        }
+
+        private string GeneraTestoSchermo(DateTime now, DateTime? orarioInizio)
+        {
+            if (orarioInizio.HasValue)
+            {
+                TimeSpan tempoMancante = orarioInizio.Value - now;
+
+                if (tempoMancante.TotalMinutes <= 30 && tempoMancante.TotalSeconds > 0)
+                {
+                    return tempoMancante.ToString(@"mm\:ss");
+                }
+            }
+
+            return now.ToString("HH:mm:ss");
+        }
+        private void AggiornaColoreOrologio(DateTime now, DateTime? orarioInizio)
+        {
+            if (orarioInizio.HasValue)
+            {
+                TimeSpan tempoMancante = orarioInizio.Value - now;
+
+                if (tempoMancante.TotalMinutes <= 30 && tempoMancante.TotalSeconds > 0)
+                {
+                    if (tempoMancante.TotalSeconds > 60)
+                    {
+                        OrologioBrush = Brushes.Green;
+                    }
+                    else if (tempoMancante.TotalSeconds > 0)
+                    {
+                        OrologioBrush = Brushes.Orange;
+                    }
+                    else
+                    {
+                        OrologioBrush = Brushes.Red;
+                    }
+                    return;
+                }
+            }
+            OrologioBrush = Brushes.White;
+        }
+
     }
 }

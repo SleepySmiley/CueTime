@@ -9,9 +9,9 @@
     <Grid>
         <Viewbox>
             <TextBlock x:Name="TxtOrologio" 
-                       Text="00:00:00" 
+                       Text="{Binding TestoSchermoPrincipale}" 
                        FontWeight="Bold" 
-                       Foreground="White"/>
+                       Foreground="{Binding OrologioBrush}"/>
         </Viewbox>
     </Grid>
 </UserControl>

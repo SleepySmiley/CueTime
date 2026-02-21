@@ -99,7 +99,7 @@ namespace InTempo
             LogicTimer.StopTimer();
 
             int indice = DatiAdunanza.Parti.IndexOf(parteSelezionata);
-            Classes.View.ModificaParte finestra = new Classes.View.ModificaParte();
+            ModificaParte finestra = new ModificaParte();
 
             if (finestra.ShowDialog() == true)
             {
@@ -213,23 +213,15 @@ namespace InTempo
             Orologio.Start();
         }
 
+
+
         private void Timer_Tick(object sender, EventArgs e)
         {
-            var now = DateTime.Now;
-            txtOrologio.Text = now.ToString("HH:mm:ss");
+            DateTime now = DateTime.Now;
 
-            // INFRAs
-            if (now.DayOfWeek == App.Settings.Infrasettimanale.GiornoSettimana &&
-                now.Hour == App.Settings.Infrasettimanale.OraInizio.Hour &&
-                now.Minute == App.Settings.Infrasettimanale.OraInizio.Minute)
-            {
-              SetStatoAdunanza(true);
-            }
+            bool devePartire = LogicTimer.CalcolaStatoOrologio(now, _isPaused);
 
-            // FINE SETTIMANA
-            else if (now.DayOfWeek == App.Settings.FineSettimana.GiornoSettimana &&
-                     now.Hour == App.Settings.FineSettimana.OraInizio.Hour &&
-                     now.Minute == App.Settings.FineSettimana.OraInizio.Minute)
+            if (devePartire)
             {
                 SetStatoAdunanza(true);
             }

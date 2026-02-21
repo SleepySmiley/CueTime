@@ -20,7 +20,7 @@ namespace InTempo.Classes.View
             logicaTimer = TimerLogic;
             OrologioCopia = TempoCopia;
             this.DataContext = logicaTimer;
-            ContenitorePrincipale.Content = new VistaOrologio(OrologioCopia);
+            ContenitorePrincipale.Content = new VistaOrologio();
                    
         }
 
@@ -64,7 +64,7 @@ namespace InTempo.Classes.View
                     ContenitorePrincipale.Content = new VistaSoloScritta(testoPersonalizzato);
                     break;
                 case 4:
-                    ContenitorePrincipale.Content = new VistaOrologio(OrologioCopia);
+                    ContenitorePrincipale.Content = new VistaOrologio();
                     break;
             }
             logicaTimer.AggiornaGrafica();
