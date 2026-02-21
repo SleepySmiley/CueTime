@@ -42,7 +42,7 @@
                    FontWeight="SemiBold" 
                    Margin="24,24,24,16"/>
 
-            <TextBlock x:Name="txbTesto" 
+            <TextBox x:Name="txbTesto" 
                        Grid.Row="1" 
                        Text="{Binding Testo}" 
                        TextWrapping="Wrap" 

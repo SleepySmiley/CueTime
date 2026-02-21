@@ -61,6 +61,28 @@ namespace InTempo.Classes.View
             BtnPredefinito2.Content = TestoBtn2;
         }
 
+        public FinestraPopUP(string TitoloPassato, int bottoni)
+        {
+            InitializeComponent();
+            Titolo = TitoloPassato;
+            Testo = "";
+            switch(bottoni)
+            {
+                case 1:
+                    BtnPredefinito2.Visibility = Visibility.Visible;
+                    BtnPredefinito1 .Visibility = Visibility.Collapsed;
+                    break;
+                case 2:
+                    BtnPredefinito1.Visibility = Visibility.Visible;
+                    BtnPredefinito2.Visibility = Visibility.Visible;
+                    break;
+                default:
+                    FinestraPopUP Errore = new FinestraPopUP("Errore", "Il numero di bottoni è errato, deve essere 0, 1 o 2", 1);
+                    Errore.ShowDialog();
+                    break;
+            }
+        }
+
         private void BtnPredefinito2_Click(object sender, RoutedEventArgs e)
         {
             Ritorno = true;

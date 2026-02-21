@@ -215,12 +215,26 @@
                 </Button>
             </StackPanel>
 
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button x:Name="btnCommentoSchermo" 
+                        Content="Messaggio"
+                        materialDesign:ButtonAssist.CornerRadius="20"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Width="150" 
+                        Height="40"
+                        ToolTip="Commento Schermo"
+                        Click="btnCommentoSchermo_Click"/>
+
+
 
                 <Button Width="40" 
                         Height="40" 
                         ToolTip="Impostazioni"
                         Padding="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
                         materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click">
 
                     <iconPacks:PackIconMaterial Kind="Cog" 

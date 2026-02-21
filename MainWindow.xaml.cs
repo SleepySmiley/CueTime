@@ -271,5 +271,11 @@ namespace InTempo
         {
             _finestratimer.Close();
         }
+
+        private void btnCommentoSchermo_Click(object sender, RoutedEventArgs e)
+        {
+            FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi", 1);
+            MessaggioOratore.ShowDialog();
+        }
     }
 }
