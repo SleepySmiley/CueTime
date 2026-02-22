@@ -1,5 +1,6 @@
 ﻿using InTempo.Classes.Utilities;
 using InTempo.Classes.View.UserControls;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -50,7 +51,7 @@ namespace InTempo.Classes.View
         }
 
         // Aggiungi questo metodo dentro FinestraTimer
-        public void CambiaVista(int tipoVista, string testoPersonalizzato)
+        public void CambiaVista(int tipoVista, string testoPersonalizzato, System.Windows.Media.Brush colorescritta)
         {
             switch (tipoVista)
             {
@@ -61,7 +62,7 @@ namespace InTempo.Classes.View
                     ContenitorePrincipale.Content = new VistaMista(testoPersonalizzato, logicaTimer);
                     break;
                 case 3:
-                    ContenitorePrincipale.Content = new VistaSoloScritta(testoPersonalizzato);
+                    ContenitorePrincipale.Content = new VistaSoloScritta(testoPersonalizzato, colorescritta);
                     break;
                 case 4:
                     ContenitorePrincipale.Content = new VistaOrologio();

@@ -9,7 +9,7 @@
 
         <Viewbox Grid.Row="0">
             <TextBlock x:Name="TxtTimer" 
-                       Text="{Binding TimerLogics.AdunanzaCorrente.Current.TempoScorrevole, StringFormat={}{0:mm\\:ss}}" 
+                       Text="{Binding TimerLogics.AdunanzaCorrente.Current.TempoScorrevoleLabel}" 
                        Foreground="{Binding TimerLogics.TimerBrush}" 
                        FontWeight="Bold"/>
         </Viewbox>

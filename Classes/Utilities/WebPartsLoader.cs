@@ -85,6 +85,23 @@ namespace InTempo.Classes.Utilities
         private const string TITLE_FINAL_COMMENTS = "Commenti conclusivi";
         private const string TITLE_COUNSEL = "Consigli";
 
+        // ==========================================================
+        // ✅ TIPI (quello che finisce in Parte.Tipo)
+        // ==========================================================
+        private const string TYPE_CANTICO = "Cantico";
+        private const string TYPE_DISCORSO = "Discorso";
+        private const string TYPE_LETTURA_BIBLICA = "Lettura biblica";
+
+        // Extra (coerenti, ma opzionali)
+        private const string TYPE_COMMENTI = "Commenti";
+        private const string TYPE_CONSIGLI = "Consigli";
+        private const string TYPE_GEMME = "Gemme spirituali";
+        private const string TYPE_STUDIO = "Studio";
+        private const string TYPE_MINISTERO = "Ministero";
+        private const string TYPE_TESORI = "Tesori";
+        private const string TYPE_VITA_CRISTIANA = "Vita cristiana";
+        private const string TYPE_PARTE = "Parte";
+
         // Weekend stock
         private const int WEEKEND_SONG_MIN = 5;
         private const int WEEKEND_TALK_MIN = 30;
@@ -158,14 +175,25 @@ namespace InTempo.Classes.Utilities
                 // (Questo metodo gestisce internamente la cache: se trova il file, lo usa)
                 var (song2, song3) = await CaricaCanticiFineSettimana_2_3_Async(bypassCache).ConfigureAwait(false);
 
-                const string tipo = "Fine settimana";
+                // ✅ FIX: Tipo corretto per i cantici (non "Fine settimana")
+                const string tipo = TYPE_CANTICO;
 
                 // Indici: 0 Cantico iniziale, 2 intermezzo, 4 finale
                 if (song2.HasValue)
-                    stock[2] = new Parte($"Cantico {song2.Value}", TimeSpan.FromMinutes(WEEKEND_SONG_MIN), tipo, System.Windows.Media.Brushes.SlateGray, TimeSpan.FromMinutes(WEEKEND_SONG_MIN), null);
+                    stock[2] = new Parte($"Cantico {song2.Value}",
+                        TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
+                        tipo,
+                        System.Windows.Media.Brushes.SlateGray,
+                        TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
+                        null);
 
                 if (song3.HasValue)
-                    stock[4] = new Parte($"Cantico {song3.Value}", TimeSpan.FromMinutes(WEEKEND_SONG_MIN), tipo, System.Windows.Media.Brushes.SlateGray, TimeSpan.FromMinutes(WEEKEND_SONG_MIN), null);
+                    stock[4] = new Parte($"Cantico {song3.Value}",
+                        TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
+                        tipo,
+                        System.Windows.Media.Brushes.SlateGray,
+                        TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
+                        null);
             }
             catch
             {
@@ -213,14 +241,13 @@ namespace InTempo.Classes.Utilities
 
         private static ObservableCollection<Parte> BuildWeekendStock()
         {
-            string tipo = "Fine settimana";
             var list = new List<Parte>
             {
-                new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN), tipo, System.Windows.Media.Brushes.SlateGray,TimeSpan.FromMinutes(SONG_MIN), 1),
-                new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), tipo,  System.Windows.Media.Brushes.DeepSkyBlue, TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
-                new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN), tipo, System.Windows.Media.Brushes.SlateGray, TimeSpan.FromMinutes(SONG_MIN), 3),
-                new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   tipo,  System.Windows.Media.Brushes.Orange, TimeSpan.FromMinutes(WEEKEND_WT_MIN), 4),
-                new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN), tipo, System.Windows.Media.Brushes.SlateGray, TimeSpan.FromMinutes(SONG_MIN), 5)
+                new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         1),
+                new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), TYPE_DISCORSO, System.Windows.Media.Brushes.DeepSkyBlue,TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
+                new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         3),
+                new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   TYPE_STUDIO,   System.Windows.Media.Brushes.Orange,      TimeSpan.FromMinutes(WEEKEND_WT_MIN),   4),
+                new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         5)
             };
 
             return new ObservableCollection<Parte>(list);
@@ -341,7 +368,7 @@ namespace InTempo.Classes.Utilities
                     if (!string.IsNullOrWhiteSpace(song))
                         result.Add(new Parte(song,
                             TimeSpan.FromMinutes(SONG_MIN),
-                            "Apertura",
+                            TYPE_CANTICO,
                             System.Windows.Media.Brushes.SlateGray,
                             TimeSpan.FromMinutes(SONG_MIN),
                             null));
@@ -349,7 +376,7 @@ namespace InTempo.Classes.Utilities
                     int mIntro = FindMinutesForHeading(n);
                     result.Add(new Parte(TITLE_INTRO_COMMENTS,
                         TimeSpan.FromMinutes(mIntro),
-                        "Apertura",
+                        TYPE_COMMENTI,
                         System.Windows.Media.Brushes.DimGray,
                         TimeSpan.FromMinutes(mIntro),
                         null));
@@ -364,7 +391,7 @@ namespace InTempo.Classes.Utilities
                     int mEnd = FindMinutesForHeading(n);
                     result.Add(new Parte(TITLE_FINAL_COMMENTS,
                         TimeSpan.FromMinutes(mEnd),
-                        "Conclusione",
+                        TYPE_COMMENTI,
                         System.Windows.Media.Brushes.DimGray,
                         TimeSpan.FromMinutes(mEnd),
                         null));
@@ -373,7 +400,7 @@ namespace InTempo.Classes.Utilities
                     if (!string.IsNullOrWhiteSpace(song))
                         result.Add(new Parte(song,
                             TimeSpan.FromMinutes(SONG_MIN),
-                            "Conclusione",
+                            TYPE_CANTICO,
                             System.Windows.Media.Brushes.SlateGray,
                             TimeSpan.FromMinutes(SONG_MIN),
                             null));
@@ -386,7 +413,7 @@ namespace InTempo.Classes.Utilities
                 {
                     result.Add(new Parte(raw,
                         TimeSpan.FromMinutes(SONG_MIN),
-                        currentSection,
+                        TYPE_CANTICO,
                         System.Windows.Media.Brushes.SlateGray,
                         TimeSpan.FromMinutes(SONG_MIN),
                         null));
@@ -405,7 +432,7 @@ namespace InTempo.Classes.Utilities
 
                     result.Add(new Parte(TITLE_GEMS,
                         TimeSpan.FromMinutes(min),
-                        "Tesori della Parola di Dio",
+                        TYPE_GEMME,
                         System.Windows.Media.Brushes.Goldenrod,
                         TimeSpan.FromMinutes(min),
                         partNo));
@@ -423,7 +450,7 @@ namespace InTempo.Classes.Utilities
 
                     result.Add(new Parte(TITLE_BIBLE_READING,
                         TimeSpan.FromMinutes(min),
-                        "Tesori della Parola di Dio",
+                        TYPE_LETTURA_BIBLICA,
                         System.Windows.Media.Brushes.Goldenrod,
                         TimeSpan.FromMinutes(min),
                         partNo));
@@ -434,7 +461,7 @@ namespace InTempo.Classes.Utilities
                     // Consigli => stesso numero (NON incrementa)
                     result.Add(new Parte(TITLE_COUNSEL,
                         TimeSpan.FromMinutes(1),
-                        TITLE_COUNSEL,
+                        TYPE_CONSIGLI,
                         System.Windows.Media.Brushes.SlateGray,
                         TimeSpan.FromMinutes(1),
                         lastNumbered));
@@ -453,7 +480,7 @@ namespace InTempo.Classes.Utilities
 
                     result.Add(new Parte(TITLE_CONG_BIBLE_STUDY,
                         TimeSpan.FromMinutes(min),
-                        "Vita cristiana",
+                        TYPE_STUDIO,
                         System.Windows.Media.Brushes.MediumSeaGreen,
                         TimeSpan.FromMinutes(min),
                         partNo));
@@ -471,9 +498,12 @@ namespace InTempo.Classes.Utilities
                         partNo++;
                         lastNumbered = partNo;
 
+                        // Tipo: se è "Discorso" -> Discorso, altrimenti Ministero
+                        string tipo = ResolveTipoFromTitleAndSection(title, currentSection);
+
                         result.Add(new Parte(title,
                             TimeSpan.FromMinutes(min),
-                            "Efficaci nel ministero",
+                            tipo,
                             System.Windows.Media.Brushes.CornflowerBlue,
                             TimeSpan.FromMinutes(min),
                             partNo));
@@ -482,7 +512,7 @@ namespace InTempo.Classes.Utilities
                         {
                             result.Add(new Parte(TITLE_COUNSEL,
                                 TimeSpan.FromMinutes(1),
-                                TITLE_COUNSEL,
+                                TYPE_CONSIGLI,
                                 System.Windows.Media.Brushes.SlateGray,
                                 TimeSpan.FromMinutes(1),
                                 lastNumbered)); // stesso numero
@@ -499,9 +529,11 @@ namespace InTempo.Classes.Utilities
                     partNo++;
                     lastNumbered = partNo;
 
+                    string tipo = ResolveTipoFromTitleAndSection(title, currentSection);
+
                     result.Add(new Parte(title,
                         TimeSpan.FromMinutes(min),
-                        "Vita cristiana",
+                        tipo,
                         System.Windows.Media.Brushes.MediumSeaGreen,
                         TimeSpan.FromMinutes(min),
                         partNo));
@@ -517,9 +549,11 @@ namespace InTempo.Classes.Utilities
                     partNo++;
                     lastNumbered = partNo;
 
+                    string tipo = ResolveTipoFromTitleAndSection(title, currentSection);
+
                     result.Add(new Parte(title,
                         TimeSpan.FromMinutes(min),
-                        "Tesori della Parola di Dio",
+                        tipo,
                         System.Windows.Media.Brushes.Goldenrod,
                         TimeSpan.FromMinutes(min),
                         partNo));
@@ -537,6 +571,57 @@ namespace InTempo.Classes.Utilities
                 if (title.Equals(t, StringComparison.OrdinalIgnoreCase))
                     return true;
             return false;
+        }
+
+        // ==========================================================
+        // ✅ Risoluzione Tipo (Parte.Tipo) -> NO "Fine settimana"/"Apertura"/sezioni
+        // ==========================================================
+        private static string ResolveTipoFromTitleAndSection(string title, string currentSection)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return TYPE_PARTE;
+
+            var t = title.Trim();
+
+            // Cantici
+            if (t.StartsWith("Cantico", StringComparison.OrdinalIgnoreCase) ||
+                t.StartsWith("Canto", StringComparison.OrdinalIgnoreCase))
+                return TYPE_CANTICO;
+
+            // Lettura biblica
+            if (t.StartsWith(TITLE_BIBLE_READING, StringComparison.OrdinalIgnoreCase))
+                return TYPE_LETTURA_BIBLICA;
+
+            // Discorso
+            if (t.IndexOf("Discorso", StringComparison.OrdinalIgnoreCase) >= 0)
+                return TYPE_DISCORSO;
+
+            // Extra coerenti
+            if (t.Equals(TITLE_INTRO_COMMENTS, StringComparison.OrdinalIgnoreCase) ||
+                t.Equals(TITLE_FINAL_COMMENTS, StringComparison.OrdinalIgnoreCase))
+                return TYPE_COMMENTI;
+
+            if (t.Equals(TITLE_COUNSEL, StringComparison.OrdinalIgnoreCase))
+                return TYPE_CONSIGLI;
+
+            if (t.Equals(TITLE_GEMS, StringComparison.OrdinalIgnoreCase))
+                return TYPE_GEMME;
+
+            if (t.Equals(TITLE_CONG_BIBLE_STUDY, StringComparison.OrdinalIgnoreCase) ||
+                t.StartsWith("Studio", StringComparison.OrdinalIgnoreCase))
+                return TYPE_STUDIO;
+
+            // Fallback per sezione (ma NON usiamo il nome sezione come tipo)
+            if (currentSection.Equals("Efficaci nel ministero", StringComparison.OrdinalIgnoreCase))
+                return TYPE_MINISTERO;
+
+            if (currentSection.Equals("Tesori della Parola di Dio", StringComparison.OrdinalIgnoreCase))
+                return TYPE_TESORI;
+
+            if (currentSection.Equals("Vita cristiana", StringComparison.OrdinalIgnoreCase))
+                return TYPE_VITA_CRISTIANA;
+
+            return TYPE_PARTE;
         }
 
         private static int FindMinutesForHeading(HtmlNode heading)

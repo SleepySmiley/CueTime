@@ -2,6 +2,7 @@
 using InTempo.Classes.Utilities;
 using InTempo.Classes.View;
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,18 +52,42 @@ namespace InTempo
         private void BtnAvanti_Click(object sender, RoutedEventArgs e)
         {
             DatiAdunanza.Avanti();
+            CheckCantico();
             LogicTimer.AggiornaGrafica();
         }
 
         private void BtnIndietro_Click(object sender, RoutedEventArgs e)
         {
             DatiAdunanza.Indietro();
+            CheckCantico();
             LogicTimer.AggiornaGrafica();
+        }
+
+        public bool CheckCantico()
+        {
+            if (DatiAdunanza.Current.TipoParte == "Cantico")
+            {
+                _finestratimer.CambiaVista(3, DatiAdunanza.Current.NomeParte, System.Windows.Media.Brushes.Yellow);
+                btnCommentoSchermo.IsEnabled = false;
+                return true;
+            }
+            else
+            {
+                _finestratimer.CambiaVista(1, "", System.Windows.Media.Brushes.White);
+                btnCommentoSchermo.IsEnabled = true;
+                return false;
+            }
         }
 
         private void BtnPausaRiprendi_Click(object sender, RoutedEventArgs e)
         {
             SetStatoAdunanza(_isPaused);
+            if(!_isPaused)
+            {
+                CheckCantico();
+            }
+            
+
         }
 
         public void StopOrologio()
@@ -241,7 +266,7 @@ namespace InTempo
 
                 // Passo da orologio -> timer adunanza
                 Orologio.Stop();
-                _finestratimer.CambiaVista(1, ""); // Passo alla vista timer
+                _finestratimer.CambiaVista(1, "", System.Windows.Media.Brushes.White); // Passo alla vista timer
                 txtOrologio.Visibility = Visibility.Collapsed;
                 txtTimer.Visibility = Visibility.Visible;
                 btnCommentoSchermo.IsEnabled = true;
@@ -265,7 +290,7 @@ namespace InTempo
                 // Stop = adunanza conclusa => stop + reset completo
                 LogicTimer.StopTimer();
                 LogicTimer.ResetCompleto();
-                _finestratimer.CambiaVista(4, "");
+                _finestratimer.CambiaVista(4, "", System.Windows.Media.Brushes.White);
 
                 // Torno a orologio
                 txtTimer.Visibility = Visibility.Collapsed;

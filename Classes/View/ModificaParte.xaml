@@ -97,7 +97,7 @@
                         <TextBox Grid.Column="0" x:Name="TxtDurata" 
                                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  materialDesign:HintAssist.Hint="Durata (MM:SS)"
-                                 Text="{Binding TempoParte}"/>
+                                 Text="{Binding TempoParteEdit, UpdateSourceTrigger=LostFocus}"/>
 
                         <ComboBox Grid.Column="2" x:Name="CmbColore" 
                                   Style="{StaticResource MaterialDesignFloatingHintComboBox}"

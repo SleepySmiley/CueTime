@@ -4,7 +4,7 @@
     <Grid>
         <Viewbox>
             <TextBlock x:Name="TxtTimer" 
-               Text="{Binding AdunanzaCorrente.Current.TempoScorrevole, StringFormat={}{0:mm\\:ss}}" 
+               Text="{Binding AdunanzaCorrente.Current.TempoScorrevoleLabel}" 
                Foreground="{Binding TimerBrush}" 
                FontWeight="Bold"/>
         </Viewbox>

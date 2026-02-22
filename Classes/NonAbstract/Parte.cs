@@ -13,11 +13,9 @@ namespace InTempo.Classes.NonAbstract
             get => _numeroParte;
             set
             {
-                if (_numeroParte != value)
-                {
-                    _numeroParte = value;
-                    OnPropertyChanged();
-                }
+                if (_numeroParte == value) return;
+                _numeroParte = value;
+                OnPropertyChanged();
             }
         }
 
@@ -27,11 +25,9 @@ namespace InTempo.Classes.NonAbstract
             get => _nomeParte;
             set
             {
-                if (_nomeParte != value)
-                {
-                    _nomeParte = value;
-                    OnPropertyChanged();
-                }
+                if (_nomeParte == value) return;
+                _nomeParte = value ?? string.Empty;
+                OnPropertyChanged();
             }
         }
 
@@ -41,12 +37,11 @@ namespace InTempo.Classes.NonAbstract
             get => _tempoParte;
             set
             {
-                if (_tempoParte != value)
-                {
-                    _tempoParte = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(TempoParteLabel));
-                }
+                if (_tempoParte == value) return;
+                _tempoParte = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TempoParteLabel));
+                OnPropertyChanged(nameof(TempoParteEdit));
             }
         }
 
@@ -56,11 +51,9 @@ namespace InTempo.Classes.NonAbstract
             get => _tipoParte;
             set
             {
-                if (_tipoParte != value)
-                {
-                    _tipoParte = value;
-                    OnPropertyChanged();
-                }
+                if (_tipoParte == value) return;
+                _tipoParte = value ?? string.Empty;
+                OnPropertyChanged();
             }
         }
 
@@ -70,11 +63,9 @@ namespace InTempo.Classes.NonAbstract
             get => _coloreParte;
             set
             {
-                if (_coloreParte != value)
-                {
-                    _coloreParte = value;
-                    OnPropertyChanged();
-                }
+                if (Equals(_coloreParte, value)) return;
+                _coloreParte = value ?? Brushes.Black;
+                OnPropertyChanged();
             }
         }
 
@@ -84,17 +75,12 @@ namespace InTempo.Classes.NonAbstract
             get => _tempoScorrevole;
             set
             {
-                if (_tempoScorrevole != value)
-                {
-                    _tempoScorrevole = value;
-                    OnPropertyChanged();
-                    OnPropertyChanged(nameof(TempoScorrevoleLabel));
-                }
+                if (_tempoScorrevole == value) return;
+                _tempoScorrevole = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(TempoScorrevoleLabel));
             }
         }
-
-        public string TempoParteLabel => FormatTotalMinutes(TempoParte);
-        public string TempoScorrevoleLabel => FormatTotalMinutes(TempoScorrevole);
 
         private bool _isCurrent;
         public bool IsCurrent
@@ -102,40 +88,90 @@ namespace InTempo.Classes.NonAbstract
             get => _isCurrent;
             set
             {
-                if (_isCurrent != value)
-                {
-                    _isCurrent = value;
-                    OnPropertyChanged();
-                }
+                if (_isCurrent == value) return;
+                _isCurrent = value;
+                OnPropertyChanged();
             }
         }
 
-        public Parte(string nome, TimeSpan t, string tipo, Brush colore, TimeSpan tempoScorrevole, int? numeroParte)
+        public string TempoParteLabel => ToMinSec(TempoParte);
+        public string TempoScorrevoleLabel => ToMinSec(TempoScorrevole);
+
+        public string TempoParteEdit
         {
-            NomeParte = nome;
-            TempoParte = t;
-            TipoParte = tipo;
-            ColoreParte = colore;
-            TempoScorrevole = tempoScorrevole;
-            NumeroParte = numeroParte;
+            get => ToMinSec(TempoParte);
+            set
+            {
+                if (TryParseMinSec(value, out var ts))
+                    TempoParte = ts;
+                else
+                    OnPropertyChanged(nameof(TempoParteEdit));
+            }
         }
 
-        private static string FormatTotalMinutes(TimeSpan ts)
+        public Parte(string nome, TimeSpan tempoParte, string tipo, Brush colore, TimeSpan tempoScorrevole, int? numeroParte)
         {
-            var sign = ts < TimeSpan.Zero ? "-" : "";
-            ts = ts.Duration();
+            _nomeParte = nome ?? string.Empty;
+            _tempoParte = tempoParte;
+            _tipoParte = tipo ?? string.Empty;
+            _coloreParte = colore ?? Brushes.Black;
+            _tempoScorrevole = tempoScorrevole;
+            _numeroParte = numeroParte;
+        }
 
-            int totalMinutes = (int)ts.TotalMinutes;
+        private static string ToMinSec(TimeSpan ts)
+        {
+            bool neg = ts < TimeSpan.Zero;
+            if (neg) ts = ts.Negate();
+
+            int minutes = (int)ts.TotalMinutes;
             int seconds = ts.Seconds;
 
-            return $"{sign}{totalMinutes}:{seconds:00}";
+            return (neg ? "-" : "") + $"{minutes:00}:{seconds:00}";
+        }
+
+        private static bool TryParseMinSec(string? input, out TimeSpan result)
+        {
+            result = TimeSpan.Zero;
+            if (string.IsNullOrWhiteSpace(input)) return false;
+
+            string s = input.Trim();
+
+            bool neg = false;
+            if (s.StartsWith("-", StringComparison.Ordinal))
+            {
+                neg = true;
+                s = s.Substring(1).Trim();
+                if (s.Length == 0) return false;
+            }
+
+            string[] parts = s.Split(':');
+
+            int minutes;
+            int seconds = 0;
+
+            if (parts.Length == 1)
+            {
+                if (!int.TryParse(parts[0], out minutes) || minutes < 0) return false;
+            }
+            else if (parts.Length == 2)
+            {
+                if (!int.TryParse(parts[0], out minutes) || minutes < 0) return false;
+                if (!int.TryParse(parts[1], out seconds) || seconds < 0 || seconds > 59) return false;
+            }
+            else
+            {
+                return false;
+            }
+
+            result = TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds);
+            if (neg) result = -result;
+            return true;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

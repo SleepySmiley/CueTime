@@ -19,12 +19,15 @@ namespace InTempo.Classes.View.UserControls
     public partial class VistaSoloScritta : UserControl
     {
         public string Text { get; set; }
+        
+        public Brush Colore { get; set; }
 
-        public VistaSoloScritta(string testo)
+        public VistaSoloScritta(string testo, Brush colorescritta)
         {
             InitializeComponent();
             Text = testo;
             DataContext = this;
+            Colore = colorescritta;
 
         }
     }

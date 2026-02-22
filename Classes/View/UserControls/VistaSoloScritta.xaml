@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
         <Viewbox>
-            <TextBlock x:Name="TxtTimer" Text="{Binding Text}" FontWeight="Bold" Foreground="White"/>
+            <TextBlock x:Name="TxtTimer" Text="{Binding Text}" FontWeight="Bold" Foreground="{Binding Colore}"/>
         </Viewbox>
     </Grid>
 </UserControl>

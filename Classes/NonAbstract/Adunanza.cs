@@ -116,6 +116,8 @@ namespace InTempo.Classes.NonAbstract
 
         public void Avanti()
         {
+            
+
             if (Parti.Count == 0)
             {
                 Current = null;
