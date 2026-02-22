@@ -61,5 +61,15 @@ namespace InTempo.Classes.View
             this.DialogResult = false; // Oppure this.Close(); a seconda di come apri la finestra
             this.Close();
         }
+
+        private void TxtNumero_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if(TxtNumero.Text=="")
+            {
+                ParteCopia.NumeroParte = null;
+
+            }
+           
+        }
     }
 }
