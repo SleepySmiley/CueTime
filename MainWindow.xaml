@@ -18,42 +18,45 @@
         Title="InTempo" Height="500" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
 
     <Grid>
-        
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <materialDesign:Card Grid.Row="0" 
+                             Margin="12,12,12,0" 
+                             UniformCornerRadius="12" 
+                             materialDesign:ElevationAssist.Elevation="Dp4">
+            <Grid Margin="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{Binding DatiAdunanza.Current.NomeParte}" 
-                       VerticalAlignment="Center"
-                       FontSize="28"
-                       FontWeight="SemiBold"
-                       Foreground="{Binding DatiAdunanza.Current.ColoreParte}"
-                       TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding DatiAdunanza.Current.NomeParte}" 
+                           VerticalAlignment="Center"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="{Binding DatiAdunanza.Current.ColoreParte}"
+                           TextTrimming="CharacterEllipsis"/>
 
-            <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
-                <TextBlock x:Name="txtTimer" Text="{Binding DatiAdunanza.Current.TempoScorrevole, StringFormat=mm\\:ss}"
-                           FontWeight="Bold"
-                           Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
-            </Viewbox>
-            <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
-                <TextBlock x:Name="txtOrologio" 
-                           FontWeight="Bold"
-                           Text="{Binding LogicTimer.TestoSchermoPrincipale}"
-                           Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
-            </Viewbox>
-        </Grid>
+                <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
+                    <TextBlock x:Name="txtTimer" Text="{Binding DatiAdunanza.Current.TempoScorrevole, StringFormat=mm\\:ss}"
+                               FontWeight="Bold"
+                               Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
+                </Viewbox>
+                <Viewbox Grid.Column="1" Height="48" Margin="16,0,0,0">
+                    <TextBlock x:Name="txtOrologio" 
+                               FontWeight="Bold"
+                               Text="{Binding LogicTimer.TestoSchermoPrincipale}"
+                               Foreground="{Binding DatiAdunanza.Current.ColoreParte}"/>
+                </Viewbox>
+            </Grid>
+        </materialDesign:Card>
 
         <materialDesign:Card Grid.Row="1" 
-                             Margin="12,0,12,0" 
+                             Margin="12,12,12,0" 
                              UniformCornerRadius="12" 
                              materialDesign:ElevationAssist.Elevation="Dp4">
 
@@ -70,7 +73,7 @@
                       CanUserDeleteRows="False"
                       CanUserReorderColumns="False"
                       BorderThickness="0"
-                      Background="{DynamicResource MaterialDesignPaper}"
+                      Background="Transparent" 
                       dd:DragDrop.IsDragSource="True"
                       dd:DragDrop.IsDropTarget="True"
                       dd:DragDrop.UseDefaultDragAdorner="True"
@@ -78,7 +81,6 @@
                       dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
                       dd:DragDrop.DragDirectlySelectedOnly="True"
                       dd:DragDrop.SelectDroppedItems="True">
-
 
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
@@ -90,7 +92,6 @@
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
-
 
                 <DataGrid.Columns>
                     <materialDesign:DataGridTextColumn Header="#" Binding="{Binding NumeroParte}" Width="Auto" IsReadOnly="True">
@@ -157,95 +158,95 @@
         </materialDesign:Card>
 
         <materialDesign:Card Grid.Row="1"
-                     UniformCornerRadius="14"
-                     Padding="4"
-                     HorizontalAlignment="Center"
-                     VerticalAlignment="Center"
-                     Background="Transparent"
-                     materialDesign:ElevationAssist.Elevation="Dp0"
-                     Panel.ZIndex="10"
-                     IsHitTestVisible="False">
+                             UniformCornerRadius="14"
+                             Padding="4"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Background="Transparent"
+                             materialDesign:ElevationAssist.Elevation="Dp0"
+                             Panel.ZIndex="10"
+                             IsHitTestVisible="False">
             <ProgressBar x:Name="prgbar"
-                 Style="{StaticResource MaterialDesignCircularProgressBar}"
-                 Value="50"
-                 IsIndeterminate="True"
-                 Width="30" Height="30"
-                 HorizontalAlignment="Center"
-                 VerticalAlignment="Center"
-                 Visibility="Visible"/>
+                         Style="{StaticResource MaterialDesignCircularProgressBar}"
+                         Value="50"
+                         IsIndeterminate="True"
+                         Width="30" Height="30"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Visibility="Visible"/>
         </materialDesign:Card>
 
 
-        <Grid Grid.Row="2" Margin="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <materialDesign:Card Grid.Row="2" 
+                             Margin="12,12,12,12" 
+                             UniformCornerRadius="12" 
+                             materialDesign:ElevationAssist.Elevation="Dp4">
+            <Grid Margin="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <TextBlock Text="TEMPO RESIDUO" FontSize="10" FontWeight="Bold" Opacity="0.5"/>
-                <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString}" 
-                           FontSize="20" 
-                           FontWeight="Medium"
-                           Foreground="{Binding LogicTimer.TempoResiduoBrush}"/>
-            </StackPanel>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="TEMPO RESIDUO" FontSize="10" FontWeight="Bold" Opacity="0.5"/>
+                    <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString}" 
+                               FontSize="20" 
+                               FontWeight="Medium"
+                               Foreground="{Binding LogicTimer.TempoResiduoBrush}"/>
+                </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnIndietro" Click="BtnIndietro_Click"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
+                            Margin="0,0,24,0"
+                            ToolTip="Precedente">
+                        <iconPacks:PackIconMaterial Kind="SkipPrevious" Width="24" Height="24"/>
+                    </Button>
 
-                <Button x:Name="BtnIndietro" Click="BtnIndietro_Click"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
-                        Margin="0,0,24,0"
-                        ToolTip="Precedente">
-                    <iconPacks:PackIconMaterial Kind="SkipPrevious" Width="24" Height="24"/>
-                </Button>
+                    <Button x:Name="BtnPausaRiprendi" Click="BtnPausaRiprendi_Click"
+                            Style="{StaticResource MaterialDesignFloatingActionButton}"
+                            Width="64" Height="64"
+                            ToolTip="Play/Pausa">
+                        <iconPacks:PackIconMaterial Kind="{Binding IconaStatoTimer, FallbackValue=Play}" Width="32" Height="32"/>
+                    </Button>
 
-                <Button x:Name="BtnPausaRiprendi" Click="BtnPausaRiprendi_Click"
-                        Style="{StaticResource MaterialDesignFloatingActionButton}"
-                        Width="64" Height="64"
-                        ToolTip="Play/Pausa">
-                    <iconPacks:PackIconMaterial Kind="{Binding IconaStatoTimer, FallbackValue=Play}" Width="32" Height="32"/>
-                </Button>
+                    <Button x:Name="BtnAvanti" Click="BtnAvanti_Click"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
+                            Margin="24,0,0,0"
+                            ToolTip="Successiva">
+                        <iconPacks:PackIconMaterial Kind="SkipNext" Width="24" Height="24"/>
+                    </Button>
+                </StackPanel>
 
-                <Button x:Name="BtnAvanti" Click="BtnAvanti_Click"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
-                        Margin="24,0,0,0"
-                        ToolTip="Successiva">
-                    <iconPacks:PackIconMaterial Kind="SkipNext" Width="24" Height="24"/>
-                </Button>
-            </StackPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button x:Name="btnCommentoSchermo" 
+                            Content="Messaggio"
+                            materialDesign:ButtonAssist.CornerRadius="20"
+                            Margin="0,0,10,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Width="150" 
+                            Height="40"
+                            ToolTip="Commento Schermo"
+                            Click="btnCommentoSchermo_Click"
+                            IsEnabled="False"/>
 
-            <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button x:Name="btnCommentoSchermo" 
-                        Content="Messaggio"
-                        materialDesign:ButtonAssist.CornerRadius="20"
-                        Margin="0,0,10,0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Bottom"
-                        Width="150" 
-                        Height="40"
-                        ToolTip="Commento Schermo"
-                        Click="btnCommentoSchermo_Click"
-                        IsEnabled="False"/>
-
-
-
-                <Button Width="40" 
-                        Height="40" 
-                        ToolTip="Impostazioni"
-                        Padding="0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click">
-
-                    <iconPacks:PackIconMaterial Kind="Cog" 
-                                    Width="22" 
-                                    Height="22" 
-                                    VerticalAlignment="Center" 
-                                    HorizontalAlignment="Center"/>
-                </Button>
-
-            </StackPanel>
-        </Grid>
+                    <Button Width="40" 
+                            Height="40" 
+                            ToolTip="Impostazioni"
+                            Padding="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click">
+                        <iconPacks:PackIconMaterial Kind="Cog" 
+                                                    Width="22" 
+                                                    Height="22" 
+                                                    VerticalAlignment="Center" 
+                                                    HorizontalAlignment="Center"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
     </Grid>
 </Window>

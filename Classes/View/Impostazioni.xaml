@@ -14,192 +14,152 @@
         TextElement.FontSize="14"
         TextOptions.TextFormattingMode="Ideal" 
         TextOptions.TextRenderingMode="Auto"
-        Background="{DynamicResource MaterialDesignPaper}"
+        Background="Transparent"
         FontFamily="{DynamicResource MaterialDesignFont}"
         
-        Title="Impostazioni" Height="450" Width="600"
+        Title="Impostazioni" Height="500" Width="600"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <materialDesign:Card Margin="16" 
+                         UniformCornerRadius="12" 
+                         Background="{DynamicResource MaterialDesignPaper}"
+                         materialDesign:ElevationAssist.Elevation="Dp8">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="16">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <iconPacks:PackIconMaterial Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesignBody}"/>
-                <TextBlock Text="Opzioni" 
-                           Margin="16,0,0,0"
-                           FontSize="24" 
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+            <materialDesign:Card Grid.Row="0" 
+                                 Margin="12,12,12,0" 
+                                 UniformCornerRadius="12" 
+                                 materialDesign:ElevationAssist.Elevation="Dp4">
+                <Grid Margin="16">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <iconPacks:PackIconMaterial Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                        <TextBlock Text="Opzioni" 
+                                   Margin="16,0,0,0"
+                                   FontSize="24" 
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
 
-        <materialDesign:Card Grid.Row="1" 
-                             Margin="12,0,12,0" 
-                             UniformCornerRadius="12" 
-                             materialDesign:ElevationAssist.Elevation="Dp4">
+            <materialDesign:Card Grid.Row="1" 
+                                 Margin="12,12,12,0" 
+                                 UniformCornerRadius="12" 
+                                 materialDesign:ElevationAssist.Elevation="Dp4">
 
-            <TabControl materialDesign:ColorZoneAssist.Mode="Standard" 
-                        TabStripPlacement="Top"
-                        BorderThickness="0"
-                        Background="{DynamicResource MaterialDesignPaper}">
+                <TabControl materialDesign:ColorZoneAssist.Mode="Standard" 
+                            TabStripPlacement="Top"
+                            BorderThickness="0"
+                            Background="Transparent">
 
-                <TabItem>
-                    <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <iconPacks:PackIconMaterial Kind="Tune" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Generali" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </TabItem.Header>
-
-                    <Grid Margin="16">
-                        <StackPanel>
-                            <TextBlock Text="Comportamento Applicazione" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                            <Label Content="Scegliere schermo secondario" HorizontalAlignment="Left"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="4,0,0,0">
-
-                                <ComboBox x:Name="cmbSchermi" 
-                                          Width="160"
-                                          HorizontalAlignment="Left" 
-                                          ItemsSource="{Binding Source={x:Static utilMonitors:GestoreMonitor.Monitors}}"
-                                          DisplayMemberPath="Nome" 
-                                          VerticalAlignment="Center"/>
-
-                                <Button x:Name="btnIdentifica" Content="Identifica"
-                                        Margin="16,0,0,0"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                                        ToolTip="Mostra un numero per identificare gli schermi fisici"
-                                        VerticalAlignment="Center" Click="btnIdentifica_Click"/>
-
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Tune" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Generali" VerticalAlignment="Center"/>
                             </StackPanel>
+                        </TabItem.Header>
+                        <Grid Margin="16">
+                            <StackPanel>
+                                <TextBlock Text="Comportamento Applicazione" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
+                                <Label Content="Scegliere schermo secondario" HorizontalAlignment="Left"/>
+                                <StackPanel Orientation="Horizontal" Margin="4,0,0,0">
+                                    <ComboBox x:Name="cmbSchermi" 
+                                              Width="160"
+                                              HorizontalAlignment="Left" 
+                                              ItemsSource="{Binding Source={x:Static utilMonitors:GestoreMonitor.Monitors}}"
+                                              DisplayMemberPath="Nome" 
+                                              VerticalAlignment="Center"/>
+                                    <Button x:Name="btnIdentifica" Content="Identifica"
+                                            Margin="16,0,0,0"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            VerticalAlignment="Center" Click="btnIdentifica_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
 
-                        </StackPanel>
-                    </Grid>
-                </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="Palette" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Aspetto" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <Grid Margin="16">
+                            <StackPanel>
+                                <TextBlock Text="Tema Grafico" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
+                                <RadioButton Content="Tema Chiaro" IsChecked="True" Margin="0,5"/>
+                                <RadioButton Content="Tema Scuro" Margin="0,5"/>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
 
-                <TabItem>
-                    <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <iconPacks:PackIconMaterial Kind="Palette" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Aspetto" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </TabItem.Header>
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="CalendarClock" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Adunanze" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                            <StackPanel MinWidth="250" MaxWidth="400" HorizontalAlignment="Center">
+                                <TextBlock Text="Infrasettimanale" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                <Grid Margin="0,0,0,24">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="CmbGiornoInfra" materialDesign:HintAssist.Hint="Giorno" Style="{StaticResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Bottom">
+                                        <ComboBoxItem Content="Lunedì" Tag="1"/>
+                                        <ComboBoxItem Content="Martedì" Tag="2"/>
+                                        <ComboBoxItem Content="Mercoledì" Tag="3"/>
+                                        <ComboBoxItem Content="Giovedì" Tag="4"/>
+                                        <ComboBoxItem Content="Venerdì" Tag="5"/>
+                                    </ComboBox>
+                                    <materialDesign:TimePicker x:Name="TimePickerInfra" Grid.Column="2" materialDesign:HintAssist.Hint="Ora Inizio" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Is24Hours="True" Width="100" VerticalAlignment="Bottom"/>
+                                </Grid>
+                                <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="0,0,0,24"/>
+                                <TextBlock Text="Fine Settimana" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="CmbGiornoFine" materialDesign:HintAssist.Hint="Giorno" Style="{StaticResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Bottom">
+                                        <ComboBoxItem Content="Sabato" Tag="6"/>
+                                        <ComboBoxItem Content="Domenica" Tag="0"/>
+                                    </ComboBox>
+                                    <materialDesign:TimePicker x:Name="TimePickerFine" Grid.Column="2" materialDesign:HintAssist.Hint="Ora Inizio" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Is24Hours="True" Width="100" VerticalAlignment="Bottom"/>
+                                </Grid>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </materialDesign:Card>
 
-                    <Grid Margin="16">
-                        <StackPanel>
-                            <TextBlock Text="Tema Grafico" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                            <RadioButton Content="Tema Chiaro" IsChecked="True" Margin="0,5"/>
-                            <RadioButton Content="Tema Scuro" Margin="0,5"/>
-                        </StackPanel>
-                    </Grid>
-                </TabItem>
-
-                <TabItem>
-                    <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <iconPacks:PackIconMaterial Kind="CalendarClock" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Adunanze" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </TabItem.Header>
-
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
-                        <StackPanel MinWidth="250" MaxWidth="400" HorizontalAlignment="Center">
-
-                            <TextBlock Text="Infrasettimanale" 
-                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}" 
-                       Opacity="0.6" 
-                       Margin="0,0,0,16"/>
-
-                            <Grid Margin="0,0,0,24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ComboBox x:Name="CmbGiornoInfra"
-                          materialDesign:HintAssist.Hint="Giorno"
-                          Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                          VerticalAlignment="Bottom">
-                                    <ComboBoxItem Content="Lunedì" Tag="1"/>
-                                    <ComboBoxItem Content="Martedì" Tag="2"/>
-                                    <ComboBoxItem Content="Mercoledì" Tag="3"/>
-                                    <ComboBoxItem Content="Giovedì" Tag="4"/>
-                                    <ComboBoxItem Content="Venerdì" Tag="5"/>
-                                </ComboBox>
-
-                                <materialDesign:TimePicker x:Name="TimePickerInfra"
-                                           Grid.Column="2"
-                                           materialDesign:HintAssist.Hint="Ora Inizio"
-                                           Style="{StaticResource MaterialDesignFloatingHintTimePicker}"
-                                           Is24Hours="True"
-                                           WithSeconds="False"
-                                           Width="100"
-                                           VerticalAlignment="Bottom"/>
-                            </Grid>
-
-                            <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="0,0,0,24"/>
-
-                            <TextBlock Text="Fine Settimana" 
-                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}" 
-                       Opacity="0.6" 
-                       Margin="0,0,0,16"/>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <ComboBox x:Name="CmbGiornoFine"
-                          materialDesign:HintAssist.Hint="Giorno"
-                          Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                          VerticalAlignment="Bottom">
-                                    <ComboBoxItem Content="Sabato" Tag="6"/>
-                                    <ComboBoxItem Content="Domenica" Tag="0"/>
-                                </ComboBox>
-
-                                <materialDesign:TimePicker x:Name="TimePickerFine"
-                                           Grid.Column="2"
-                                           materialDesign:HintAssist.Hint="Ora Inizio"
-                                           Style="{StaticResource MaterialDesignFloatingHintTimePicker}"
-                                           Is24Hours="True"
-                                           WithSeconds="False"
-                                           Width="100"
-                                           VerticalAlignment="Bottom"/>
-                            </Grid>
-
-                        </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-
-            </TabControl>
-        </materialDesign:Card>
-
-        <Grid Grid.Row="2" Margin="16">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-
-                <Button Content="Annulla"
-                        Click="BtnAnnulla_Click"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Margin="0,0,8,0"/>
-
-                <Button Content="Salva"
-                        Click="BtnSalva_Click"
-                        Width="100"
-                        Height="40"
-                        materialDesign:ButtonAssist.CornerRadius="15">
-                </Button>
-
-            </StackPanel>
+            <materialDesign:Card Grid.Row="2" 
+                                 Margin="12,12,12,12" 
+                                 UniformCornerRadius="12" 
+                                 materialDesign:ElevationAssist.Elevation="Dp4">
+                <Grid Margin="16">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Annulla" Click="BtnAnnulla_Click" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
+                        <Button Content="Salva" Click="BtnSalva_Click" Width="100" Height="40" materialDesign:ButtonAssist.CornerRadius="15"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
         </Grid>
-
-    </Grid>
+    </materialDesign:Card>
 </Window>

@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace InTempo.Classes.View
 {
@@ -176,6 +177,14 @@ namespace InTempo.Classes.View
 
                 // Mostriamo la finestra
                 fin.Show();
+            }
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                this.DragMove();
             }
         }
     }

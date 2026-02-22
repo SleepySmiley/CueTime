@@ -148,21 +148,30 @@ namespace InTempo.Classes.Utilities
 
         public void ResetTimerPreciso(Parte Parte)
         {
-            if(Parte == AdunanzaCorrente.Current)
+            if (Parte == AdunanzaCorrente.Current)
             {
-                TimeSpan temp = Parte.TempoParte - Parte.TempoScorrevole;
-                if (temp > TimeSpan.Zero)
+                TimeSpan tempoPerso;
+
+                if (Parte.TempoScorrevole >= TimeSpan.Zero)
                 {
-                    AdunanzaCorrente.TempoResiduo = AdunanzaCorrente.TempoResiduo.Add(temp);
+                    tempoPerso = Parte.TempoParte - Parte.TempoScorrevole;
+                }
+                else
+                {
+                    tempoPerso = Parte.TempoParte;
+                }
+
+                if (tempoPerso > TimeSpan.Zero)
+                {
+                    AdunanzaCorrente.TempoResiduo = AdunanzaCorrente.TempoResiduo.Subtract(tempoPerso);
                 }
             }
 
             Parte.TempoScorrevole = Parte.TempoParte;
 
-            if (Parte == AdunanzaCorrente.Current)
-            {
-                CheckColorParte();
-            }
+            CheckColorParte();
+            CheckColorTempoResiduo();
+            
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

@@ -52,7 +52,7 @@
                         VerticalAlignment="Center"
                         Click="BtnChiudiIcona_Click"
                         ToolTip="Chiudi">
-                    <materialDesign:PackIcon Kind="Close" Width="20" Height="20"/>
+                    <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
                 </Button>
 
                 <Label x:Name="lblTitolo" 
@@ -71,7 +71,17 @@
                        Margin="24,0,24,24" 
                        FontSize="15" 
                        Opacity="0.8"
-                       Foreground="Black"/>
+                       Foreground="Black"
+                       Visibility="Collapsed"/>
+            <TextBlock x:Name="txbTesto" 
+                       Grid.Row="1" 
+                       Text="{Binding Testo}" 
+                       TextWrapping="Wrap" 
+                       Margin="24,0,24,24" 
+                       FontSize="15" 
+                       Opacity="0.8"
+                       Foreground="Black"
+                       Visibility="Collapsed"/>
 
             <StackPanel Grid.Row="2" 
                         Orientation="Horizontal" 

@@ -53,6 +53,7 @@ namespace InTempo.Classes.View
             Titolo = TitoloPassato;
             Testo = TestoPassato;
             DataContext = this;
+            txbTesto.Visibility = Visibility.Visible;
             txtTesto.IsReadOnly = true;
             TipologiaFinestra = 0;
 
@@ -63,6 +64,7 @@ namespace InTempo.Classes.View
             InitializeComponent();
             Titolo = TitoloPassato;
             Testo = TestoPassato;
+            txbTesto.Visibility = Visibility.Visible;
             BtnPredefinito1.Content = TestoBtn1;
             BtnPredefinito2.Content = TestoBtn2;
             DataContext = this;
@@ -74,6 +76,7 @@ namespace InTempo.Classes.View
         {
             InitializeComponent();
             Titolo = TitoloPassato;
+            txtTesto.Visibility = Visibility.Visible;
             Testo = "";
             DataContext = this;
             BtnPredefinito1.Content = TestoBtn1;

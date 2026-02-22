@@ -195,7 +195,7 @@ namespace InTempo
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Classes.View.Impostazioni finestra = new Classes.View.Impostazioni();
+            Impostazioni finestra = new Impostazioni();
             finestra.ShowDialog();
         }
 
