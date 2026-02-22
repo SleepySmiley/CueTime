@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace InTempo
@@ -285,5 +286,6 @@ namespace InTempo
             FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi","Tutto Schermo","Parziale", _finestratimer);
             MessaggioOratore.ShowDialog();
         }
+
     }
 }

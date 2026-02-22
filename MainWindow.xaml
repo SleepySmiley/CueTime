@@ -80,7 +80,25 @@
                       dd:DragDrop.DefaultDragAdornerOpacity="0.8"
                       dd:DragDrop.ShowAlwaysDropTargetAdorner="True"
                       dd:DragDrop.DragDirectlySelectedOnly="True"
-                      dd:DragDrop.SelectDroppedItems="True">
+                      dd:DragDrop.SelectDroppedItems="True"
+                      FocusVisualStyle="{x:Null}"
+                      materialDesign:DataGridAssist.SelectedCellBorderBrush="Transparent">
+
+
+                <DataGrid.Resources>
+                    <!-- MaterialDesign: sfondo riga selezionata -->
+                    <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.Selected" Color="Transparent"/>
+
+                    <!-- (OPZIONALE) se vuoi eliminare anche l'effetto hover -->
+                    <!-- <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.RowHoverBackground" Color="Transparent"/> -->
+                </DataGrid.Resources>
+
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                </DataGrid.CellStyle>
 
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
@@ -201,7 +219,7 @@
                             Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
                             Margin="0,0,24,0"
                             ToolTip="Precedente">
-                        <iconPacks:PackIconMaterial Kind="SkipPrevious" Width="24" Height="24"/>
+                        <iconPacks:PackIconMaterial Kind="SkipPreviousCircle" Width="24" Height="24"/>
                     </Button>
 
                     <Button x:Name="BtnPausaRiprendi" Click="BtnPausaRiprendi_Click"
@@ -215,7 +233,7 @@
                             Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}"
                             Margin="24,0,0,0"
                             ToolTip="Successiva">
-                        <iconPacks:PackIconMaterial Kind="SkipNext" Width="24" Height="24"/>
+                        <iconPacks:PackIconMaterial Kind="SkipNextCircle" Width="24" Height="24"/>
                     </Button>
                 </StackPanel>
 
