@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace InTempo.Classes.NonAbstract
@@ -29,6 +30,8 @@ namespace InTempo.Classes.NonAbstract
 
         private int _currentParteIndex = 0;
         private Parte? _current;
+
+        [JsonIgnore]
         public Parte? Current
         {
             get => _current;
@@ -51,6 +54,8 @@ namespace InTempo.Classes.NonAbstract
 
 
         private TimeSpan _tempoResiduo;
+
+        [JsonIgnore]
         public TimeSpan TempoResiduo
         {
             get => _tempoResiduo;
@@ -68,6 +73,7 @@ namespace InTempo.Classes.NonAbstract
 
 
         // Proprietà aggiunta per gestire la visualizzazione con +/- 
+        [JsonIgnore]
         public string TempoResiduoString
         {
             get

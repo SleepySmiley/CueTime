@@ -221,7 +221,7 @@ namespace InTempo
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Impostazioni finestra = new Impostazioni();
+            Impostazioni finestra = new Impostazioni(LogicTimer);
             finestra.ShowDialog();
         }
 

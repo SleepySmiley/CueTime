@@ -1,4 +1,5 @@
-﻿using InTempo.Classes.Utilities.Monitors;
+﻿using InTempo.Classes.Utilities;
+using InTempo.Classes.Utilities.Monitors;
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
@@ -8,11 +9,11 @@ using System.Windows.Input;
 
 namespace InTempo.Classes.View
 {
-
-
     public partial class Impostazioni : Window
     {
-        public Impostazioni()
+        public TimerLogics Logiche { get; set; }
+
+        public Impostazioni(TimerLogics Logichepassate)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -20,14 +21,23 @@ namespace InTempo.Classes.View
             TimePickerInfra.SelectedTime = App.Settings.Infrasettimanale.OraInizio;
             SelezioneGiorno();
             SelezionaMonitorScelto();
+            Logiche = Logichepassate;
         }
 
         private void BtnSalva_Click(object sender, RoutedEventArgs e)
         {
-            PrendiGiorno(CmbGiornoInfra.SelectedItem as ComboBoxItem);
-            PrendiGiorno(CmbGiornoFine.SelectedItem as ComboBoxItem);
-            PrendiOrario();
-            SalvaMonitor();
+            if (!PrendiGiorno(CmbGiornoInfra.SelectedItem as ComboBoxItem, "Infrasettimanale"))
+                return;
+
+            if (!PrendiGiorno(CmbGiornoFine.SelectedItem as ComboBoxItem, "Fine Settimana"))
+                return;
+
+            if (!PrendiOrario())
+                return;
+
+            if (!SalvaMonitor())
+                return;
+
             this.DialogResult = true;
             this.Close();
         }
@@ -38,64 +48,64 @@ namespace InTempo.Classes.View
             this.Close();
         }
 
-        public void PrendiGiorno(ComboBoxItem cmbGiorno)
+        public bool PrendiGiorno(ComboBoxItem cmbGiorno, string tipoAdunanza)
         {
             if (cmbGiorno == null)
             {
-                throw new ArgumentNullException("Giorno non selezionato");
+                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", $"Seleziona il giorno per l'adunanza {tipoAdunanza}.", 1);
+                Errore.ShowDialog();
+                return false;
             }
 
             switch (cmbGiorno.Tag)
             {
                 case "1":
                     App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Monday;
-
                     break;
                 case "2":
                     App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Tuesday;
-
                     break;
                 case "3":
                     App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Wednesday;
-
                     break;
                 case "4":
                     App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Thursday;
-
                     break;
                 case "5":
                     App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Friday;
-
                     break;
                 case "6":
                     App.Settings.FineSettimana.GiornoSettimana = DayOfWeek.Saturday;
-
                     break;
                 case "0":
                     App.Settings.FineSettimana.GiornoSettimana = DayOfWeek.Sunday;
-
                     break;
-
             }
 
-
-
+            return true; 
         }
 
-        public void PrendiOrario()
+        public bool PrendiOrario()
         {
-            if(TimePickerInfra.SelectedTime == null)
+            if (TimePickerInfra.SelectedTime == null)
             {
-                throw new ArgumentNullException("Orario Infrasettimanale non selezionato");
+                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona l'orario per l'Infrasettimanale.", 1);
+                Errore.ShowDialog();
+                return false;
             }
-            App.Settings.Infrasettimanale.OraInizio = (DateTime)TimePickerInfra.SelectedTime;
-            if(TimePickerFine.SelectedTime == null)
-            {
-                throw new ArgumentNullException("Orario Finesettimanale non selezionato");
-            }
-            App.Settings.FineSettimana.OraInizio = (DateTime)TimePickerFine.SelectedTime;
-        }
 
+            if (TimePickerFine.SelectedTime == null)
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona l'orario per il Fine Settimana.", 1);
+                Errore.ShowDialog();
+                return false;
+            }
+
+            App.Settings.Infrasettimanale.OraInizio = (DateTime)TimePickerInfra.SelectedTime;
+            App.Settings.FineSettimana.OraInizio = (DateTime)TimePickerFine.SelectedTime;
+
+            return true; 
+        }
 
         public void SelezioneGiorno()
         {
@@ -122,34 +132,34 @@ namespace InTempo.Classes.View
                     break;
                 }
             }
-
         }
 
         public void SelezionaMonitorScelto()
         {
             string NomeMonitorSalvato = App.Settings.MonitorScelto.Nome;
 
-            foreach(var monitor in GestoreMonitor.Monitors)
+            foreach (var monitor in GestoreMonitor.Monitors)
             {
-                if(monitor.Nome == NomeMonitorSalvato)
+                if (monitor.Nome == NomeMonitorSalvato)
                 {
                     cmbSchermi.SelectedItem = monitor;
                     break;
                 }
             }
-
-
         }
 
-        public void SalvaMonitor()
+        public bool SalvaMonitor()
         {
-            if(cmbSchermi.SelectedItem is Utilities.Monitors.Monitor monitorSelezionato)
-                {
-                    App.Settings.MonitorScelto = monitorSelezionato;
-                }
-                else
-                {
-                    throw new ArgumentException("Monitor selezionato non valido");
+            if (cmbSchermi.SelectedItem is Utilities.Monitors.Monitor monitorSelezionato)
+            {
+                App.Settings.MonitorScelto = monitorSelezionato;
+                return true; 
+            }
+            else
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Errore", "Seleziona un monitor valido prima di salvare.", 1);
+                Errore.ShowDialog();
+                return false; 
             }
         }
 
@@ -157,25 +167,20 @@ namespace InTempo.Classes.View
         {
             foreach (var monitor in GestoreMonitor.Monitors)
             {
-                // Estraiamo solo i numeri dal nome del monitor (es. da "\\.\DISPLAY2" tiriamo fuori "2")
                 string numeroVero = Regex.Match(monitor.Nome, @"\d+").Value;
 
-                // Se per qualche motivo strano non trova numeri, mettiamo un "?" di sicurezza
                 if (string.IsNullOrEmpty(numeroVero))
                 {
                     numeroVero = "?";
                 }
 
-                // Creiamo la finestra passandole il numero reale
                 FinestraIdentifica fin = new FinestraIdentifica(numeroVero);
 
-                // La posizioniamo
                 fin.Left = monitor.AreaTotale.Left;
                 fin.Top = monitor.AreaTotale.Top;
                 fin.Width = monitor.AreaTotale.Width;
                 fin.Height = monitor.AreaTotale.Height;
 
-                // Mostriamo la finestra
                 fin.Show();
             }
         }
@@ -187,6 +192,31 @@ namespace InTempo.Classes.View
                 this.DragMove();
             }
         }
-    }
 
+        private void BtnSalvaAdunanza_Click(object sender, RoutedEventArgs e)
+        {
+            string nomefile = TxtNomeSalvataggio.Text.Trim();
+
+            if (string.IsNullOrEmpty(nomefile))
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Attenzione", "Inserisci un nome per il salvataggio.", 1);
+                Errore.ShowDialog();
+                return;
+            }
+
+            bool successo = GestoreSalvataggi.SalvaAdunanza(Logiche.AdunanzaCorrente, nomefile);
+
+            if (successo)
+            {
+                FinestraPopUP Successo = new FinestraPopUP("Completato", $"Adunanza '{nomefile}' salvata con successo!", 1);
+                Successo.ShowDialog();
+                TxtNomeSalvataggio.Clear();
+            }
+            else
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Errore", "Si è verificato un problema durante il salvataggio.", 1);
+                Errore.ShowDialog();
+            }
+        }
+    }
 }

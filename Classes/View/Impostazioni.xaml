@@ -146,6 +146,71 @@
                             </StackPanel>
                         </ScrollViewer>
                     </TabItem>
+
+                    <TabItem>
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <iconPacks:PackIconMaterial Kind="FolderSync" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Archivio" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                                <TextBlock Text="Gestione Salvataggi" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,12"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox x:Name="TxtNomeSalvataggio" 
+                                             materialDesign:HintAssist.Hint="Nome adunanza da salvare" 
+                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                             VerticalAlignment="Bottom" 
+                                             Margin="0,0,16,0"/>
+
+                                    <Button x:Name="BtnSalvaAdunanza" Grid.Column="1" 
+                                            Content="Salva" 
+                                            Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                            Margin="0,0,8,0" 
+                                            VerticalAlignment="Bottom" Click="BtnSalvaAdunanza_Click"/>
+
+                                    <Button x:Name="BtnCaricaAdunanza" Grid.Column="2" 
+                                            Content="Carica Selezionata" 
+                                            Style="{StaticResource MaterialDesignFlatButton}" 
+                                            VerticalAlignment="Bottom"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Text="Adunanze Salvate" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,8"/>
+
+                                <Border Grid.Row="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="4">
+                                    <ListView x:Name="ListAdunanzeSalvate" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Margin="4">
+                                                    <iconPacks:PackIconMaterial Kind="FileDocumentOutline" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                                                    <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
                 </TabControl>
             </materialDesign:Card>
 
