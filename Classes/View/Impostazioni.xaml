@@ -167,6 +167,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBox x:Name="TxtNomeSalvataggio" 
@@ -181,10 +182,17 @@
                                             Margin="0,0,8,0" 
                                             VerticalAlignment="Bottom" Click="BtnSalvaAdunanza_Click"/>
 
-                                    <Button x:Name="BtnCaricaAdunanza" Grid.Column="2" 
+                                    <Button x:Name="BtnCaricaAdunanza" Grid.Column="3" 
                                             Content="Carica Selezionata" 
                                             Style="{StaticResource MaterialDesignFlatButton}" 
-                                            VerticalAlignment="Bottom"/>
+                                            VerticalAlignment="Bottom" Click="BtnCaricaAdunanza_Click"/>
+
+                                    <Button x:Name="BtnEliminaAdunanza" Grid.Column="2" 
+                                            Content="Elimina" 
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            Foreground="#EF5350" BorderBrush="#EF5350"
+                                            Margin="8,0,0,0"
+                                            VerticalAlignment="Bottom" Click="BtnEliminaAdunanza_Click"/>
                                 </Grid>
                             </StackPanel>
 

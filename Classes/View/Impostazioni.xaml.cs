@@ -1,4 +1,5 @@
-﻿using InTempo.Classes.Utilities;
+﻿using InTempo.Classes.NonAbstract;
+using InTempo.Classes.Utilities;
 using InTempo.Classes.Utilities.Monitors;
 using System;
 using System.Security.Cryptography.X509Certificates;
@@ -22,6 +23,7 @@ namespace InTempo.Classes.View
             SelezioneGiorno();
             SelezionaMonitorScelto();
             Logiche = Logichepassate;
+            AggiornaListaSalvataggi();
         }
 
         private void BtnSalva_Click(object sender, RoutedEventArgs e)
@@ -48,7 +50,7 @@ namespace InTempo.Classes.View
             this.Close();
         }
 
-        public bool PrendiGiorno(ComboBoxItem cmbGiorno, string tipoAdunanza)
+        public bool PrendiGiorno(ComboBoxItem? cmbGiorno, string tipoAdunanza)
         {
             if (cmbGiorno == null)
             {
@@ -211,6 +213,7 @@ namespace InTempo.Classes.View
                 FinestraPopUP Successo = new FinestraPopUP("Completato", $"Adunanza '{nomefile}' salvata con successo!", 1);
                 Successo.ShowDialog();
                 TxtNomeSalvataggio.Clear();
+                AggiornaListaSalvataggi();
             }
             else
             {
@@ -218,5 +221,71 @@ namespace InTempo.Classes.View
                 Errore.ShowDialog();
             }
         }
+
+        private void AggiornaListaSalvataggi()
+        {
+            ListAdunanzeSalvate.ItemsSource = GestoreSalvataggi.OttieniListaSalvataggi();
+        }
+
+        private void BtnCaricaAdunanza_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListAdunanzeSalvate.SelectedItem == null)
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Attenzione", "Seleziona un'adunanza dalla lista prima di caricare.", 1);
+                Errore.ShowDialog();
+                return;
+            }
+
+            string nomeFile = ListAdunanzeSalvate.SelectedItem as string ?? string.Empty;
+            Adunanza? adunanzaCaricata = Utilities.GestoreSalvataggi.CaricaAdunanza(nomeFile);
+
+            if (adunanzaCaricata != null)
+            {
+                Logiche.AdunanzaCorrente.Parti.Clear();
+
+                foreach (var parte in adunanzaCaricata.Parti)
+                {
+                    Logiche.AdunanzaCorrente.Parti.Add(parte);
+                }
+
+                FinestraPopUP Successo = new FinestraPopUP("Completato", $"Adunanza '{nomeFile}' caricata con successo!", 1);
+                Successo.ShowDialog();
+
+                this.DialogResult = true;
+                this.Close();
+            }
+            else
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Errore", "Impossibile caricare il file selezionato.", 1);
+                Errore.ShowDialog();
+            }
+        }
+
+        private void BtnEliminaAdunanza_Click(object sender, RoutedEventArgs e)
+        {
+            if (ListAdunanzeSalvate.SelectedItem == null)
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Attenzione", "Seleziona un'adunanza dalla lista prima di eliminare.", 1);
+                Errore.ShowDialog();
+                return;
+            }
+
+            string nomeFile = ListAdunanzeSalvate.SelectedItem as string ?? string.Empty;
+
+            bool eliminato = GestoreSalvataggi.EliminaAdunanza(nomeFile);
+
+            if (eliminato)
+            {
+                FinestraPopUP Successo = new FinestraPopUP("Eliminata", $"L'adunanza '{nomeFile}' è stata eliminata.", 1);
+                Successo.ShowDialog();
+
+                AggiornaListaSalvataggi();
+            }
+            else
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Errore", "Impossibile eliminare il file selezionato.", 1);
+                Errore.ShowDialog();
+            }
+        }
     }
-}
+    }

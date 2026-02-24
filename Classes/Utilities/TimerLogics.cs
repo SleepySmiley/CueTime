@@ -9,7 +9,7 @@ namespace InTempo.Classes.Utilities
     public class TimerLogics : INotifyPropertyChanged
     {
         private DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render);
-        public Adunanza AdunanzaCorrente { get; }
+        public Adunanza AdunanzaCorrente { get; set; }
 
         public static bool IsRunning { get; private set; } = false;
 
@@ -97,7 +97,7 @@ namespace InTempo.Classes.Utilities
             }
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             if (AdunanzaCorrente.Current != null)
             {

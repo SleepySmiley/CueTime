@@ -58,6 +58,29 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
+
+        private string _coloreSalvato = "#FF000000"; 
+
+        public string ColoreSalvato
+        {
+            get => _coloreSalvato;
+            set
+            {
+                if (_coloreSalvato == value) return;
+                _coloreSalvato = value;
+
+                try
+                {
+                    if (new BrushConverter().ConvertFromString(_coloreSalvato) is Brush converted)
+                    {
+                        _coloreParte = converted;
+                        OnPropertyChanged(nameof(ColoreParte));
+                    }
+                }
+                catch { }
+            }
+        }
+
         [JsonIgnore]
         private Brush _coloreParte = Brushes.Black;
 
@@ -69,6 +92,12 @@ namespace InTempo.Classes.NonAbstract
             {
                 if (Equals(_coloreParte, value)) return;
                 _coloreParte = value ?? Brushes.Black;
+
+                if (_coloreParte is SolidColorBrush solidBrush)
+                {
+                    _coloreSalvato = solidBrush.Color.ToString();
+                }
+
                 OnPropertyChanged();
             }
         }
@@ -98,9 +127,13 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
+        [JsonIgnore]
         public string TempoParteLabel => ToMinSec(TempoParte);
+
+        [JsonIgnore]
         public string TempoScorrevoleLabel => ToMinSec(TempoScorrevole);
 
+        [JsonIgnore]
         public string TempoParteEdit
         {
             get => ToMinSec(TempoParte);
@@ -118,10 +151,12 @@ namespace InTempo.Classes.NonAbstract
             _nomeParte = nome ?? string.Empty;
             _tempoParte = tempoParte;
             _tipoParte = tipo ?? string.Empty;
-            _coloreParte = colore ?? Brushes.Black;
+            ColoreParte = colore ?? Brushes.Black;
             _tempoScorrevole = tempoScorrevole;
             _numeroParte = numeroParte;
         }
+
+        public Parte() { }
 
         private static string ToMinSec(TimeSpan ts)
         {

@@ -22,32 +22,76 @@ namespace InTempo.Classes.Utilities
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show(ex.Message, "Errore tecnico");
                 return false;
             }
         }
 
-        public static Adunanza CaricaAdunanza(string nomeFile)
+        public static Adunanza? CaricaAdunanza(string nomeFile)
         {
+            try
+            {
+                string percorsoFile = Path.Combine(cartellaSalvataggi, $"{nomeFile}.json");
 
-            return null;
+                if (!File.Exists(percorsoFile))
+                {
+                    return null;
+                }
+
+                string json = File.ReadAllText(percorsoFile);
+                return JsonSerializer.Deserialize<Adunanza>(json);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static List<string> OttieniListaSalvataggi()
         {
+            List<string> lista = new List<string>();
 
-            return new List<string>();
+            if (!Directory.Exists(cartellaSalvataggi))
+            {
+                return lista;
+            }
+
+            string[] files = Directory.GetFiles(cartellaSalvataggi, "*.json");
+
+            foreach (string file in files)
+            {
+                lista.Add(Path.GetFileNameWithoutExtension(file));
+            }
+
+            return lista;
         }
 
         public static void CreaCartella()
         {
-            string percorsoCartella = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AdunanzeSalvate");
+            string percorsoCartella = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AdunanzeSalvate");
 
-            if (!System.IO.Directory.Exists(percorsoCartella))
+            if (!Directory.Exists(percorsoCartella))
             {
-                System.IO.Directory.CreateDirectory(percorsoCartella);
+                Directory.CreateDirectory(percorsoCartella);
+            }
+        }
+
+        public static bool EliminaAdunanza(string nomeFile)
+        {
+            try
+            {
+                string percorsoFile = Path.Combine(cartellaSalvataggi, $"{nomeFile}.json");
+                if (File.Exists(percorsoFile))
+                {
+                    File.Delete(percorsoFile);
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
             }
         }
     }
