@@ -219,22 +219,28 @@ namespace InTempo.Classes.Utilities
             if (orarioInizio.HasValue && isPaused)
             {
                 TimeSpan tempoMancante = orarioInizio.Value - now;
+                double sec = tempoMancante.TotalSeconds;
 
-                if (tempoMancante.TotalSeconds <= 0 && tempoMancante.TotalSeconds > -5)
+                if (sec > 0 && sec <= 60)
                 {
+                    if (_ultimoPreavvisoPerOrarioInizio != orarioInizio.Value)
+                    {
+                        CheckTimerPreAdunanza = true;
+                        _ultimoPreavvisoPerOrarioInizio = orarioInizio.Value;
+                    }
+                }
+
+                if (sec <= 0 && sec > -5)
                     return true;
-                }
-                else if(tempoMancante.TotalSeconds <= 60)
-                {
-                    CheckTimerPreAdunanza = true;
-                }
                 else
                 {
-                    return false; 
+                    return false;
                 }
             }
             return false;
         }
+
+        private DateTime? _ultimoPreavvisoPerOrarioInizio;
 
         public static bool CheckTimerPreAdunanza {  get; set; } = false;
 

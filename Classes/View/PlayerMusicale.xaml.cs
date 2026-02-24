@@ -225,14 +225,18 @@ namespace InTempo.Classes.View
                 TxtTempoTrascorso.Text = _player.Position.ToString(@"mm\:ss");
             }
 
-            if(TimerLogics.IsRunning)
+            if (TimerLogics.IsRunning)
             {
-               _player.Stop();
+                _player.Stop();
+                _inRiproduzione = false;
+                IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
+                return;
             }
 
             if (TimerLogics.CheckTimerPreAdunanza)
             {
                 GestisciStopGraduale();
+                return;
             }
 
         }
