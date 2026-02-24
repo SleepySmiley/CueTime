@@ -235,7 +235,6 @@ namespace InTempo
             Orologio.Tick += Timer_Tick;
             txtTimer.Visibility = Visibility.Collapsed;
             txtOrologio.Visibility = Visibility.Visible;
-
             Orologio.Start();
         }
 
@@ -303,7 +302,16 @@ namespace InTempo
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _finestratimer.Close();
+            if(_finestratimer != null)
+            {
+                _finestratimer.Close();
+            }
+           
+            if(player != null)
+            {
+                player.Close();
+            }
+            
         }
 
         private void btnCommentoSchermo_Click(object sender, RoutedEventArgs e)
@@ -311,6 +319,10 @@ namespace InTempo
             FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi","Tutto Schermo","Parziale", _finestratimer);
             MessaggioOratore.ShowDialog();
         }
-
+        PlayerMusicale player = new PlayerMusicale();
+        private void btnMusica_Click(object sender, RoutedEventArgs e)
+        {
+            player.Show();
+        }
     }
 }

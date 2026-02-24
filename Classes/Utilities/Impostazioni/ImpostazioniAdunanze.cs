@@ -1,4 +1,5 @@
-﻿using InTempo.Classes.Utilities.Monitors;
+﻿using System;
+using InTempo.Classes.Utilities.Monitors;
 
 namespace InTempo.Classes.Utilities.Impostazioni
 {
@@ -9,12 +10,14 @@ namespace InTempo.Classes.Utilities.Impostazioni
 
         public Monitors.Monitor MonitorScelto { get; set; } = new Monitors.Monitor();
 
+        public string PercorsoCartellaMusica { get; set; } = string.Empty;
+
         public ImpostazioniAdunanze()
         {
-            Infrasettimanale.OraInizio = new DateTime(1, 1, 1, 20, 0, 0); // Default: 20:00
-            Infrasettimanale.GiornoSettimana = DayOfWeek.Wednesday; // Default: Mercoledì
-            FineSettimana.OraInizio = new DateTime(1, 1, 1, 10, 0, 0); // Default: 10:00
-            FineSettimana.GiornoSettimana = DayOfWeek.Sunday; // Default: Domenica
+            Infrasettimanale.OraInizio = new DateTime(1, 1, 1, 20, 0, 0);
+            Infrasettimanale.GiornoSettimana = DayOfWeek.Wednesday;
+            FineSettimana.OraInizio = new DateTime(1, 1, 1, 10, 0, 0);
+            FineSettimana.GiornoSettimana = DayOfWeek.Sunday;
             MonitorScelto = new Monitors.Monitor
             {
                 Nome = "Default",

@@ -224,6 +224,10 @@ namespace InTempo.Classes.Utilities
                 {
                     return true;
                 }
+                else if(tempoMancante.TotalSeconds <= 60)
+                {
+                    CheckTimerPreAdunanza = true;
+                }
                 else
                 {
                     return false; 
@@ -231,6 +235,8 @@ namespace InTempo.Classes.Utilities
             }
             return false;
         }
+
+        public static bool CheckTimerPreAdunanza {  get; set; } = false;
 
         private DateTime? OttieniOrarioInizioAdunanzaOggi(DateTime now)
         {

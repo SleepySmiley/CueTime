@@ -408,10 +408,11 @@ namespace InTempo.Classes.Utilities
                     continue;
                 }
 
-                // Cantico “singolo” => NumeroParte = null
                 if (raw.StartsWith("Cantico", StringComparison.OrdinalIgnoreCase) || raw.StartsWith("Canto", StringComparison.OrdinalIgnoreCase))
                 {
-                    result.Add(new Parte(raw,
+                    string songTitle = ExtractCanticoTitle(raw);
+
+                    result.Add(new Parte(songTitle,
                         TimeSpan.FromMinutes(SONG_MIN),
                         TYPE_CANTICO,
                         System.Windows.Media.Brushes.SlateGray,
@@ -665,13 +666,10 @@ namespace InTempo.Classes.Utilities
 
         private static string ExtractCanticoTitle(string text)
         {
-            var m = Regex.Match(text ?? "", @"\b(Cantico\s+\d+)\b", RegexOptions.IgnoreCase);
-            if (m.Success)
-            {
-                if ((text ?? "").IndexOf("preghiera", StringComparison.OrdinalIgnoreCase) >= 0)
-                    return $"{m.Groups[1].Value} e preghiera";
-                return m.Groups[1].Value;
-            }
+            var m = Regex.Match(text ?? "", @"\b(?:Cantico|Canto)\s+(\d+)\b", RegexOptions.IgnoreCase);
+            if (m.Success && int.TryParse(m.Groups[1].Value, out int num))
+                return $"Cantico {num}";
+
             return (text ?? "").Trim();
         }
 

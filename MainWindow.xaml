@@ -86,11 +86,7 @@
 
 
                 <DataGrid.Resources>
-                    <!-- MaterialDesign: sfondo riga selezionata -->
                     <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.Selected" Color="Transparent"/>
-
-                    <!-- (OPZIONALE) se vuoi eliminare anche l'effetto hover -->
-                    <!-- <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.RowHoverBackground" Color="Transparent"/> -->
                 </DataGrid.Resources>
 
                 <DataGrid.CellStyle>
@@ -206,12 +202,44 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="TEMPO RESIDUO" FontSize="10" FontWeight="Bold" Opacity="0.5"/>
-                    <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString}" 
-                               FontSize="20" 
-                               FontWeight="Medium"
-                               Foreground="{Binding LogicTimer.TempoResiduoBrush}"/>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+
+                    <Button Width="40" 
+                            Height="40" 
+                            ToolTip="Impostazioni"
+                            Padding="0"
+                            Margin="0,0,12,0"
+                            VerticalAlignment="Center"
+                            materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click">
+                        <iconPacks:PackIconMaterial Kind="Cog" 
+                                                    Width="22" 
+                                                    Height="22" 
+                                                    VerticalAlignment="Center" 
+                                                    HorizontalAlignment="Center"/>
+                    </Button>
+
+                    <Button x:Name="btnMusica"
+                            Width="40" 
+                            Height="40" 
+                            ToolTip="Musica"
+                            Padding="0"
+                            Margin="0,0,16,0"
+                            VerticalAlignment="Center"
+                            materialDesign:ButtonAssist.CornerRadius="15" Click="btnMusica_Click" >
+                        <iconPacks:PackIconMaterial Kind="Music" 
+                                                    Width="22" 
+                                                    Height="22" 
+                                                    VerticalAlignment="Center" 
+                                                    HorizontalAlignment="Center"/>
+                    </Button>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="TEMPO RESIDUO" FontSize="10" FontWeight="Bold" Opacity="0.5"/>
+                        <TextBlock Text="{Binding DatiAdunanza.TempoResiduoString}" 
+                                   FontSize="20" 
+                                   FontWeight="Medium"
+                                   Foreground="{Binding LogicTimer.TempoResiduoBrush}"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -243,26 +271,12 @@
                             materialDesign:ButtonAssist.CornerRadius="20"
                             Margin="0,0,10,0"
                             HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
+                            VerticalAlignment="Center"
                             Width="150" 
                             Height="40"
                             ToolTip="Commento Schermo"
                             Click="btnCommentoSchermo_Click"
                             IsEnabled="False"/>
-
-                    <Button Width="40" 
-                            Height="40" 
-                            ToolTip="Impostazioni"
-                            Padding="0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            materialDesign:ButtonAssist.CornerRadius="15" Click="Button_Click">
-                        <iconPacks:PackIconMaterial Kind="Cog" 
-                                                    Width="22" 
-                                                    Height="22" 
-                                                    VerticalAlignment="Center" 
-                                                    HorizontalAlignment="Center"/>
-                    </Button>
                 </StackPanel>
             </Grid>
         </materialDesign:Card>
