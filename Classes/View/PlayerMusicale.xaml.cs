@@ -24,14 +24,14 @@ namespace InTempo.Classes.View
         public PlayerMusicale()
         {
             InitializeComponent();
-
+            SliderVolume.ValueChanged += SliderVolume_ValueChanged;
             _player.MediaOpened += Player_MediaOpened;
             _player.MediaEnded += Player_MediaEnded;
 
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += Timer_Tick;
 
-            SliderVolume.Value = 100;
+            SliderVolume.Value = 1;
             _player.Volume = SliderVolume.Value;
 
             SliderProgresso.PreviewMouseLeftButtonDown += (s, e) => _staTrascinandoSlider = true;
@@ -39,6 +39,11 @@ namespace InTempo.Classes.View
 
             ListBrani.SelectionChanged += ListBrani_SelectionChanged;
             CaricaCartellaMusica(App.Settings.PercorsoCartellaMusica);
+        }
+
+        private void SliderVolume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            _player.Volume = SliderVolume.Value;
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
