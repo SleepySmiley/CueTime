@@ -12,11 +12,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
-using System.Drawing;
-
 // Assicurati che questi namespace esistano nel tuo progetto
 using InTempo.Classes.NonAbstract;
-using System.Formats.Nrbf;
 
 namespace InTempo.Classes.Utilities
 {
@@ -118,10 +115,6 @@ namespace InTempo.Classes.Utilities
         private static readonly Regex MinutesTokenCleanup = new Regex(
             @"\s*\(?\s*\d{1,3}\s*(?:min\.?|minuti|minute)\s*\)?\s*",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        // HttpClient: 2 client, uno senza proxy, uno con proxy di sistema
-        private static readonly HttpClient NoProxyClient = CreateHttpClient(useProxy: false);
-        private static readonly HttpClient ProxyClient = CreateHttpClient(useProxy: true);
 
         private enum MeetingKind { Midweek, Weekend }
 
@@ -883,83 +876,118 @@ namespace InTempo.Classes.Utilities
         }
 
         // ==========================================================
-        // HTTP
+        // ✅ HTTP (Aggressive Staggered Hedging - SILENZIOSO)
         // ==========================================================
 
-        private static HttpClient CreateHttpClient(bool useProxy)
+        // 1. Windows Chrome (Veloce, standard)
+        private static readonly HttpClient ClientWinChrome = CreateHttpClient(useProxy: false,
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+
+        // 2. Mac Safari (Spesso instradato su CDN diverse)
+        private static readonly HttpClient ClientMacSafari = CreateHttpClient(useProxy: false,
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15");
+
+        // 3. iPhone Mobile (Priorità mobile sui server moderni)
+        private static readonly HttpClient ClientMobile = CreateHttpClient(useProxy: false,
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1");
+
+        // 4. Windows Firefox (Motore diverso, utile se ci sono blocchi specifici)
+        private static readonly HttpClient ClientWinFirefox = CreateHttpClient(useProxy: false,
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0");
+
+        // 5. Proxy di sistema (Ultima spiaggia assoluta)
+        private static readonly HttpClient ClientProxy = CreateHttpClient(useProxy: true,
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+
+        private static HttpClient CreateHttpClient(bool useProxy, string userAgent)
         {
             var handler = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 UseProxy = useProxy,
-                Proxy = null,
+                Proxy = null, // Usa quello di sistema se useProxy è true
                 DefaultProxyCredentials = CredentialCache.DefaultCredentials
             };
 
             var client = new HttpClient(handler, disposeHandler: true);
+            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent);
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7");
 
-            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36");
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,*/*");
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "it-IT,it;q=0.9,en;q=0.8");
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Cache-Control", "max-age=0");
 
             return client;
         }
 
-        private const int MaxAttempts = 3;
-
         private static async Task<string> FastGetAsync(string url, int timeoutMs)
         {
-            Exception? last = null;
+            using var raceCts = new CancellationTokenSource(timeoutMs);
+            Exception? lastException = null;
 
-            for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+            async Task<(bool Success, string Content, Exception? Error)> RunFetchStrategy(HttpClient client, int delayStartMs)
             {
-                int attemptTimeout = timeoutMs + (attempt - 1) * 5000;
-
                 try
                 {
-                    return await GetStringViaHttpClientAsync(NoProxyClient, url, attemptTimeout).ConfigureAwait(false);
-                }
-                catch (Exception ex) when (IsTransient(ex))
-                {
-                    last = ex;
-                    await Task.Delay(250 * attempt).ConfigureAwait(false);
-                }
+                    // Ritardo controllato per scaglionare i tentativi
+                    if (delayStartMs > 0)
+                    {
+                        await Task.Delay(delayStartMs, raceCts.Token).ConfigureAwait(false);
+                    }
 
-                try
-                {
-                    return await GetStringViaHttpClientAsync(ProxyClient, url, attemptTimeout).ConfigureAwait(false);
+                    using var req = new HttpRequestMessage(HttpMethod.Get, url);
+                    using var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, raceCts.Token).ConfigureAwait(false);
+                    resp.EnsureSuccessStatusCode();
+
+                    string html = await resp.Content.ReadAsStringAsync(raceCts.Token).ConfigureAwait(false);
+
+                    // Se durante il caricamento un'altra strategia ha già vinto e cancellato, blocchiamo qui per evitare "doppi successi"
+                    if (raceCts.IsCancellationRequested)
+                    {
+                        return (false, string.Empty, new OperationCanceledException());
+                    }
+
+                    return (true, html, null);
                 }
-                catch (Exception ex) when (IsTransient(ex))
+                catch (Exception ex)
                 {
-                    last = ex;
-                    await Task.Delay(250 * attempt).ConfigureAwait(false);
+                    return (false, string.Empty, ex);
                 }
             }
 
-            throw new HttpRequestException($"Impossibile scaricare '{url}' dopo {MaxAttempts} tentativi.", last);
-        }
+            var pendingTasks = new List<Task<(bool Success, string Content, Exception? Error)>>
+            {
+                RunFetchStrategy(ClientWinChrome,   delayStartMs: 0),
+                RunFetchStrategy(ClientMacSafari,   delayStartMs: 350),
+                RunFetchStrategy(ClientMobile,      delayStartMs: 700),
+                RunFetchStrategy(ClientWinFirefox,  delayStartMs: 1200),
+                RunFetchStrategy(ClientProxy,       delayStartMs: 2000)
+            };
 
-        private static bool IsTransient(Exception ex)
-        {
-            return ex is TaskCanceledException
-                || ex is TimeoutException
-                || ex is HttpRequestException
-                || ex is IOException;
-        }
+            while (pendingTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(pendingTasks).ConfigureAwait(false);
+                pendingTasks.Remove(completedTask);
 
-        private static async Task<string> GetStringViaHttpClientAsync(HttpClient client, string url, int timeoutMs)
-        {
-            using var cts = new CancellationTokenSource(timeoutMs);
-            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+                var result = await completedTask.ConfigureAwait(false);
 
-            using var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token)
-                                         .ConfigureAwait(false);
+                if (result.Success)
+                {
+                    // Trovato il primissimo vincitore! Cancelliamo tutti gli altri ancora in volo.
+                    if (!raceCts.IsCancellationRequested)
+                    {
+                        raceCts.Cancel();
+                    }
 
-            resp.EnsureSuccessStatusCode();
+                    return result.Content;
+                }
+                else
+                {
+                    // Salviamo l'ultimo errore in caso falliscano tutti. Il while continua.
+                    lastException = result.Error;
+                }
+            }
 
-            var readTask = resp.Content.ReadAsStringAsync();
-            return await readTask.WaitAsync(cts.Token).ConfigureAwait(false);
+            throw new HttpRequestException($"Impossibile scaricare '{url}' dopo aver provato 5 strategie concorrenti.", lastException);
         }
 
         private static (int? Song2, int? Song3) ExtractWeekendSongs_2_3_FromWtStudyHtml(string wtStudyHtml)
