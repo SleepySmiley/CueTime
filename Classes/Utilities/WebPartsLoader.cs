@@ -104,6 +104,14 @@ namespace InTempo.Classes.Utilities
         private const int WEEKEND_TALK_MIN = 30;
         private const int WEEKEND_WT_MIN = 60;
 
+        // Palette custom sezioni
+        private static readonly System.Windows.Media.Brush ColorSezione1 =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3C, 0x7F, 0x8B)); // #3c7f8b
+        private static readonly System.Windows.Media.Brush ColorSezione2 =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xD6, 0x8F, 0x00)); // #d68f00
+        private static readonly System.Windows.Media.Brush ColorSezione3 =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xBF, 0x2F, 0x13)); // #bf2f13
+
         // ==========================================================
         // Regex minuti
         // ==========================================================
@@ -237,9 +245,9 @@ namespace InTempo.Classes.Utilities
             var list = new List<Parte>
             {
                 new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         1),
-                new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), TYPE_DISCORSO, System.Windows.Media.Brushes.DeepSkyBlue,TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
+                new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), TYPE_DISCORSO, ColorSezione2,TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
                 new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         3),
-                new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   TYPE_STUDIO,   System.Windows.Media.Brushes.Orange,      TimeSpan.FromMinutes(WEEKEND_WT_MIN),   4),
+                new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   TYPE_STUDIO,   ColorSezione3,      TimeSpan.FromMinutes(WEEKEND_WT_MIN),   4),
                 new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         5)
             };
 
@@ -427,7 +435,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_GEMS,
                         TimeSpan.FromMinutes(min),
                         TYPE_GEMME,
-                        System.Windows.Media.Brushes.Goldenrod,
+                        ColorSezione1,
                         TimeSpan.FromMinutes(min),
                         partNo));
 
@@ -445,7 +453,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_BIBLE_READING,
                         TimeSpan.FromMinutes(min),
                         TYPE_LETTURA_BIBLICA,
-                        System.Windows.Media.Brushes.Goldenrod,
+                        ColorSezione1,
                         TimeSpan.FromMinutes(min),
                         partNo));
 
@@ -475,7 +483,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_CONG_BIBLE_STUDY,
                         TimeSpan.FromMinutes(min),
                         TYPE_STUDIO,
-                        System.Windows.Media.Brushes.MediumSeaGreen,
+                        ColorSezione3,
                         TimeSpan.FromMinutes(min),
                         partNo));
 
@@ -498,7 +506,7 @@ namespace InTempo.Classes.Utilities
                         result.Add(new Parte(title,
                             TimeSpan.FromMinutes(min),
                             tipo,
-                            System.Windows.Media.Brushes.CornflowerBlue,
+                            ColorSezione2,
                             TimeSpan.FromMinutes(min),
                             partNo));
 
@@ -528,7 +536,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(title,
                         TimeSpan.FromMinutes(min),
                         tipo,
-                        System.Windows.Media.Brushes.MediumSeaGreen,
+                        ColorSezione3,
                         TimeSpan.FromMinutes(min),
                         partNo));
 
@@ -548,7 +556,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(title,
                         TimeSpan.FromMinutes(min),
                         tipo,
-                        System.Windows.Media.Brushes.Goldenrod,
+                        ColorSezione1,
                         TimeSpan.FromMinutes(min),
                         partNo));
 
