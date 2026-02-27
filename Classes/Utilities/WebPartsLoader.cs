@@ -27,8 +27,10 @@ namespace InTempo.Classes.Utilities
         public static bool IsLoading { get; private set; } = true;
 
         // Timeouts
-        private const int WeekPageTimeoutMs = 6000;
-        private const int DetailPageTimeoutMs = 7000;
+        private const int WeekPageTimeoutMs = 12000;
+        private const int DetailPageTimeoutMs = 15000;
+        private const int NetworkMaxAttempts = 2;
+        private const int NetworkRetryDelayMs = 700;
 
         // ==========================================================
         // Cache: LocalAppData (ROBUSTO)
@@ -182,7 +184,9 @@ namespace InTempo.Classes.Utilities
             {
                 // Prendo SOLO cantico 2 e 3 dallo Studio Torre di Guardia
                 // (Questo metodo gestisce internamente la cache: se trova il file, lo usa)
-                var (song2, song3) = await CaricaCanticiFineSettimana_2_3_Async(bypassCache).ConfigureAwait(false);
+                var (song2, song3) = await ExecuteWithRetryAsync(
+                    attempt => CaricaCanticiFineSettimana_2_3_Async(bypassCache || attempt > 1))
+                    .ConfigureAwait(false);
 
                 // ✅ FIX: Tipo corretto per i cantici (non "Fine settimana")
                 const string tipo = TYPE_CANTICO;
@@ -227,7 +231,8 @@ namespace InTempo.Classes.Utilities
             try
             {
                 // GetMeetingArticleAsync controlla la cache. Se il file esiste, lo carica e ritorna subito.
-                HtmlNode article = await GetMeetingArticleAsync(MeetingKind.Midweek, bypassCache, preferStudyForWeekend: true)
+                HtmlNode article = await ExecuteWithRetryAsync(
+                    attempt => GetMeetingArticleAsync(MeetingKind.Midweek, bypassCache || attempt > 1, preferStudyForWeekend: true))
                     .ConfigureAwait(false);
 
                 // ✅ FIX: Se siamo qui, abbiamo l'articolo (da web o da cache).
@@ -296,13 +301,21 @@ namespace InTempo.Classes.Utilities
             string? cachedLink = (!bypassCache) ? TryReadLinkFromFile(linksPath, wantedKey) : null;
             if (!string.IsNullOrWhiteSpace(cachedLink))
             {
-                string absUrl = BuildAbsoluteUrl(cachedLink);
-                string html = await FastGetAsync(absUrl, DetailPageTimeoutMs).ConfigureAwait(false);
-                SafeWriteAllText(detailCache, html);
+                try
+                {
+                    string absUrl = BuildAbsoluteUrl(cachedLink);
+                    string html = await FastGetAsync(absUrl, DetailPageTimeoutMs).ConfigureAwait(false);
+                    SafeWriteAllText(detailCache, html);
 
-                var doc = LoadHtml(html);
-                var art = FindArticleNode(doc);
-                if (art != null) return art;
+                    var doc = LoadHtml(html);
+                    var art = FindArticleNode(doc);
+                    if (art != null) return art;
+                }
+                catch
+                {
+                    // Il link in cache può essere scaduto o temporaneamente irraggiungibile:
+                    // proseguiamo con il flusso standard da pagina settimanale.
+                }
             }
 
             // 3) Pagina settimanale (direct /year/week → fallback root)
@@ -882,6 +895,30 @@ namespace InTempo.Classes.Utilities
 
             string rootHtml = await FastGetAsync(WeeklyRootUrl, WeekPageTimeoutMs).ConfigureAwait(false);
             return LoadHtml(rootHtml);
+        }
+
+        private static async Task<T> ExecuteWithRetryAsync<T>(Func<int, Task<T>> operation)
+        {
+            Exception? last = null;
+
+            for (int attempt = 1; attempt <= NetworkMaxAttempts; attempt++)
+            {
+                try
+                {
+                    return await operation(attempt).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    last = ex;
+
+                    if (attempt >= NetworkMaxAttempts)
+                        break;
+
+                    await Task.Delay(NetworkRetryDelayMs).ConfigureAwait(false);
+                }
+            }
+
+            throw last ?? new InvalidOperationException("Operazione di rete non riuscita.");
         }
 
         private static string BuildAbsoluteUrl(string href)
