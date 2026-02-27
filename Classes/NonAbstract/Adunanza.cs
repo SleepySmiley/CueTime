@@ -13,6 +13,9 @@ namespace InTempo.Classes.NonAbstract
     {
         private Finesettimanale _finesettimana = new Finesettimanale();
         private Infrasettimanale _infrasettimanale = new Infrasettimanale();
+        private Sorvegliante_Infrasettimanale _sorveglianteInfrasettimanale = new Sorvegliante_Infrasettimanale();
+        private Sorvegliante_Finesettimanale _sorveglianteFinesettimanale = new Sorvegliante_Finesettimanale();
+
 
         private ObservableCollection<Parte> _parti = new ObservableCollection<Parte>();
         public ObservableCollection<Parte> Parti
@@ -97,11 +100,23 @@ namespace InTempo.Classes.NonAbstract
 
             if (today == DayOfWeek.Sunday || today == DayOfWeek.Saturday)
             {
+                if(DateTime.Today == App.Settings.DateVisitaSorvegliante[1])
+                {
+                    await _sorveglianteInfrasettimanale.CaricaSchema();
+                    Parti = _sorveglianteInfrasettimanale.Parti;
+                    return;
+                }
                 await _finesettimana.LoadAsync();
                 Parti = _finesettimana.Parti;
             }
             else
             {
+                if(DateTime.Today == App.Settings.DateVisitaSorvegliante[0])
+                {
+                    await _sorveglianteFinesettimanale.CaricaSchema();
+                    Parti = _sorveglianteFinesettimanale.Parti;
+                    return;
+                }
                 await _infrasettimanale.LoadAsync();
                 Parti = _infrasettimanale.Parti;
             }

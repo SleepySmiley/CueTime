@@ -25,6 +25,7 @@ namespace InTempo.Classes.View
             SelezionaMonitorScelto();
             Logiche = Logichepassate;
             AggiornaListaSalvataggi();
+            CaricaDateSorvegliante();
         }
 
         private void BtnSalva_Click(object sender, RoutedEventArgs e)
@@ -41,7 +42,7 @@ namespace InTempo.Classes.View
             if (!SalvaMonitor())
                 return;
 
-            if(!RaccogliDateSorvegliante())
+            if (!RaccogliDateSorvegliante())
                 return;
 
             this.DialogResult = true;
@@ -88,7 +89,7 @@ namespace InTempo.Classes.View
                     break;
             }
 
-            return true; 
+            return true;
         }
 
         public bool PrendiOrario()
@@ -110,7 +111,7 @@ namespace InTempo.Classes.View
             App.Settings.Infrasettimanale.OraInizio = (DateTime)TimePickerInfra.SelectedTime;
             App.Settings.FineSettimana.OraInizio = (DateTime)TimePickerFine.SelectedTime;
 
-            return true; 
+            return true;
         }
 
         public void SelezioneGiorno()
@@ -159,13 +160,13 @@ namespace InTempo.Classes.View
             if (cmbSchermi.SelectedItem is Utilities.Monitors.Monitor monitorSelezionato)
             {
                 App.Settings.MonitorScelto = monitorSelezionato;
-                return true; 
+                return true;
             }
             else
             {
                 FinestraPopUP Errore = new FinestraPopUP("Errore", "Seleziona un monitor valido prima di salvare.", 1);
                 Errore.ShowDialog();
-                return false; 
+                return false;
             }
         }
 
@@ -338,18 +339,18 @@ namespace InTempo.Classes.View
             }
         }
 
-        public bool RaccogliDateSorvegliante()
+        private bool RaccogliDateSorvegliante()
         {
             DateTime? data1 = DatePrimaVisita.SelectedDate;
             DateTime? data2 = DateSecondaVisita.SelectedDate;
 
-            if(data1 == null || data2 == null)
+            if (data1 == null || data2 == null)
             {
                 FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona entrambe le date per le visite del sorvegliante.", 1);
                 Errore.ShowDialog();
                 return false;
             }
-            else if(data1 > data2)
+            else if (data1 > data2)
             {
                 FinestraPopUP Errore = new FinestraPopUP("Dati non validi", "La prima data non può essere successiva alla seconda data.", 1);
                 Errore.ShowDialog();
@@ -363,6 +364,12 @@ namespace InTempo.Classes.View
             }
 
 
+        }
+
+        private void CaricaDateSorvegliante()
+        {
+            DatePrimaVisita.SelectedDate = App.Settings.DateVisitaSorvegliante[0];
+            DateSecondaVisita.SelectedDate = App.Settings.DateVisitaSorvegliante[1];
         }
     }
 }
