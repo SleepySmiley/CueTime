@@ -2,6 +2,7 @@
 using InTempo.Classes.Utilities;
 using InTempo.Classes.View;
 using System;
+using System.IO;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
@@ -48,11 +49,12 @@ namespace InTempo
             {
                 await DatiAdunanza.SelectedAdunanza();
             }
-            catch
+            catch (Exception ex)
             {
                 DatiAdunanza.Parti.Clear();
                 DatiAdunanza.Current = null;
                 LogicTimer.AggiornaGrafica();
+                LogStartupError(ex);
                 FinestraPopUP errore = new FinestraPopUP(
                     "Errore caricamento",
                     "Impossibile caricare i dati dell'adunanza dal web. Controlla la connessione e riprova.",
@@ -341,6 +343,27 @@ namespace InTempo
         private void btnMusica_Click(object sender, RoutedEventArgs e)
         {
             player.Show();
+        }
+
+        private static void LogStartupError(Exception ex)
+        {
+            try
+            {
+                string logDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "InTempo",
+                    "logs");
+                Directory.CreateDirectory(logDir);
+
+                string logPath = Path.Combine(logDir, "startup-errors.log");
+                string entry =
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex.GetType().FullName}: {ex.Message}{Environment.NewLine}{ex}{Environment.NewLine}";
+                File.AppendAllText(logPath, entry + Environment.NewLine);
+            }
+            catch
+            {
+                // non bloccare mai la UI per errori di logging
+            }
         }
     }
 }

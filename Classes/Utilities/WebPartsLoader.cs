@@ -243,6 +243,12 @@ namespace InTempo.Classes.Utilities
             }
             catch
             {
+                if (TryLoadCachedArticle(MeetingKind.Midweek, out var cachedArticle) && cachedArticle != null)
+                {
+                    IsLoading = false;
+                    return ParseMidweekFromMwbArticle(cachedArticle);
+                }
+
                 // In caso di errore critico, assicuriamoci di sbloccare lo stato di caricamento
                 IsLoading = false;
                 throw; // Rilanciamo l'errore per farlo gestire alla UI se necessario
@@ -919,6 +925,41 @@ namespace InTempo.Classes.Utilities
             }
 
             throw last ?? new InvalidOperationException("Operazione di rete non riuscita.");
+        }
+
+        private static bool TryLoadCachedArticle(MeetingKind kind, out HtmlNode? article)
+        {
+            article = null;
+
+            try
+            {
+                string prefix = kind == MeetingKind.Weekend ? "weekend-" : "midweek-";
+
+                if (!Directory.Exists(CacheDir))
+                    return false;
+
+                var candidate = new DirectoryInfo(CacheDir)
+                    .GetFiles($"{prefix}*.html")
+                    .OrderByDescending(f => f.LastWriteTimeUtc)
+                    .FirstOrDefault();
+
+                if (candidate == null)
+                    return false;
+
+                string html = File.ReadAllText(candidate.FullName);
+                var doc = LoadHtml(html);
+                var found = FindArticleNode(doc);
+
+                if (found == null || string.IsNullOrWhiteSpace(found.InnerText))
+                    return false;
+
+                article = found;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static string BuildAbsoluteUrl(string href)
