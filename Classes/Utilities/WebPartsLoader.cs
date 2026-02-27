@@ -108,19 +108,19 @@ namespace InTempo.Classes.Utilities
 
         // Palette custom sezioni principali
         private static readonly System.Windows.Media.Brush ColorSezione1 =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x32, 0xC4, 0xE3)); // #32c4e3
+            CreateFrozenBrush(0x32, 0xC4, 0xE3); // #32c4e3
         private static readonly System.Windows.Media.Brush ColorSezione2 =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE3, 0xA2, 0x1D)); // #e3a21d
+            CreateFrozenBrush(0xE3, 0xA2, 0x1D); // #e3a21d
         private static readonly System.Windows.Media.Brush ColorSezione3 =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE3, 0x4A, 0x2B)); // #e34a2b
+            CreateFrozenBrush(0xE3, 0x4A, 0x2B); // #e34a2b
 
         // Palette neutra per parti secondarie
         private static readonly System.Windows.Media.Brush ColorCantico =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x76, 0x76, 0x76)); // #767676
+            CreateFrozenBrush(0x76, 0x76, 0x76); // #767676
         private static readonly System.Windows.Media.Brush ColorCommenti =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x9A, 0x9A, 0x9A)); // #9a9a9a
+            CreateFrozenBrush(0x9A, 0x9A, 0x9A); // #9a9a9a
         private static readonly System.Windows.Media.Brush ColorConsigli =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x58, 0x58, 0x58)); // #585858
+            CreateFrozenBrush(0x58, 0x58, 0x58); // #585858
 
         // ==========================================================
         // Regex minuti
@@ -967,6 +967,13 @@ namespace InTempo.Classes.Utilities
             if (string.IsNullOrWhiteSpace(href)) return string.Empty;
             if (href.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return href;
             return BaseUrl + href;
+        }
+
+        private static System.Windows.Media.Brush CreateFrozenBrush(byte r, byte g, byte b)
+        {
+            var brush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
+            brush.Freeze();
+            return brush;
         }
 
         // ==========================================================
