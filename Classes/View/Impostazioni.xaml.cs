@@ -358,12 +358,24 @@ namespace InTempo.Classes.View
             }
             else
             {
-                App.Settings.DateVisitaSorvegliante[0] = data1.Value;
-                App.Settings.DateVisitaSorvegliante[1] = data2.Value;
+                DateTime lunedi1 = ToMonday(data1.Value);
+                DateTime lunedi2 = ToMonday(data2.Value);
+
+                App.Settings.DateVisitaSorvegliante[0] = lunedi1;
+                App.Settings.DateVisitaSorvegliante[1] = lunedi2;
+
+                DatePrimaVisita.SelectedDate = lunedi1;
+                DateSecondaVisita.SelectedDate = lunedi2;
                 return true;
             }
 
 
+        }
+
+        private static DateTime ToMonday(DateTime date)
+        {
+            int diff = ((int)date.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            return date.Date.AddDays(-diff);
         }
 
         private void CaricaDateSorvegliante()

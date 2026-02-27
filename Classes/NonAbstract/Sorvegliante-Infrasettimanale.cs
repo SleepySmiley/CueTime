@@ -1,34 +1,35 @@
-﻿using InTempo.Classes.Abstract;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Text;
 
 namespace InTempo.Classes.NonAbstract
 {
     internal class Sorvegliante_Infrasettimanale : Infrasettimanale
     {
-        public override ObservableCollection<Parte> Parti { get; set; } = new ObservableCollection<Parte>();
-
-        public Sorvegliante_Infrasettimanale()
-        {
-        }
-
+        public Sorvegliante_Infrasettimanale() { }
 
         public void ModificaSchemaParti()
         {
             for (int i = 0; i < Parti.Count; i++)
             {
-                if (Parti[i].NomeParte == "Studio biblico di congregazione")
+                if (Parti[i].NomeParte.Equals("Studio biblico di congregazione", StringComparison.OrdinalIgnoreCase))
                 {
-                    Parti[i] = new Parte("Discorso Sorvegliante", new TimeSpan(0, 30, 0), "Discorso Sorvegliante", Parti[i].ColoreParte, new TimeSpan(0, 30, 0), Parti[i].NumeroParte);
-                    return;
+                    Parti[i] = new Parte(
+                        "Discorso Sorvegliante",
+                        TimeSpan.FromMinutes(30),
+                        "Discorso Sorvegliante",
+                        Parti[i].ColoreParte,
+                        TimeSpan.FromMinutes(30),
+                        Parti[i].NumeroParte);
                 }
-                if (Parti[i].TipoParte == "Cantico")
+
+                if (Parti[i].TipoParte.Equals("Cantico", StringComparison.OrdinalIgnoreCase))
                 {
-                    Parti[i] = new Parte("Cantico Sorvegliante", new TimeSpan(0, 5, 0), "Cantico Sorvegliante", Parti[i].ColoreParte, new TimeSpan(0, 5, 0), Parti[i].NumeroParte);
-                    return;
+                    Parti[i] = new Parte(
+                        "Cantico Sorvegliante",
+                        TimeSpan.FromMinutes(5),
+                        "Cantico Sorvegliante",
+                        Parti[i].ColoreParte,
+                        TimeSpan.FromMinutes(5),
+                        Parti[i].NumeroParte);
                 }
             }
         }
@@ -36,10 +37,7 @@ namespace InTempo.Classes.NonAbstract
         public async Task CaricaSchema()
         {
             await base.LoadAsync();
-            Parti = base.Parti;
             ModificaSchemaParti();
         }
-
-
     }
 }
