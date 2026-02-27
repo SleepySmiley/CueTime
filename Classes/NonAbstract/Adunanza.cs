@@ -97,34 +97,49 @@ namespace InTempo.Classes.NonAbstract
         {
             DayOfWeek today = DateTime.Now.DayOfWeek;
             Parti.Clear();
+            TempoResiduo = TimeSpan.Zero;
+            Current = null;
 
-            if (today == DayOfWeek.Sunday || today == DayOfWeek.Saturday)
+            DateTime visitaInfra = App.Settings.DateVisitaSorvegliante[0].Date;
+            DateTime visitaFine = App.Settings.DateVisitaSorvegliante[1].Date;
+            bool isWeekend = today == DayOfWeek.Sunday || today == DayOfWeek.Saturday;
+
+            if (isWeekend)
             {
-                if(DateTime.Today == App.Settings.DateVisitaSorvegliante[1])
-                {
-                    await _sorveglianteInfrasettimanale.CaricaSchema();
-                    Parti = _sorveglianteInfrasettimanale.Parti;
-                    return;
-                }
-                await _finesettimana.LoadAsync();
-                Parti = _finesettimana.Parti;
-            }
-            else
-            {
-                if(DateTime.Today == App.Settings.DateVisitaSorvegliante[0])
+                if (DateTime.Today == visitaFine)
                 {
                     await _sorveglianteFinesettimanale.CaricaSchema();
                     Parti = _sorveglianteFinesettimanale.Parti;
-                    return;
                 }
-                await _infrasettimanale.LoadAsync();
-                Parti = _infrasettimanale.Parti;
+                else
+                {
+                    await _finesettimana.LoadAsync();
+                    Parti = _finesettimana.Parti;
+                }
+            }
+            else
+            {
+                if (DateTime.Today == visitaInfra)
+                {
+                    await _sorveglianteInfrasettimanale.CaricaSchema();
+                    Parti = _sorveglianteInfrasettimanale.Parti;
+                }
+                else
+                {
+                    await _infrasettimanale.LoadAsync();
+                    Parti = _infrasettimanale.Parti;
+                }
             }
 
             if (Parti.Count > 0)
             {
                 _currentParteIndex = 0;
                 Current = Parti[_currentParteIndex];
+            }
+            else
+            {
+                _currentParteIndex = 0;
+                Current = null;
             }
         }
 
