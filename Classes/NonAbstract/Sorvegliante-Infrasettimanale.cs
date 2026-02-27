@@ -21,7 +21,7 @@ namespace InTempo.Classes.NonAbstract
                         Parti[i].NumeroParte);
                 }
 
-                if (Parti[i].TipoParte.Equals("Cantico", StringComparison.OrdinalIgnoreCase))
+                if (i == Parti.Count-1)
                 {
                     Parti[i] = new Parte(
                         "Cantico Sorvegliante",
