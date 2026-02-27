@@ -12,6 +12,8 @@ namespace InTempo.Classes.Utilities.Impostazioni
 
         public string PercorsoCartellaMusica { get; set; } = string.Empty;
 
+        public DateTime[] DateVisitaSorvegliante { get; set; } = new DateTime[2];
+
         public ImpostazioniAdunanze()
         {
             Infrasettimanale.OraInizio = new DateTime(1, 1, 1, 20, 0, 0);
@@ -25,6 +27,8 @@ namespace InTempo.Classes.Utilities.Impostazioni
                 AreaTotale = new System.Windows.Rect(0, 0, 1920, 1080),
                 AreaDiLavoro = new System.Windows.Rect(0, 0, 1920, 1040)
             };
+            DateVisitaSorvegliante[0] = DateTime.Now;
+            DateVisitaSorvegliante[1] = DateTime.Now;
         }
     }
 }

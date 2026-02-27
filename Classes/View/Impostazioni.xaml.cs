@@ -40,6 +40,9 @@ namespace InTempo.Classes.View
             if (!SalvaMonitor())
                 return;
 
+            if(!RaccogliDateSorvegliante())
+                return;
+
             this.DialogResult = true;
             this.Close();
         }
@@ -287,5 +290,32 @@ namespace InTempo.Classes.View
                 Errore.ShowDialog();
             }
         }
+
+        public bool RaccogliDateSorvegliante()
+        {
+            DateTime? data1 = DatePrimaVisita.SelectedDate;
+            DateTime? data2 = DateSecondaVisita.SelectedDate;
+
+            if(data1 == null || data2 == null)
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona entrambe le date per le visite del sorvegliante.", 1);
+                Errore.ShowDialog();
+                return false;
+            }
+            else if(data1 > data2)
+            {
+                FinestraPopUP Errore = new FinestraPopUP("Dati non validi", "La prima data non può essere successiva alla seconda data.", 1);
+                Errore.ShowDialog();
+                return false;
+            }
+            else
+            {
+                App.Settings.DateVisitaSorvegliante[0] = data1.Value;
+                App.Settings.DateVisitaSorvegliante[1] = data2.Value;
+                return true;
+            }
+
+
+        }
     }
-    }
+}

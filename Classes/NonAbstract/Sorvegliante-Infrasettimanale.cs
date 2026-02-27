@@ -10,7 +10,16 @@ namespace InTempo.Classes.NonAbstract
     {
         public override ObservableCollection<Parte> Parti { get; set; } = new ObservableCollection<Parte>();
 
-        public Sorvegliante_Infrasettimanale() { }
+        public Sorvegliante_Infrasettimanale() 
+        {
+            Parti = base.Parti;
+        }
+
+
+        public void ModificaSchemaParti(ObservableCollection<Parte> nuoveParti)
+        {
+            
+        }
         
     }
 }

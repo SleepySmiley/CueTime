@@ -112,38 +112,64 @@
                             </StackPanel>
                         </TabItem.Header>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
-                            <StackPanel MinWidth="250" MaxWidth="400" HorizontalAlignment="Center">
-                                <TextBlock Text="Infrasettimanale" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
-                                <Grid Margin="0,0,0,24">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <ComboBox x:Name="CmbGiornoInfra" materialDesign:HintAssist.Hint="Giorno" Style="{StaticResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Bottom">
-                                        <ComboBoxItem Content="Lunedì" Tag="1"/>
-                                        <ComboBoxItem Content="Martedì" Tag="2"/>
-                                        <ComboBoxItem Content="Mercoledì" Tag="3"/>
-                                        <ComboBoxItem Content="Giovedì" Tag="4"/>
-                                        <ComboBoxItem Content="Venerdì" Tag="5"/>
-                                    </ComboBox>
-                                    <materialDesign:TimePicker x:Name="TimePickerInfra" Grid.Column="2" materialDesign:HintAssist.Hint="Ora Inizio" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Is24Hours="True" Width="100" VerticalAlignment="Bottom"/>
-                                </Grid>
-                                <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="0,0,0,24"/>
-                                <TextBlock Text="Fine Settimana" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <ComboBox x:Name="CmbGiornoFine" materialDesign:HintAssist.Hint="Giorno" Style="{StaticResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Bottom">
-                                        <ComboBoxItem Content="Sabato" Tag="6"/>
-                                        <ComboBoxItem Content="Domenica" Tag="0"/>
-                                    </ComboBox>
-                                    <materialDesign:TimePicker x:Name="TimePickerFine" Grid.Column="2" materialDesign:HintAssist.Hint="Ora Inizio" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Is24Hours="True" Width="100" VerticalAlignment="Bottom"/>
-                                </Grid>
-                            </StackPanel>
+                            <Grid HorizontalAlignment="Stretch" Margin="24,8,24,24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="48"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+
+                                    <TextBlock Text="Infrasettimanale" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                    <Grid Margin="0,0,0,24">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="CmbGiornoInfra" materialDesign:HintAssist.Hint="Giorno" Style="{StaticResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Bottom">
+                                            <ComboBoxItem Content="Lunedì" Tag="1"/>
+                                            <ComboBoxItem Content="Martedì" Tag="2"/>
+                                            <ComboBoxItem Content="Mercoledì" Tag="3"/>
+                                            <ComboBoxItem Content="Giovedì" Tag="4"/>
+                                            <ComboBoxItem Content="Venerdì" Tag="5"/>
+                                        </ComboBox>
+                                        <materialDesign:TimePicker x:Name="TimePickerInfra" Grid.Column="2" materialDesign:HintAssist.Hint="Ora Inizio" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Is24Hours="True" Width="80" VerticalAlignment="Bottom"/>
+                                    </Grid>
+
+                                    <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="0,0,0,24"/>
+
+                                    <TextBlock Text="Fine Settimana" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="CmbGiornoFine" materialDesign:HintAssist.Hint="Giorno" Style="{StaticResource MaterialDesignFloatingHintComboBox}" VerticalAlignment="Bottom">
+                                            <ComboBoxItem Content="Sabato" Tag="6"/>
+                                            <ComboBoxItem Content="Domenica" Tag="0"/>
+                                        </ComboBox>
+                                        <materialDesign:TimePicker x:Name="TimePickerFine" Grid.Column="2" materialDesign:HintAssist.Hint="Ora Inizio" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Is24Hours="True" Width="80" VerticalAlignment="Bottom"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Visita del Sorvegliante" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+
+                                    <DatePicker x:Name="DatePrimaVisita" 
+                                                materialDesign:HintAssist.Hint="Data Prima Visita" 
+                                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" 
+                                                Margin="0,0,0,32"
+                                                VerticalAlignment="Bottom"/>
+
+                                    <DatePicker x:Name="DateSecondaVisita" 
+                                                materialDesign:HintAssist.Hint="Data Seconda Visita" 
+                                                Style="{StaticResource MaterialDesignFloatingHintDatePicker}" 
+                                                VerticalAlignment="Bottom"/>
+                                </StackPanel>
+                            </Grid>
                         </ScrollViewer>
                     </TabItem>
 
