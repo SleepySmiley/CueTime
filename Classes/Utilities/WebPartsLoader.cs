@@ -104,13 +104,21 @@ namespace InTempo.Classes.Utilities
         private const int WEEKEND_TALK_MIN = 30;
         private const int WEEKEND_WT_MIN = 60;
 
-        // Palette custom sezioni
+        // Palette custom sezioni principali
         private static readonly System.Windows.Media.Brush ColorSezione1 =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3C, 0x7F, 0x8B)); // #3c7f8b
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x32, 0xC4, 0xE3)); // #32c4e3
         private static readonly System.Windows.Media.Brush ColorSezione2 =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xD6, 0x8F, 0x00)); // #d68f00
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE3, 0xA2, 0x1D)); // #e3a21d
         private static readonly System.Windows.Media.Brush ColorSezione3 =
-            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xBF, 0x2F, 0x13)); // #bf2f13
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE3, 0x4A, 0x2B)); // #e34a2b
+
+        // Palette neutra per parti secondarie
+        private static readonly System.Windows.Media.Brush ColorCantico =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x76, 0x76, 0x76)); // #767676
+        private static readonly System.Windows.Media.Brush ColorCommenti =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x9A, 0x9A, 0x9A)); // #9a9a9a
+        private static readonly System.Windows.Media.Brush ColorConsigli =
+            new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x58, 0x58, 0x58)); // #585858
 
         // ==========================================================
         // Regex minuti
@@ -184,7 +192,7 @@ namespace InTempo.Classes.Utilities
                     stock[2] = new Parte($"Cantico {song2.Value}",
                         TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
                         tipo,
-                        System.Windows.Media.Brushes.SlateGray,
+                        ColorCantico,
                         TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
                         null);
 
@@ -192,7 +200,7 @@ namespace InTempo.Classes.Utilities
                     stock[4] = new Parte($"Cantico {song3.Value}",
                         TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
                         tipo,
-                        System.Windows.Media.Brushes.SlateGray,
+                        ColorCantico,
                         TimeSpan.FromMinutes(WEEKEND_SONG_MIN),
                         null);
             }
@@ -244,11 +252,11 @@ namespace InTempo.Classes.Utilities
         {
             var list = new List<Parte>
             {
-                new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         1),
+                new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         1),
                 new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), TYPE_DISCORSO, ColorSezione2,TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
-                new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         3),
+                new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         3),
                 new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   TYPE_STUDIO,   ColorSezione3,      TimeSpan.FromMinutes(WEEKEND_WT_MIN),   4),
-                new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  System.Windows.Media.Brushes.SlateGray,   TimeSpan.FromMinutes(SONG_MIN),         5)
+                new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         5)
             };
 
             return new ObservableCollection<Parte>(list);
@@ -370,7 +378,7 @@ namespace InTempo.Classes.Utilities
                         result.Add(new Parte(song,
                             TimeSpan.FromMinutes(SONG_MIN),
                             TYPE_CANTICO,
-                            System.Windows.Media.Brushes.SlateGray,
+                            ColorCantico,
                             TimeSpan.FromMinutes(SONG_MIN),
                             null));
 
@@ -378,7 +386,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_INTRO_COMMENTS,
                         TimeSpan.FromMinutes(mIntro),
                         TYPE_COMMENTI,
-                        System.Windows.Media.Brushes.DimGray,
+                        ColorCommenti,
                         TimeSpan.FromMinutes(mIntro),
                         null));
 
@@ -393,7 +401,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_FINAL_COMMENTS,
                         TimeSpan.FromMinutes(mEnd),
                         TYPE_COMMENTI,
-                        System.Windows.Media.Brushes.DimGray,
+                        ColorCommenti,
                         TimeSpan.FromMinutes(mEnd),
                         null));
 
@@ -402,7 +410,7 @@ namespace InTempo.Classes.Utilities
                         result.Add(new Parte(song,
                             TimeSpan.FromMinutes(SONG_MIN),
                             TYPE_CANTICO,
-                            System.Windows.Media.Brushes.SlateGray,
+                            ColorCantico,
                             TimeSpan.FromMinutes(SONG_MIN),
                             null));
 
@@ -416,7 +424,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(songTitle,
                         TimeSpan.FromMinutes(SONG_MIN),
                         TYPE_CANTICO,
-                        System.Windows.Media.Brushes.SlateGray,
+                        ColorCantico,
                         TimeSpan.FromMinutes(SONG_MIN),
                         null));
                     continue;
@@ -464,7 +472,7 @@ namespace InTempo.Classes.Utilities
                     result.Add(new Parte(TITLE_COUNSEL,
                         TimeSpan.FromMinutes(1),
                         TYPE_CONSIGLI,
-                        System.Windows.Media.Brushes.SlateGray,
+                        ColorConsigli,
                         TimeSpan.FromMinutes(1),
                         lastNumbered));
 
@@ -515,7 +523,7 @@ namespace InTempo.Classes.Utilities
                             result.Add(new Parte(TITLE_COUNSEL,
                                 TimeSpan.FromMinutes(1),
                                 TYPE_CONSIGLI,
-                                System.Windows.Media.Brushes.SlateGray,
+                                ColorConsigli,
                                 TimeSpan.FromMinutes(1),
                                 lastNumbered)); // stesso numero
                         }
