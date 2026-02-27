@@ -14,10 +14,8 @@ namespace InTempo.Classes.NonAbstract
 
         public async Task LoadAsync()
         {
-            Parti.Clear();
-            var loaded = await WebPartsLoader.CaricaInfrasettimanaleAsync().ConfigureAwait(false);
-            foreach (var p in loaded)
-                Parti.Add(p);
+            var loaded = await WebPartsLoader.CaricaInfrasettimanaleAsync();
+            Parti = loaded;
         }
 
        
