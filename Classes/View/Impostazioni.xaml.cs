@@ -2,6 +2,7 @@
 using InTempo.Classes.Utilities;
 using InTempo.Classes.Utilities.Monitors;
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -244,11 +245,26 @@ namespace InTempo.Classes.View
 
             if (adunanzaCaricata != null)
             {
+                bool wasRunning = TimerLogics.IsRunning;
+                Logiche.StopTimer();
+
                 Logiche.AdunanzaCorrente.Parti.Clear();
 
                 foreach (var parte in adunanzaCaricata.Parti)
                 {
                     Logiche.AdunanzaCorrente.Parti.Add(parte);
+                }
+
+                var current = Logiche.AdunanzaCorrente.Parti.FirstOrDefault(p => p.IsCurrent)
+                              ?? Logiche.AdunanzaCorrente.Parti.FirstOrDefault();
+
+                Logiche.AdunanzaCorrente.Current = current;
+                Logiche.AdunanzaCorrente.TempoResiduo = CalcolaTempoResiduoDaParti(Logiche.AdunanzaCorrente);
+                Logiche.AggiornaGrafica();
+
+                if (wasRunning)
+                {
+                    Logiche.StartTimer();
                 }
 
                 FinestraPopUP Successo = new FinestraPopUP("Completato", $"Adunanza '{nomeFile}' caricata con successo!", 1);
@@ -262,6 +278,37 @@ namespace InTempo.Classes.View
                 FinestraPopUP Errore = new FinestraPopUP("Errore", "Impossibile caricare il file selezionato.", 1);
                 Errore.ShowDialog();
             }
+        }
+
+        private static TimeSpan CalcolaTempoResiduoDaParti(Adunanza adunanza)
+        {
+            if (adunanza.Parti.Count == 0)
+            {
+                return TimeSpan.Zero;
+            }
+
+            int currentIndex = adunanza.Current != null ? adunanza.Parti.IndexOf(adunanza.Current) : -1;
+            if (currentIndex < 0)
+            {
+                currentIndex = 0;
+            }
+
+            TimeSpan residuo = TimeSpan.Zero;
+
+            for (int i = 0; i < currentIndex; i++)
+            {
+                if (adunanza.Parti[i].TempoScorrevole > TimeSpan.Zero)
+                {
+                    residuo += adunanza.Parti[i].TempoScorrevole;
+                }
+            }
+
+            if (currentIndex < adunanza.Parti.Count && adunanza.Parti[currentIndex].TempoScorrevole < TimeSpan.Zero)
+            {
+                residuo += adunanza.Parti[currentIndex].TempoScorrevole;
+            }
+
+            return residuo;
         }
 
         private void BtnEliminaAdunanza_Click(object sender, RoutedEventArgs e)

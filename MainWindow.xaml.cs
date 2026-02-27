@@ -44,9 +44,25 @@ namespace InTempo
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            await DatiAdunanza.SelectedAdunanza();
-
-            Caricamento();
+            try
+            {
+                await DatiAdunanza.SelectedAdunanza();
+            }
+            catch
+            {
+                DatiAdunanza.Parti.Clear();
+                DatiAdunanza.Current = null;
+                LogicTimer.AggiornaGrafica();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Errore caricamento",
+                    "Impossibile caricare i dati dell'adunanza dal web. Controlla la connessione e riprova.",
+                    1);
+                errore.ShowDialog();
+            }
+            finally
+            {
+                Caricamento();
+            }
         }
 
         private void BtnAvanti_Click(object sender, RoutedEventArgs e)
@@ -65,9 +81,11 @@ namespace InTempo
 
         public bool CheckCantico()
         {
-            if (DatiAdunanza.Current.TipoParte == "Cantico")
+            Parte? current = DatiAdunanza.Current;
+
+            if (current?.TipoParte == "Cantico")
             {
-                _finestratimer.CambiaVista(3, DatiAdunanza.Current.NomeParte, System.Windows.Media.Brushes.Yellow);
+                _finestratimer.CambiaVista(3, current.NomeParte, System.Windows.Media.Brushes.Yellow);
                 btnCommentoSchermo.IsEnabled = false;
                 return true;
             }

@@ -9,14 +9,21 @@ namespace InTempo.Classes.Utilities
 {
     public static class GestoreSalvataggi
     {
-        private static readonly string cartellaSalvataggi = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AdunanzeSalvate");
+        private static readonly string cartellaSalvataggi = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "InTempo",
+            "AdunanzeSalvate");
 
         public static bool SalvaAdunanza(Adunanza dati, string nomeFile)
         {
             try
             {
                 CreaCartella();
-                string percorsoFile = Path.Combine(cartellaSalvataggi, $"{nomeFile}.json");
+                if (!TryBuildSafeSavePath(nomeFile, out string percorsoFile))
+                {
+                    return false;
+                }
+
                 string json = JsonSerializer.Serialize(dati);
                 File.WriteAllText(percorsoFile, json);
 
@@ -32,7 +39,10 @@ namespace InTempo.Classes.Utilities
         {
             try
             {
-                string percorsoFile = Path.Combine(cartellaSalvataggi, $"{nomeFile}.json");
+                if (!TryBuildSafeSavePath(nomeFile, out string percorsoFile))
+                {
+                    return null;
+                }
 
                 if (!File.Exists(percorsoFile))
                 {
@@ -69,11 +79,9 @@ namespace InTempo.Classes.Utilities
 
         public static void CreaCartella()
         {
-            string percorsoCartella = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AdunanzeSalvate");
-
-            if (!Directory.Exists(percorsoCartella))
+            if (!Directory.Exists(cartellaSalvataggi))
             {
-                Directory.CreateDirectory(percorsoCartella);
+                Directory.CreateDirectory(cartellaSalvataggi);
             }
         }
 
@@ -81,7 +89,11 @@ namespace InTempo.Classes.Utilities
         {
             try
             {
-                string percorsoFile = Path.Combine(cartellaSalvataggi, $"{nomeFile}.json");
+                if (!TryBuildSafeSavePath(nomeFile, out string percorsoFile))
+                {
+                    return false;
+                }
+
                 if (File.Exists(percorsoFile))
                 {
                     File.Delete(percorsoFile);
@@ -93,6 +105,41 @@ namespace InTempo.Classes.Utilities
             {
                 return false;
             }
+        }
+
+        private static bool TryBuildSafeSavePath(string nomeFile, out string percorsoFile)
+        {
+            percorsoFile = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(nomeFile))
+            {
+                return false;
+            }
+
+            string trimmed = nomeFile.Trim();
+            string baseName = Path.GetFileNameWithoutExtension(trimmed);
+
+            if (!string.Equals(trimmed, baseName, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            if (baseName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            {
+                return false;
+            }
+
+            string root = Path.GetFullPath(cartellaSalvataggi);
+            string candidate = Path.GetFullPath(Path.Combine(root, $"{baseName}.json"));
+            string rootWithSep = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
+
+            if (!candidate.StartsWith(rootWithSep, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            percorsoFile = candidate;
+            return true;
         }
     }
 }
