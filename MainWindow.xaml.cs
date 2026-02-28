@@ -4,10 +4,12 @@ using InTempo.Classes.View;
 using System;
 using System.IO;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 
 namespace InTempo
@@ -33,6 +35,7 @@ namespace InTempo
         public MainWindow()
         {
             InitializeComponent();
+            SourceInitialized += MainWindow_SourceInitialized;
             AvviaOrologio();
             LogicTimer = new TimerLogics(DatiAdunanza);
             DataContext = this;
@@ -41,6 +44,28 @@ namespace InTempo
             _finestratimer = new FinestraTimer(Orologio, LogicTimer);
             _finestratimer.Show();
 
+        }
+
+        private void MainWindow_SourceInitialized(object? sender, EventArgs e)
+        {
+            HideCaptionIcon();
+        }
+
+        private void HideCaptionIcon()
+        {
+            IntPtr hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return;
+
+            // Rimuove l'icona dalla title bar senza mostrare la placeholder stock.
+            IntPtr exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+            IntPtr newStyle = (IntPtr)(exStyle.ToInt64() | WS_EX_DLGMODALFRAME);
+            SetWindowLongPtr(hwnd, GWL_EXSTYLE, newStyle);
+
+            SetWindowPos(
+                hwnd,
+                IntPtr.Zero,
+                0, 0, 0, 0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -365,5 +390,29 @@ namespace InTempo
                 // non bloccare mai la UI per errori di logging
             }
         }
+
+        private const int GWL_EXSTYLE = -20;
+        private const long WS_EX_DLGMODALFRAME = 0x00000001L;
+
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_FRAMECHANGED = 0x0020;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool SetWindowPos(
+            IntPtr hWnd,
+            IntPtr hWndInsertAfter,
+            int X,
+            int Y,
+            int cx,
+            int cy,
+            uint uFlags);
     }
 }

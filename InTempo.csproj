@@ -6,11 +6,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>intempo_icon_transparent_clean_1024.ico</ApplicationIcon>
+    <ApplicationIcon>intempo_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="intempo_icon_transparent_clean_1024.ico" />
+    <Resource Include="intempo_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
