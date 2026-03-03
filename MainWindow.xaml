@@ -100,7 +100,7 @@
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                                <Setter Property="Background" Value="#332196F3"/>
+                                <Setter Property="Background" Value="#2EB39DDB"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </DataTrigger>
                         </Style.Triggers>

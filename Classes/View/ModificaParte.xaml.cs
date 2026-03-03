@@ -1,4 +1,4 @@
-﻿using InTempo.Classes.NonAbstract;
+using InTempo.Classes.NonAbstract;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -10,7 +10,8 @@ namespace InTempo.Classes.View
     {
         public Parte ParteCopia { get; set; }
 
-        public Color ColorPickerColor { get; set; } = Colors.Black; // Valore predefinito
+        public Color ColorPickerColor { get; set; } = Colors.Black;
+
         public ModificaParte()
         {
             InitializeComponent();
@@ -40,14 +41,15 @@ namespace InTempo.Classes.View
                 originale.NumeroParte
             );
 
-            ColorPickerColor = ((SolidColorBrush)originale.ColoreParte).Color;
+            ColorPickerColor = originale.ColoreParte is SolidColorBrush sb ? sb.Color : Colors.Black;
 
             DataContext = ParteCopia;
         }
 
         private void BtnFatto_Click(object sender, RoutedEventArgs e)
         {
-           ParteCopia.TempoScorrevole = ParteCopia.TempoParte;
+            ParteCopia.ColoreParte = new SolidColorBrush(ColorPickerColor);
+            ParteCopia.TempoScorrevole = ParteCopia.TempoParte;
             DialogResult = true;
         }
 
@@ -55,24 +57,22 @@ namespace InTempo.Classes.View
         {
             if (e.ButtonState == MouseButtonState.Pressed)
             {
-                this.DragMove();
+                DragMove();
             }
         }
 
         private void BtnChiudiIcona_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false; // Oppure this.Close(); a seconda di come apri la finestra
-            this.Close();
+            DialogResult = false;
+            Close();
         }
 
         private void TxtNumero_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            if(TxtNumero.Text=="")
+            if (TxtNumero.Text == "")
             {
                 ParteCopia.NumeroParte = null;
-
             }
-           
         }
     }
 }

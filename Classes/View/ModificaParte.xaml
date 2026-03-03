@@ -24,7 +24,6 @@
         Background="Transparent"
         Topmost="True" 
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
-
     <materialDesign:Card Margin="16" 
                          UniformCornerRadius="12" 
                          Background="{DynamicResource MaterialDesignPaper}"
@@ -100,20 +99,22 @@
                                  materialDesign:HintAssist.Hint="Durata (MM:SS)"
                                  Text="{Binding TempoParteEdit, UpdateSourceTrigger=LostFocus}"/>
 
-                        <xctk:ColorPicker 
-                            Grid.Column="2"
-                            x:Name="ColorPicker"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            SelectedColor="{Binding ColorPickerColor, Mode=TwoWay}"
-                            UsingAlphaChannel="False"
-                            ShowAvailableColors="True"
-                            ShowStandardColors="True"
-                            ShowDropDownButton="True"
-                            />
-
-
-
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Colore Parte"
+                                        FontSize="12"
+                                       Margin="0,0,0,6"/>
+                            <xctk:ColorPicker 
+                                x:Name="ColorPicker"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                SelectedColor="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ColorPickerColor, Mode=TwoWay}"
+                                UsingAlphaChannel="False"
+                                ShowAvailableColors="True"
+                                ShowStandardColors="True"
+                                ShowRecentColors="True"
+                                ShowDropDownButton="True"
+                                />
+                        </StackPanel>
                     </Grid>
                 </StackPanel>
             </materialDesign:Card>
