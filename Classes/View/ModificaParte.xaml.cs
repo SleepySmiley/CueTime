@@ -10,6 +10,7 @@ namespace InTempo.Classes.View
     {
         public Parte ParteCopia { get; set; }
 
+        public Color ColorPickerColor { get; set; } = Colors.Black; // Valore predefinito
         public ModificaParte()
         {
             InitializeComponent();
@@ -38,6 +39,8 @@ namespace InTempo.Classes.View
                 originale.TempoScorrevole,
                 originale.NumeroParte
             );
+
+            ColorPickerColor = ((SolidColorBrush)originale.ColoreParte).Color;
 
             DataContext = ParteCopia;
         }

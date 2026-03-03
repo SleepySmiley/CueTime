@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:media="clr-namespace:System.Windows.Media;assembly=PresentationCore"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -99,16 +100,20 @@
                                  materialDesign:HintAssist.Hint="Durata (MM:SS)"
                                  Text="{Binding TempoParteEdit, UpdateSourceTrigger=LostFocus}"/>
 
-                        <ComboBox Grid.Column="2" x:Name="CmbColore" 
-                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                                  materialDesign:HintAssist.Hint="Colore"
-                                  SelectedValuePath="Tag"
-                                  SelectedValue="{Binding ColoreParte}">
-                            <ComboBoxItem Content="Nero" Foreground="{DynamicResource MaterialDesignBody}" Tag="{x:Static media:Brushes.Black}"/>
-                            <ComboBoxItem Content="Rosso" Foreground="Red" Tag="{x:Static media:Brushes.Red}"/>
-                            <ComboBoxItem Content="Blu" Foreground="#2196F3" Tag="{x:Static media:Brushes.Blue}"/>
-                            <ComboBoxItem Content="Verde" Foreground="Green" Tag="{x:Static media:Brushes.Green}"/>
-                        </ComboBox>
+                        <xctk:ColorPicker 
+                            Grid.Column="2"
+                            x:Name="ColorPicker"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            SelectedColor="{Binding ColorPickerColor, Mode=TwoWay}"
+                            UsingAlphaChannel="False"
+                            ShowAvailableColors="True"
+                            ShowStandardColors="True"
+                            ShowDropDownButton="True"
+                            />
+
+
+
                     </Grid>
                 </StackPanel>
             </materialDesign:Card>
