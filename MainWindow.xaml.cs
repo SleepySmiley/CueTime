@@ -127,12 +127,6 @@ namespace InTempo
         private void BtnPausaRiprendi_Click(object sender, RoutedEventArgs e)
         {
             SetStatoAdunanza(_isPaused);
-            if(!_isPaused)
-            {
-                CheckCantico();
-            }
-            
-
         }
 
         public void StopOrologio()
@@ -315,6 +309,7 @@ namespace InTempo
                 txtTimer.Visibility = Visibility.Visible;
                 btnCommentoSchermo.IsEnabled = true;
                 LogicTimer.StartTimer();
+                CheckCantico();
             }
             else
             {
