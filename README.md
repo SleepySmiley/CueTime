@@ -1,6 +1,6 @@
 # [InTime]
 
-Intime è un progetto ideato per le sale del regno dei TestimoniDiGeova funziona solo in locale 
+Intime è un progetto ideato per le sale del regno dei Testimoni Di Geova funziona solo in locale 
 ed è ideato per la gestione dei tempi tra le diverse parti+gestione musica pre e post adunanza
 
 ---
