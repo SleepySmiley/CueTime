@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -22,6 +23,11 @@ namespace InTempo.Classes.Utilities
         private const string WeeklyRootUrl = @"https://wol.jw.org/it/wol/meetings/r6/lp-i";
         private const string BaseUrl = "https://wol.jw.org";
         private const int SONG_MIN = 5;
+
+        // ✅ Commemorazione
+        private const string MemorialPageUrl = "https://www.jw.org/it/testimoni-di-geova/commemorazione/";
+        private const int MemorialPageTimeoutMs = 12000;
+        private const int MEMORIAL_TALK_MIN = 45;
 
         // Propieta' Completed
         public static bool IsLoading { get; private set; } = true;
@@ -123,7 +129,7 @@ namespace InTempo.Classes.Utilities
             CreateFrozenBrush(0x58, 0x58, 0x58); // #585858
 
         // ==========================================================
-        // Regex minuti
+        // Regex minuti / Commemorazione
         // ==========================================================
 
         private static readonly Regex MinutesRegex = new Regex(
@@ -132,6 +138,10 @@ namespace InTempo.Classes.Utilities
 
         private static readonly Regex MinutesTokenCleanup = new Regex(
             @"\s*\(?\s*\d{1,3}\s*(?:min\.?|minuti|minute)\s*\)?\s*",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static readonly Regex MemorialDateLineRegex = new Regex(
+            @"\b(?<year>\d{4})\s*:\s*(?:(?:luned[iì]|marted[iì]|mercoled[iì]|gioved[iì]|venerd[iì]|sabato|domenica)\s+)?(?<day>\d{1,2})\s+(?<month>[A-Za-zÀ-ÿ]+)\b",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private enum MeetingKind { Midweek, Weekend }
@@ -169,6 +179,14 @@ namespace InTempo.Classes.Utilities
         {
             // Resetto a true all'inizio dell'operazione
             IsLoading = true;
+
+            // ✅ Se oggi è la Commemorazione, carico schema speciale
+            var memorial = await TryLoadMemorialSchemaAsync(bypassCache).ConfigureAwait(false);
+            if (memorial != null)
+            {
+                IsLoading = false;
+                return memorial;
+            }
 
             var stock = BuildWeekendStock();
 
@@ -228,6 +246,14 @@ namespace InTempo.Classes.Utilities
             // Resetto a true all'inizio
             IsLoading = true;
 
+            // ✅ Se oggi è la Commemorazione, carico schema speciale
+            var memorial = await TryLoadMemorialSchemaAsync(bypassCache).ConfigureAwait(false);
+            if (memorial != null)
+            {
+                IsLoading = false;
+                return memorial;
+            }
+
             try
             {
                 // GetMeetingArticleAsync controlla la cache. Se il file esiste, lo carica e ritorna subito.
@@ -256,18 +282,50 @@ namespace InTempo.Classes.Utilities
         }
 
         // ==========================================================
-        // WEEKEND STOCK
+        // SCHEMI SPECIALI
         // ==========================================================
 
         private static ObservableCollection<Parte> BuildWeekendStock()
         {
             var list = new List<Parte>
             {
-                new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         1),
-                new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), TYPE_DISCORSO, ColorSezione2,TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
-                new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         3),
-                new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   TYPE_STUDIO,   ColorSezione3,      TimeSpan.FromMinutes(WEEKEND_WT_MIN),   4),
-                new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,  ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         5)
+                new Parte("Cantico (iniziale)",       TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,   ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         1),
+                new Parte("Discorso pubblico",        TimeSpan.FromMinutes(WEEKEND_TALK_MIN), TYPE_DISCORSO,  ColorSezione2,  TimeSpan.FromMinutes(WEEKEND_TALK_MIN), 2),
+                new Parte("Cantico (intermezzo)",     TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,   ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         3),
+                new Parte("Studio Torre di Guardia",  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   TYPE_STUDIO,    ColorSezione3,  TimeSpan.FromMinutes(WEEKEND_WT_MIN),   4),
+                new Parte("Cantico (finale)",         TimeSpan.FromMinutes(SONG_MIN),         TYPE_CANTICO,   ColorCantico,   TimeSpan.FromMinutes(SONG_MIN),         5)
+            };
+
+            return new ObservableCollection<Parte>(list);
+        }
+
+        private static ObservableCollection<Parte> BuildMemorialSchema()
+        {
+            var list = new List<Parte>
+            {
+                new Parte(
+                    "Cantico 25",
+                    TimeSpan.FromMinutes(SONG_MIN),
+                    TYPE_CANTICO,
+                    ColorCantico,
+                    TimeSpan.FromMinutes(SONG_MIN),
+                    1),
+
+                new Parte(
+                    "Discorso commemorazione",
+                    TimeSpan.FromMinutes(MEMORIAL_TALK_MIN),
+                    TYPE_DISCORSO,
+                    ColorSezione3,
+                    TimeSpan.FromMinutes(MEMORIAL_TALK_MIN),
+                    3),
+
+                new Parte(
+                    "Cantico 18",
+                    TimeSpan.FromMinutes(SONG_MIN),
+                    TYPE_CANTICO,
+                    ColorCantico,
+                    TimeSpan.FromMinutes(SONG_MIN),
+                    4),
             };
 
             return new ObservableCollection<Parte>(list);
@@ -739,6 +797,149 @@ namespace InTempo.Classes.Utilities
         }
 
         // ==========================================================
+        // ✅ Commemorazione: rilevazione data ufficiale
+        // ==========================================================
+
+        private static async Task<ObservableCollection<Parte>?> TryLoadMemorialSchemaAsync(bool bypassCache)
+        {
+            try
+            {
+                if (await IsTodayOfficialMemorialAsync(bypassCache).ConfigureAwait(false))
+                    return BuildMemorialSchema();
+            }
+            catch
+            {
+                // Se rete/parsing falliscono, non blocchiamo mai il flusso normale.
+            }
+
+            return null;
+        }
+
+        private static async Task<bool> IsTodayOfficialMemorialAsync(bool bypassCache)
+        {
+            var today = DateTime.Today;
+            var officialDate = await GetOfficialMemorialDateAsync(today.Year, bypassCache).ConfigureAwait(false);
+
+            return officialDate.HasValue && officialDate.Value.Date == today;
+        }
+
+        private static async Task<DateTime?> GetOfficialMemorialDateAsync(int year, bool bypassCache)
+        {
+            string cachePath = Path.Combine(CacheDir, $"memorial-date-{year}.txt");
+
+            // 1) Provo cache
+            if (!bypassCache && File.Exists(cachePath))
+            {
+                try
+                {
+                    string cached = (File.ReadAllText(cachePath) ?? string.Empty).Trim();
+
+                    if (DateTime.TryParseExact(
+                        cached,
+                        "yyyy-MM-dd",
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out var cachedDate))
+                    {
+                        return cachedDate.Date;
+                    }
+                }
+                catch
+                {
+                    // ignora e vai web
+                }
+            }
+
+            // 2) Scarico pagina ufficiale
+            string html = await FastGetAsync(MemorialPageUrl, MemorialPageTimeoutMs).ConfigureAwait(false);
+
+            // 3) Estraggo data
+            DateTime? officialDate = TryExtractOfficialMemorialDate(html, year);
+
+            // 4) Salvo cache
+            if (officialDate.HasValue)
+            {
+                SafeWriteAllText(
+                    cachePath,
+                    officialDate.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+            }
+
+            return officialDate;
+        }
+
+        private static DateTime? TryExtractOfficialMemorialDate(string html, int year)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+                return null;
+
+            var doc = LoadHtml(html);
+            string text = HtmlEntity.DeEntitize(doc.DocumentNode?.InnerText ?? string.Empty);
+            text = NormalizeSpaces(text);
+
+            var matches = MemorialDateLineRegex.Matches(text);
+            foreach (Match match in matches)
+            {
+                if (!match.Success)
+                    continue;
+
+                if (!int.TryParse(match.Groups["year"].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int y))
+                    continue;
+
+                if (y != year)
+                    continue;
+
+                if (!int.TryParse(match.Groups["day"].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int day))
+                    continue;
+
+                int month = ParseItalianMonthName(match.Groups["month"].Value);
+                if (month <= 0)
+                    continue;
+
+                try
+                {
+                    return new DateTime(y, month, day);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
+        private static int ParseItalianMonthName(string monthName)
+        {
+            if (string.IsNullOrWhiteSpace(monthName))
+                return 0;
+
+            string m = monthName.Trim().ToLowerInvariant()
+                .Replace("à", "a")
+                .Replace("è", "e")
+                .Replace("é", "e")
+                .Replace("ì", "i")
+                .Replace("ò", "o")
+                .Replace("ù", "u");
+
+            return m switch
+            {
+                "gennaio" => 1,
+                "febbraio" => 2,
+                "marzo" => 3,
+                "aprile" => 4,
+                "maggio" => 5,
+                "giugno" => 6,
+                "luglio" => 7,
+                "agosto" => 8,
+                "settembre" => 9,
+                "ottobre" => 10,
+                "novembre" => 11,
+                "dicembre" => 12,
+                _ => 0
+            };
+        }
+
+        // ==========================================================
         // helper cache/file
         // ==========================================================
 
@@ -1014,7 +1215,6 @@ namespace InTempo.Classes.Utilities
             client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent);
             client.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
             client.DefaultRequestHeaders.TryAddWithoutValidation("Accept-Language", "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7");
-
             client.DefaultRequestHeaders.TryAddWithoutValidation("Cache-Control", "max-age=0");
 
             return client;
