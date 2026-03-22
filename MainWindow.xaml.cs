@@ -212,9 +212,6 @@ namespace InTempo
             var parteSelezionata = GetParteFromButton(sender);
             if (parteSelezionata == null) return;
 
-            bool wasRunning = TimerLogics.IsRunning;
-            LogicTimer.StopTimer();
-
             ModificaParte finestra = new ModificaParte(parteSelezionata);
 
             if (finestra.ShowDialog() == true)
@@ -243,7 +240,6 @@ namespace InTempo
                 }
             }
 
-            if (wasRunning) LogicTimer.StartTimer();
         }
 
         public void Caricamento()
