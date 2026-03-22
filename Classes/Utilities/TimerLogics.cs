@@ -83,6 +83,7 @@ namespace InTempo.Classes.Utilities
             if (!IsRunning)
             {
                 IsRunning = true;
+                CheckTimerPreAdunanza = false;
                 AggiornaGrafica(); // Aggiorna subito la grafica per evitare ritardi visivi
                 timer.Start();
             }

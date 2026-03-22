@@ -88,6 +88,8 @@ namespace InTempo.Classes.View
                 {
                     RiproduciBrano(0);
                     _player.Pause();
+                    _inRiproduzione = false;
+                    IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
                 }
                 else
                 {
@@ -121,6 +123,8 @@ namespace InTempo.Classes.View
             {
                 RiproduciBrano(0);
                 _player.Pause();
+                _inRiproduzione = false;
+                IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
             }
         }
 
@@ -259,9 +263,16 @@ namespace InTempo.Classes.View
 
         private void GestisciStopGraduale()
         {
+            if (!_inRiproduzione || _player.Source == null || SliderVolume.Value <= 0)
+            {
+                TimerLogics.CheckTimerPreAdunanza = false;
+                _player.Volume = SliderVolume.Value;
+                return;
+            }
+
             double stepVolume = SliderVolume.Value / 30.0;
 
-            _player.Volume -= stepVolume;
+            _player.Volume = Math.Max(0, _player.Volume - stepVolume);
 
             if (_player.Volume <= 0)
             {

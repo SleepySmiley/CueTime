@@ -4,6 +4,7 @@ using InTempo.Classes.View;
 using System;
 using System.IO;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -73,6 +74,7 @@ namespace InTempo
             try
             {
                 await DatiAdunanza.SelectedAdunanza();
+                RichiediCanticoInizialeSeNecessario();
             }
             catch (Exception ex)
             {
@@ -229,14 +231,7 @@ namespace InTempo
                     target.TipoParte = finestra.ParteCopia.TipoParte;
                     target.ColoreParte = finestra.ParteCopia.ColoreParte;
 
-                    if (target == DatiAdunanza.Current)
-                    {
-                        target.TempoScorrevole += differenzaTempo;
-                    }
-                    else
-                    {
-                        target.TempoScorrevole = finestra.ParteCopia.TempoParte;
-                    }
+                    target.TempoScorrevole += differenzaTempo;
                 }
             }
 
@@ -379,6 +374,32 @@ namespace InTempo
             catch
             {
                 // non bloccare mai la UI per errori di logging
+            }
+        }
+
+        private void RichiediCanticoInizialeSeNecessario()
+        {
+            Parte? canticoIniziale = DatiAdunanza.Parti
+                .FirstOrDefault(parte => string.Equals(parte.NomeParte, "Cantico (iniziale)", StringComparison.OrdinalIgnoreCase));
+
+            if (canticoIniziale == null)
+            {
+                return;
+            }
+
+            FinestraPopUP richiestaCantico = new FinestraPopUP(
+                "Cantico iniziale",
+                "Inserisci il numero del cantico iniziale per questa adunanza.",
+                "Annulla",
+                "Conferma",
+                true);
+
+            richiestaCantico.Owner = this;
+
+            if (richiestaCantico.ShowDialog() == true && richiestaCantico.NumeroInserito.HasValue)
+            {
+                canticoIniziale.NomeParte = $"Cantico {richiestaCantico.NumeroInserito.Value}";
+                LogicTimer.AggiornaGrafica();
             }
         }
 

@@ -20,11 +20,15 @@ namespace InTempo.Classes.View
     public partial class FinestraPopUP : Window
     {
         public string Titolo { get; set; }
-        public string Testo { get; set; }
+        public string TestoMessaggio { get; set; } = string.Empty;
+        public string TestoInput { get; set; } = string.Empty;
 
         public int TipologiaFinestra { get; set; }
 
-        private FinestraTimer _finestratimer;
+        public int? NumeroInserito { get; private set; }
+
+        private FinestraTimer? _finestratimer;
+        private bool _richiedeNumeroInteroPositivo;
 
         public FinestraPopUP(string TitoloPassato, string TestoPassato, int Bottoni)
         {
@@ -48,7 +52,7 @@ namespace InTempo.Classes.View
                     break;
             }
             Titolo = TitoloPassato;
-            Testo = TestoPassato;
+            TestoMessaggio = TestoPassato;
             DataContext = this;
             txbTesto.Visibility = Visibility.Visible;
             txtTesto.IsReadOnly = true;
@@ -60,7 +64,7 @@ namespace InTempo.Classes.View
         {
             InitializeComponent();
             Titolo = TitoloPassato;
-            Testo = TestoPassato;
+            TestoMessaggio = TestoPassato;
             txbTesto.Visibility = Visibility.Visible;
             BtnPredefinito1.Content = TestoBtn1;
             BtnPredefinito2.Content = TestoBtn2;
@@ -74,12 +78,29 @@ namespace InTempo.Classes.View
             InitializeComponent();
             Titolo = TitoloPassato;
             txtTesto.Visibility = Visibility.Visible;
-            Testo = "";
+            TestoInput = "";
             DataContext = this;
             BtnPredefinito1.Content = TestoBtn1;
             BtnPredefinito2.Content = TestoBtn2;
             TipologiaFinestra = 2;
             _finestratimer = finestraDaPassare;
+        }
+
+        public FinestraPopUP(string TitoloPassato, string TestoPassato, string TestoBtn1, string TestoBtn2, bool richiedeNumeroInteroPositivo)
+        {
+            InitializeComponent();
+            Titolo = TitoloPassato;
+            TestoMessaggio = TestoPassato;
+            TestoInput = string.Empty;
+            DataContext = this;
+            BtnPredefinito1.Content = TestoBtn1;
+            BtnPredefinito2.Content = TestoBtn2;
+            txbTesto.Visibility = Visibility.Visible;
+            txtTesto.Visibility = Visibility.Visible;
+            txtTesto.IsReadOnly = false;
+            TipologiaFinestra = 3;
+            _richiedeNumeroInteroPositivo = richiedeNumeroInteroPositivo;
+            Loaded += (_, _) => txtTesto.Focus();
         }
 
         private void BtnPredefinito2_Click(object sender, RoutedEventArgs e)
@@ -96,10 +117,20 @@ namespace InTempo.Classes.View
             }
             else if(TipologiaFinestra == 2)
             {
-              
+               
                 string input = txtTesto.Text;
 
-                _finestratimer.CambiaVista(2, input, Brushes.White);
+                _finestratimer?.CambiaVista(2, input, Brushes.White);
+            }
+            else if (TipologiaFinestra == 3)
+            {
+                if (!TryConfermaInput())
+                {
+                    return;
+                }
+
+                DialogResult = true;
+                Close();
 
             }
 
@@ -121,7 +152,12 @@ namespace InTempo.Classes.View
             {
                 string input = txtTesto.Text;
 
-                _finestratimer.CambiaVista(3, input, Brushes.White);
+                _finestratimer?.CambiaVista(3, input, Brushes.White);
+            }
+            else if (TipologiaFinestra == 3)
+            {
+                DialogResult = false;
+                Close();
             }
         }
 
@@ -130,11 +166,54 @@ namespace InTempo.Classes.View
             if(TipologiaFinestra == 2)
             {
                 if (TimerLogics.IsRunning)
-                    _finestratimer.CambiaVista(1, "", Brushes.White);
+                    _finestratimer?.CambiaVista(1, "", Brushes.White);
                 else
-                    _finestratimer.CambiaVista(4, "", Brushes.White);
+                    _finestratimer?.CambiaVista(4, "", Brushes.White);
             }
-               
+                
+        }
+
+        private bool TryConfermaInput()
+        {
+            string input = txtTesto.Text.Trim();
+
+            if (_richiedeNumeroInteroPositivo)
+            {
+                if (!int.TryParse(input, out int numero) || numero <= 0)
+                {
+                    MostraErroreInput("Inserisci un numero intero valido maggiore di zero.");
+                    return false;
+                }
+
+                NumeroInserito = numero;
+            }
+            else
+            {
+                TestoInput = input;
+            }
+
+            NascondiErroreInput();
+            return true;
+        }
+
+        private void MostraErroreInput(string messaggio)
+        {
+            txtErroreInput.Text = messaggio;
+            txtErroreInput.Visibility = Visibility.Visible;
+        }
+
+        private void NascondiErroreInput()
+        {
+            txtErroreInput.Text = string.Empty;
+            txtErroreInput.Visibility = Visibility.Collapsed;
+        }
+
+        private void txtTesto_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (txtErroreInput.Visibility == Visibility.Visible)
+            {
+                NascondiErroreInput();
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
