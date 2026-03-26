@@ -3,7 +3,6 @@ using InTempo.Classes.Utilities;
 using InTempo.Classes.View;
 using System;
 using System.IO;
-using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -170,8 +169,8 @@ namespace InTempo
 
             if (finestra.ShowDialog() == true)
             {
-                DatiAdunanza.TempoResiduo -= finestra.ParteCopia.TempoParte;
                 DatiAdunanza.Parti.Insert(indice + 1, finestra.ParteCopia);
+                LogicTimer.AggiornaGrafica();
             }
 
             if (wasRunning) LogicTimer.StartTimer();
@@ -188,9 +187,15 @@ namespace InTempo
             {
                 return; 
             }
+
+            bool wasRunning = TimerLogics.IsRunning;
+            LogicTimer.StopTimer();
+
+            LogicTimer.RegistraRimozioneParte(parteSelezionata);
+
             if (parteSelezionata == DatiAdunanza.Current)
             {
-                
+                 
                 if (DatiAdunanza.Parti[0] == DatiAdunanza.Current)
                 {
                    DatiAdunanza.Avanti();
@@ -200,12 +205,18 @@ namespace InTempo
                     DatiAdunanza.Indietro();
                 }
                 DatiAdunanza.Parti.Remove(parteSelezionata);
-                return;
             }
             else
             {
-                DatiAdunanza.TempoResiduo += parteSelezionata.TempoParte;
                 DatiAdunanza.Parti.Remove(parteSelezionata);
+            }
+
+            LogicTimer.AggiornaGrafica();
+            CheckCantico();
+
+            if (wasRunning)
+            {
+                LogicTimer.StartTimer();
             }
         }
 
@@ -213,6 +224,9 @@ namespace InTempo
         {
             var parteSelezionata = GetParteFromButton(sender);
             if (parteSelezionata == null) return;
+
+            bool wasRunning = TimerLogics.IsRunning;
+            LogicTimer.StopTimer();
 
             ModificaParte finestra = new ModificaParte(parteSelezionata);
 
@@ -222,7 +236,6 @@ namespace InTempo
                 if (index != -1)
                 {
                     TimeSpan differenzaTempo = finestra.ParteCopia.TempoParte - parteSelezionata.TempoParte;
-                    DatiAdunanza.TempoResiduo -= differenzaTempo;
 
                     var target = DatiAdunanza.Parti[index];
                     target.NumeroParte = finestra.ParteCopia.NumeroParte;
@@ -235,6 +248,13 @@ namespace InTempo
                 }
             }
 
+            LogicTimer.AggiornaGrafica();
+            CheckCantico();
+
+            if (wasRunning)
+            {
+                LogicTimer.StartTimer();
+            }
         }
 
         public void Caricamento()
@@ -252,7 +272,13 @@ namespace InTempo
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Impostazioni finestra = new Impostazioni(LogicTimer);
-            finestra.ShowDialog();
+            finestra.Owner = this;
+
+            if (finestra.ShowDialog() == true)
+            {
+                _finestratimer.ApplicaMonitorScelto();
+                SincronizzaStatoVisuale();
+            }
         }
 
         // Logica orologio
@@ -270,7 +296,7 @@ namespace InTempo
 
 
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             DateTime now = DateTime.Now;
 
@@ -348,7 +374,8 @@ namespace InTempo
         private void btnCommentoSchermo_Click(object sender, RoutedEventArgs e)
         {
             FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi","Tutto Schermo","Parziale", _finestratimer);
-            MessaggioOratore.ShowDialog();
+            MessaggioOratore.Owner = this;
+            MessaggioOratore.Show();
         }
         PlayerMusicale player = new PlayerMusicale();
         private void btnMusica_Click(object sender, RoutedEventArgs e)
@@ -401,6 +428,24 @@ namespace InTempo
                 canticoIniziale.NomeParte = $"Cantico {richiestaCantico.NumeroInserito.Value}";
                 LogicTimer.AggiornaGrafica();
             }
+        }
+
+        private void SincronizzaStatoVisuale()
+        {
+            LogicTimer.AggiornaGrafica();
+
+            if (_isPaused)
+            {
+                _finestratimer.CambiaVista(4, "", System.Windows.Media.Brushes.White);
+                btnCommentoSchermo.IsEnabled = false;
+                txtTimer.Visibility = Visibility.Collapsed;
+                txtOrologio.Visibility = Visibility.Visible;
+                return;
+            }
+
+            CheckCantico();
+            txtOrologio.Visibility = Visibility.Collapsed;
+            txtTimer.Visibility = Visibility.Visible;
         }
 
         private const int GWL_EXSTYLE = -20;

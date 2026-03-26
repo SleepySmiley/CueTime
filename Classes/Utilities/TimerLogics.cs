@@ -74,6 +74,7 @@ namespace InTempo.Classes.Utilities
             AdunanzaCorrente = adunanzaCorrente;
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
+            RicalcolaTempoResiduo();
             CheckColorParte();
             CheckColorTempoResiduo();
         }
@@ -103,6 +104,7 @@ namespace InTempo.Classes.Utilities
             if (AdunanzaCorrente.Current != null)
             {
                 AdunanzaCorrente.Current.TempoScorrevole = AdunanzaCorrente.Current.TempoScorrevole.Add(TimeSpan.FromSeconds(-1));
+                RicalcolaTempoResiduo();
                 CheckColorParte();
                 CheckColorTempoResiduo();
             }
@@ -126,8 +128,6 @@ namespace InTempo.Classes.Utilities
             else
             {
                 TimerBrush = Brushes.Red;
-                // siamo in ritardo sul tempo perciò continuo a scalare il tempo residuo
-                AdunanzaCorrente.TempoResiduo = AdunanzaCorrente.TempoResiduo.Add(TimeSpan.FromSeconds(-1));
             }
         }
 
@@ -149,30 +149,8 @@ namespace InTempo.Classes.Utilities
 
         public void ResetTimerPreciso(Parte Parte)
         {
-            if (Parte == AdunanzaCorrente.Current)
-            {
-                TimeSpan tempoPerso;
-
-                if (Parte.TempoScorrevole >= TimeSpan.Zero)
-                {
-                    tempoPerso = Parte.TempoParte - Parte.TempoScorrevole;
-                }
-                else
-                {
-                    tempoPerso = Parte.TempoParte;
-                }
-
-                if (tempoPerso > TimeSpan.Zero)
-                {
-                    AdunanzaCorrente.TempoResiduo = AdunanzaCorrente.TempoResiduo.Subtract(tempoPerso);
-                }
-            }
-
             Parte.TempoScorrevole = Parte.TempoParte;
-
-            CheckColorParte();
-            CheckColorTempoResiduo();
-            
+            AggiornaGrafica();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -190,18 +168,18 @@ namespace InTempo.Classes.Utilities
                 parte.TempoScorrevole = parte.TempoParte;
             }
             AdunanzaCorrente.Current = AdunanzaCorrente.Parti.FirstOrDefault();
-            AdunanzaCorrente.TempoResiduo = TimeSpan.Zero;
+            AdunanzaCorrente.TempoConsumatoPartiRimosse = TimeSpan.Zero;
+            RicalcolaTempoResiduo();
             CheckColorParte();
             CheckColorTempoResiduo();
         }
 
         public void AggiornaGrafica()
         {
-            // 1. Ricalcola i colori per sicurezza
+            RicalcolaTempoResiduo();
             CheckColorParte();
             CheckColorTempoResiduo();
 
-            // 2. Forza lo XAML a rileggere i dati in questo esatto millisecondo
             OnPropertyChanged(nameof(AdunanzaCorrente));
             OnPropertyChanged(nameof(TimerBrush));
             OnPropertyChanged(nameof(TempoResiduoBrush));
@@ -302,6 +280,89 @@ namespace InTempo.Classes.Utilities
                 }
             }
             OrologioBrush = Brushes.White;
+        }
+
+        public void RicalcolaTempoResiduo()
+        {
+            AdunanzaCorrente.NormalizzaTracciamentoResiduo();
+
+            if (AdunanzaCorrente.Parti.Count == 0)
+            {
+                AdunanzaCorrente.TempoResiduo = TimeSpan.Zero;
+                return;
+            }
+
+            TimeSpan tempoProgrammatoCorrente = AdunanzaCorrente.CalcolaTempoTotaleParti();
+            TimeSpan correzionePartiVisibili = CalcolaCorrezioneResiduoPartiVisibili();
+
+            // Il residuo confronta il totale originale con la durata finale proiettata:
+            // programma visibile corrente, correzione di parti gia' lavorate e tempo gia' consumato su parti rimosse.
+            AdunanzaCorrente.TempoResiduo =
+                AdunanzaCorrente.TempoTotaleRiferimento
+                - tempoProgrammatoCorrente
+                + correzionePartiVisibili
+                - AdunanzaCorrente.TempoConsumatoPartiRimosse;
+        }
+
+        public void RegistraRimozioneParte(Parte parte)
+        {
+            TimeSpan tempoConsumato = CalcolaTempoConsumatoParte(parte);
+            if (tempoConsumato > TimeSpan.Zero)
+            {
+                AdunanzaCorrente.TempoConsumatoPartiRimosse += tempoConsumato;
+            }
+        }
+
+        private TimeSpan CalcolaCorrezioneResiduoPartiVisibili()
+        {
+            int indiceCorrente = OttieniIndiceCorrente();
+            TimeSpan totale = TimeSpan.Zero;
+
+            for (int i = 0; i < AdunanzaCorrente.Parti.Count; i++)
+            {
+                Parte parte = AdunanzaCorrente.Parti[i];
+
+                if (i < indiceCorrente)
+                {
+                    totale += parte.TempoScorrevole;
+                    continue;
+                }
+
+                if (i == indiceCorrente && parte.TempoScorrevole < TimeSpan.Zero)
+                {
+                    totale += parte.TempoScorrevole;
+                }
+            }
+
+            return totale;
+        }
+
+        private int OttieniIndiceCorrente()
+        {
+            if (AdunanzaCorrente.Current != null)
+            {
+                int indiceCorrente = AdunanzaCorrente.Parti.IndexOf(AdunanzaCorrente.Current);
+                if (indiceCorrente >= 0)
+                {
+                    return indiceCorrente;
+                }
+            }
+
+            for (int i = 0; i < AdunanzaCorrente.Parti.Count; i++)
+            {
+                if (AdunanzaCorrente.Parti[i].IsCurrent)
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
+
+        private static TimeSpan CalcolaTempoConsumatoParte(Parte parte)
+        {
+            TimeSpan consumato = parte.TempoParte - parte.TempoScorrevole;
+            return consumato > TimeSpan.Zero ? consumato : TimeSpan.Zero;
         }
 
     }

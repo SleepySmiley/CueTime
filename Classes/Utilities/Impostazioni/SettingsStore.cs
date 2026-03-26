@@ -34,14 +34,12 @@ namespace InTempo.Classes.Utilities.Impostazioni
                 var s = JsonSerializer.Deserialize<ImpostazioniAdunanze>(json, JsonOptions)
                         ?? new ImpostazioniAdunanze();
 
-                // “Fix” anti-null se nel file manca qualcosa
-                s.Infrasettimanale ??= new OrarioAdunanza();
-                s.FineSettimana ??= new OrarioAdunanza();
-
+                s.Normalizza();
                 return s;
             }
             catch
             {
+                BackupUnreadableSettingsFile();
                 return new ImpostazioniAdunanze();
             }
         }
@@ -50,7 +48,10 @@ namespace InTempo.Classes.Utilities.Impostazioni
         {
             Directory.CreateDirectory(FolderPath);
 
-            string json = JsonSerializer.Serialize(settings ?? new ImpostazioniAdunanze(), JsonOptions);
+            settings ??= new ImpostazioniAdunanze();
+            settings.Normalizza();
+
+            string json = JsonSerializer.Serialize(settings, JsonOptions);
 
             // Scrittura “atomica” (riduce il rischio di file corrotto)
             string tmp = FilePath + ".tmp";
@@ -64,5 +65,26 @@ namespace InTempo.Classes.Utilities.Impostazioni
 
         // comodo per debug
         public static string GetSettingsPath() => FilePath;
+
+        private static void BackupUnreadableSettingsFile()
+        {
+            try
+            {
+                if (!File.Exists(FilePath))
+                    return;
+
+                Directory.CreateDirectory(FolderPath);
+
+                string backupName = $"settings.invalid-{DateTime.Now:yyyyMMdd-HHmmss}.json";
+                string backupPath = Path.Combine(FolderPath, backupName);
+
+                if (!File.Exists(backupPath))
+                    File.Copy(FilePath, backupPath, overwrite: false);
+            }
+            catch
+            {
+                // non bloccare l'avvio se anche il backup fallisce
+            }
+        }
     }
 }

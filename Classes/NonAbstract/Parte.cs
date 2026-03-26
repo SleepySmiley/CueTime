@@ -175,14 +175,8 @@ namespace InTempo.Classes.NonAbstract
             if (string.IsNullOrWhiteSpace(input)) return false;
 
             string s = input.Trim();
-
-            bool neg = false;
             if (s.StartsWith("-", StringComparison.Ordinal))
-            {
-                neg = true;
-                s = s.Substring(1).Trim();
-                if (s.Length == 0) return false;
-            }
+                return false;
 
             string[] parts = s.Split(':');
 
@@ -204,7 +198,6 @@ namespace InTempo.Classes.NonAbstract
             }
 
             result = TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds);
-            if (neg) result = -result;
             return true;
         }
 

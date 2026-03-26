@@ -9,7 +9,7 @@ namespace InTempo.Classes.Utilities.Monitors
     // Questo è l'oggetto "pulito" che userai nel tuo codice WPF
     public class Monitor
     {
-        public string Nome { get; set; }
+        public string Nome { get; set; } = string.Empty;
         public bool EPrimario { get; set; }
 
         // L'area totale dello schermo (Risoluzione)

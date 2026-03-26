@@ -1,9 +1,9 @@
 ﻿using InTempo.Classes.NonAbstract;
 using InTempo.Classes.Utilities;
+using InTempo.Classes.Utilities.Impostazioni;
 using InTempo.Classes.Utilities.Monitors;
 using System;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -143,15 +143,21 @@ namespace InTempo.Classes.View
 
         public void SelezionaMonitorScelto()
         {
-            string NomeMonitorSalvato = App.Settings.MonitorScelto.Nome;
+            string nomeMonitorSalvato = App.Settings.MonitorScelto?.Nome ?? string.Empty;
 
             foreach (var monitor in GestoreMonitor.Monitors)
             {
-                if (monitor.Nome == NomeMonitorSalvato)
+                if (monitor.Nome == nomeMonitorSalvato)
                 {
                     cmbSchermi.SelectedItem = monitor;
                     break;
                 }
+            }
+
+            if (cmbSchermi.SelectedItem == null)
+            {
+                cmbSchermi.SelectedItem = GestoreMonitor.Monitors.FirstOrDefault(m => m.EPrimario)
+                    ?? GestoreMonitor.Monitors.FirstOrDefault();
             }
         }
 
@@ -241,6 +247,21 @@ namespace InTempo.Classes.View
                 return;
             }
 
+            CaricaAdunanzaSelezionata();
+        }
+
+        private void ListAdunanzeSalvate_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ListAdunanzeSalvate.SelectedItem == null)
+            {
+                return;
+            }
+
+            CaricaAdunanzaSelezionata();
+        }
+
+        private void CaricaAdunanzaSelezionata()
+        {
             string nomeFile = ListAdunanzeSalvate.SelectedItem as string ?? string.Empty;
             Adunanza? adunanzaCaricata = Utilities.GestoreSalvataggi.CaricaAdunanza(nomeFile);
 
@@ -256,11 +277,14 @@ namespace InTempo.Classes.View
                     Logiche.AdunanzaCorrente.Parti.Add(parte);
                 }
 
+                Logiche.AdunanzaCorrente.TempoTotaleRiferimento = adunanzaCaricata.TempoTotaleRiferimento;
+                Logiche.AdunanzaCorrente.TempoConsumatoPartiRimosse = adunanzaCaricata.TempoConsumatoPartiRimosse;
+                Logiche.AdunanzaCorrente.NormalizzaTracciamentoResiduo();
+
                 var current = Logiche.AdunanzaCorrente.Parti.FirstOrDefault(p => p.IsCurrent)
                               ?? Logiche.AdunanzaCorrente.Parti.FirstOrDefault();
 
                 Logiche.AdunanzaCorrente.Current = current;
-                Logiche.AdunanzaCorrente.TempoResiduo = CalcolaTempoResiduoDaParti(Logiche.AdunanzaCorrente);
                 Logiche.AggiornaGrafica();
 
                 if (wasRunning)
@@ -279,37 +303,6 @@ namespace InTempo.Classes.View
                 FinestraPopUP Errore = new FinestraPopUP("Errore", "Impossibile caricare il file selezionato.", 1);
                 Errore.ShowDialog();
             }
-        }
-
-        private static TimeSpan CalcolaTempoResiduoDaParti(Adunanza adunanza)
-        {
-            if (adunanza.Parti.Count == 0)
-            {
-                return TimeSpan.Zero;
-            }
-
-            int currentIndex = adunanza.Current != null ? adunanza.Parti.IndexOf(adunanza.Current) : -1;
-            if (currentIndex < 0)
-            {
-                currentIndex = 0;
-            }
-
-            TimeSpan residuo = TimeSpan.Zero;
-
-            for (int i = 0; i < currentIndex; i++)
-            {
-                if (adunanza.Parti[i].TempoScorrevole > TimeSpan.Zero)
-                {
-                    residuo += adunanza.Parti[i].TempoScorrevole;
-                }
-            }
-
-            if (currentIndex < adunanza.Parti.Count && adunanza.Parti[currentIndex].TempoScorrevole < TimeSpan.Zero)
-            {
-                residuo += adunanza.Parti[currentIndex].TempoScorrevole;
-            }
-
-            return residuo;
         }
 
         private void BtnEliminaAdunanza_Click(object sender, RoutedEventArgs e)
@@ -361,6 +354,12 @@ namespace InTempo.Classes.View
                 DateTime lunedi1 = ToMonday(data1.Value);
                 DateTime lunedi2 = ToMonday(data2.Value);
 
+                App.Settings.DateVisitaSorvegliante ??= ImpostazioniAdunanze.CreateDefaultDateVisitaSorvegliante();
+                if (App.Settings.DateVisitaSorvegliante.Length < 2)
+                {
+                    App.Settings.DateVisitaSorvegliante = ImpostazioniAdunanze.CreateDefaultDateVisitaSorvegliante();
+                }
+
                 App.Settings.DateVisitaSorvegliante[0] = lunedi1;
                 App.Settings.DateVisitaSorvegliante[1] = lunedi2;
 
@@ -380,8 +379,17 @@ namespace InTempo.Classes.View
 
         private void CaricaDateSorvegliante()
         {
-            DatePrimaVisita.SelectedDate = App.Settings.DateVisitaSorvegliante[0];
-            DateSecondaVisita.SelectedDate = App.Settings.DateVisitaSorvegliante[1];
+            var dateVisita = App.Settings.DateVisitaSorvegliante ?? Array.Empty<DateTime>();
+
+            DatePrimaVisita.SelectedDate =
+                dateVisita.Length > 0 && ImpostazioniAdunanze.IsDataVisitaValida(dateVisita[0])
+                    ? dateVisita[0]
+                    : null;
+
+            DateSecondaVisita.SelectedDate =
+                dateVisita.Length > 1 && ImpostazioniAdunanze.IsDataVisitaValida(dateVisita[1])
+                    ? dateVisita[1]
+                    : null;
         }
     }
 }

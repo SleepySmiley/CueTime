@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -69,30 +70,9 @@ namespace InTempo.Classes.View
                 string cartellaSelezionata = dialog.FolderName;
                 App.Settings.PercorsoCartellaMusica = cartellaSelezionata;
 
-                _percorsiBrani.Clear();
-                ListBrani.Items.Clear();
-
-                string[] fileTrovati = Directory.GetFiles(cartellaSelezionata);
-
-                foreach (string file in fileTrovati)
+                if (!TryCaricaCartellaMusica(cartellaSelezionata))
                 {
-                    string estensione = Path.GetExtension(file).ToLower();
-                    if (estensione == ".mp3" || estensione == ".wav" || estensione == ".wma" || estensione == ".m4a")
-                    {
-                        _percorsiBrani.Add(file);
-                        ListBrani.Items.Add(Path.GetFileNameWithoutExtension(file));
-                    }
-                }
-
-                if (_percorsiBrani.Count > 0)
-                {
-                    RiproduciBrano(0);
-                    _player.Pause();
-                    _inRiproduzione = false;
-                    IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
-                }
-                else
-                {
+                    SvuotaPlayer();
                     FinestraPopUP Avviso = new FinestraPopUP("Attenzione", "Non sono stati trovati file audio supportati in questa cartella.", 1);
                     Avviso.ShowDialog();
                 }
@@ -101,31 +81,8 @@ namespace InTempo.Classes.View
 
         private void CaricaCartellaMusica(string cartellaSelezionata)
         {
-            if (string.IsNullOrEmpty(cartellaSelezionata) || !Directory.Exists(cartellaSelezionata))
-                return;
-
-            _percorsiBrani.Clear();
-            ListBrani.Items.Clear();
-
-            string[] fileTrovati = Directory.GetFiles(cartellaSelezionata);
-
-            foreach (string file in fileTrovati)
-            {
-                string estensione = Path.GetExtension(file).ToLower();
-                if (estensione == ".mp3" || estensione == ".wav" || estensione == ".wma" || estensione == ".m4a")
-                {
-                    _percorsiBrani.Add(file);
-                    ListBrani.Items.Add(Path.GetFileNameWithoutExtension(file));
-                }
-            }
-
-            if (_percorsiBrani.Count > 0)
-            {
-                RiproduciBrano(0);
-                _player.Pause();
-                _inRiproduzione = false;
-                IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
-            }
+            if (!TryCaricaCartellaMusica(cartellaSelezionata))
+                SvuotaPlayer();
         }
 
         private void RiproduciBrano(int indice)
@@ -285,6 +242,71 @@ namespace InTempo.Classes.View
                 _player.Volume = SliderVolume.Value;
                 TimerLogics.CheckTimerPreAdunanza = false;
             }
+        }
+
+        private bool TryCaricaCartellaMusica(string cartellaSelezionata)
+        {
+            if (string.IsNullOrWhiteSpace(cartellaSelezionata) || !Directory.Exists(cartellaSelezionata))
+                return false;
+
+            string[] fileTrovati;
+            try
+            {
+                fileTrovati = Directory.GetFiles(cartellaSelezionata)
+                    .Where(IsAudioSupportato)
+                    .ToArray();
+            }
+            catch
+            {
+                return false;
+            }
+
+            _percorsiBrani.Clear();
+            ListBrani.Items.Clear();
+
+            foreach (string file in fileTrovati)
+            {
+                _percorsiBrani.Add(file);
+                ListBrani.Items.Add(Path.GetFileNameWithoutExtension(file));
+            }
+
+            if (_percorsiBrani.Count == 0)
+                return false;
+
+            RiproduciBrano(0);
+            _player.Pause();
+            _inRiproduzione = false;
+            IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
+            return true;
+        }
+
+        private void SvuotaPlayer()
+        {
+            _timer.Stop();
+            _player.Stop();
+            _player.Close();
+            _percorsiBrani.Clear();
+            ListBrani.Items.Clear();
+            ListBrani.SelectedIndex = -1;
+            _indiceCorrente = -1;
+            _inRiproduzione = false;
+            _staTrascinandoSlider = false;
+            SliderProgresso.Maximum = 100;
+            SliderProgresso.Value = 0;
+            TxtTempoTrascorso.Text = "00:00";
+            TxtTempoTotale.Text = "00:00";
+            TxtBranoCorrente.Text = "Nessun brano in riproduzione";
+            IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
+            _player.Volume = SliderVolume.Value;
+        }
+
+        private static bool IsAudioSupportato(string filePath)
+        {
+            string estensione = Path.GetExtension(filePath).ToLowerInvariant();
+            return estensione == ".mp3"
+                || estensione == ".wav"
+                || estensione == ".wma"
+                || estensione == ".m4a";
         }
     }
 }

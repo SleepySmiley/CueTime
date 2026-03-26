@@ -231,7 +231,9 @@
                                 <TextBlock Grid.Row="0" Text="Adunanze Salvate" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,8"/>
 
                                 <Border Grid.Row="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="4">
-                                    <ListView x:Name="ListAdunanzeSalvate" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <ListView x:Name="ListAdunanzeSalvate"
+                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                              MouseDoubleClick="ListAdunanzeSalvate_MouseDoubleClick">
                                         <ListView.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Margin="4">

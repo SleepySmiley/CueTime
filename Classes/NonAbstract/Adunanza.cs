@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using InTempo.Classes.Utilities.Impostazioni;
 
 namespace InTempo.Classes.NonAbstract
 {
@@ -73,6 +75,10 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
+        public TimeSpan TempoTotaleRiferimento { get; set; }
+
+        public TimeSpan TempoConsumatoPartiRimosse { get; set; }
+
 
 
         // Proprietà aggiunta per gestire la visualizzazione con +/- 
@@ -98,12 +104,16 @@ namespace InTempo.Classes.NonAbstract
             DayOfWeek today = DateTime.Now.DayOfWeek;
             Parti.Clear();
             TempoResiduo = TimeSpan.Zero;
+            TempoTotaleRiferimento = TimeSpan.Zero;
+            TempoConsumatoPartiRimosse = TimeSpan.Zero;
             Current = null;
 
-            DateTime visita1 = App.Settings.DateVisitaSorvegliante[0].Date;
-            DateTime visita2 = App.Settings.DateVisitaSorvegliante[1].Date;
             DateTime oggi = DateTime.Today;
-            bool isSettimanaVisitaSorvegliante = IsInVisitWeek(oggi, visita1) || IsInVisitWeek(oggi, visita2);
+            var dateVisita = App.Settings.DateVisitaSorvegliante ?? Array.Empty<DateTime>();
+            bool isSettimanaVisitaSorvegliante = dateVisita
+                .Where(ImpostazioniAdunanze.IsDataVisitaValida)
+                .Take(2)
+                .Any(data => IsInVisitWeek(oggi, data.Date));
 
             if (today == DayOfWeek.Sunday || today == DayOfWeek.Saturday)
             {
@@ -134,6 +144,7 @@ namespace InTempo.Classes.NonAbstract
 
             if (Parti.Count > 0)
             {
+                InizializzaTempoRiferimentoDaPartiCorrenti();
                 _currentParteIndex = 0;
                 Current = Parti[_currentParteIndex];
             }
@@ -180,9 +191,6 @@ namespace InTempo.Classes.NonAbstract
             if (idx >= Parti.Count - 1)
                 return;
 
-            if (Current!.TempoScorrevole > TimeSpan.Zero)
-                TempoResiduo += Current.TempoScorrevole;
-
             _currentParteIndex = idx + 1;
             Current = Parti[_currentParteIndex];
         }
@@ -209,13 +217,32 @@ namespace InTempo.Classes.NonAbstract
 
             _currentParteIndex = idx - 1;
 
-            if (Parti[_currentParteIndex].TempoScorrevole > TimeSpan.Zero)
-                TempoResiduo -= Parti[_currentParteIndex].TempoScorrevole;
-
             Current = Parti[_currentParteIndex];
         }
 
-       
+        public void InizializzaTempoRiferimentoDaPartiCorrenti()
+        {
+            TempoTotaleRiferimento = CalcolaTempoTotaleParti();
+            TempoConsumatoPartiRimosse = TimeSpan.Zero;
+        }
+
+        public void NormalizzaTracciamentoResiduo()
+        {
+            if (TempoTotaleRiferimento <= TimeSpan.Zero && Parti.Count > 0)
+            {
+                TempoTotaleRiferimento = CalcolaTempoTotaleParti();
+            }
+
+            if (TempoConsumatoPartiRimosse < TimeSpan.Zero)
+            {
+                TempoConsumatoPartiRimosse = TimeSpan.Zero;
+            }
+        }
+
+        public TimeSpan CalcolaTempoTotaleParti()
+        {
+            return Parti.Aggregate(TimeSpan.Zero, (totale, parte) => totale + parte.TempoParte);
+        }
 
     }
 }

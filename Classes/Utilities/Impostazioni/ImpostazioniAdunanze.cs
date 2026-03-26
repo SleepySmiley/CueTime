@@ -8,11 +8,11 @@ namespace InTempo.Classes.Utilities.Impostazioni
         public OrarioAdunanza Infrasettimanale { get; set; } = new OrarioAdunanza();
         public OrarioAdunanza FineSettimana { get; set; } = new OrarioAdunanza();
 
-        public Monitors.Monitor MonitorScelto { get; set; } = new Monitors.Monitor();
+        public Monitors.Monitor MonitorScelto { get; set; } = CreateDefaultMonitor();
 
         public string PercorsoCartellaMusica { get; set; } = string.Empty;
 
-        public DateTime[] DateVisitaSorvegliante { get; set; } = new DateTime[2];
+        public DateTime[] DateVisitaSorvegliante { get; set; } = CreateDefaultDateVisitaSorvegliante();
 
         public ImpostazioniAdunanze()
         {
@@ -20,15 +20,56 @@ namespace InTempo.Classes.Utilities.Impostazioni
             Infrasettimanale.GiornoSettimana = DayOfWeek.Wednesday;
             FineSettimana.OraInizio = new DateTime(1, 1, 1, 10, 0, 0);
             FineSettimana.GiornoSettimana = DayOfWeek.Sunday;
-            MonitorScelto = new Monitors.Monitor
+            MonitorScelto = CreateDefaultMonitor();
+            DateVisitaSorvegliante = CreateDefaultDateVisitaSorvegliante();
+        }
+
+        public void Normalizza()
+        {
+            Infrasettimanale ??= new OrarioAdunanza
+            {
+                OraInizio = new DateTime(1, 1, 1, 20, 0, 0),
+                GiornoSettimana = DayOfWeek.Wednesday
+            };
+
+            FineSettimana ??= new OrarioAdunanza
+            {
+                OraInizio = new DateTime(1, 1, 1, 10, 0, 0),
+                GiornoSettimana = DayOfWeek.Sunday
+            };
+
+            if (MonitorScelto == null || string.IsNullOrWhiteSpace(MonitorScelto.Nome))
+            {
+                MonitorScelto = CreateDefaultMonitor();
+            }
+
+            PercorsoCartellaMusica ??= string.Empty;
+
+            if (DateVisitaSorvegliante == null || DateVisitaSorvegliante.Length < 2)
+            {
+                DateVisitaSorvegliante = CreateDefaultDateVisitaSorvegliante();
+            }
+        }
+
+        public static bool IsDataVisitaValida(DateTime data)
+        {
+            return data > DateTime.MinValue;
+        }
+
+        public static DateTime[] CreateDefaultDateVisitaSorvegliante()
+        {
+            return new[] { DateTime.MinValue, DateTime.MinValue };
+        }
+
+        public static Monitors.Monitor CreateDefaultMonitor()
+        {
+            return new Monitors.Monitor
             {
                 Nome = "Default",
                 EPrimario = true,
                 AreaTotale = new System.Windows.Rect(0, 0, 1920, 1080),
                 AreaDiLavoro = new System.Windows.Rect(0, 0, 1920, 1040)
             };
-            DateVisitaSorvegliante[0] = DateTime.Now;
-            DateVisitaSorvegliante[1] = DateTime.Now;
         }
     }
 }

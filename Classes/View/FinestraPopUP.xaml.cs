@@ -117,10 +117,7 @@ namespace InTempo.Classes.View
             }
             else if(TipologiaFinestra == 2)
             {
-               
-                string input = txtTesto.Text;
-
-                _finestratimer?.CambiaVista(2, input, Brushes.White);
+                ApplicaMessaggio(2);
             }
             else if (TipologiaFinestra == 3)
             {
@@ -150,9 +147,7 @@ namespace InTempo.Classes.View
             }
             else if (TipologiaFinestra == 2)
             {
-                string input = txtTesto.Text;
-
-                _finestratimer?.CambiaVista(3, input, Brushes.White);
+                ApplicaMessaggio(3);
             }
             else if (TipologiaFinestra == 3)
             {
@@ -165,12 +160,9 @@ namespace InTempo.Classes.View
         {
             if(TipologiaFinestra == 2)
             {
-                if (TimerLogics.IsRunning)
-                    _finestratimer?.CambiaVista(1, "", Brushes.White);
-                else
-                    _finestratimer?.CambiaVista(4, "", Brushes.White);
+                _finestratimer?.CambiaVista(1, "", Brushes.White);
             }
-                
+                 
         }
 
         private bool TryConfermaInput()
@@ -208,6 +200,14 @@ namespace InTempo.Classes.View
             txtErroreInput.Visibility = Visibility.Collapsed;
         }
 
+        private void ApplicaMessaggio(int tipoVista)
+        {
+            string input = txtTesto.Text;
+            _finestratimer?.CambiaVista(tipoVista, input, Brushes.White);
+            txtTesto.Focus();
+            txtTesto.SelectAll();
+        }
+
         private void txtTesto_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (txtErroreInput.Visibility == Visibility.Visible)
@@ -226,6 +226,12 @@ namespace InTempo.Classes.View
 
         private void BtnChiudiIcona_Click(object sender, RoutedEventArgs e)
         {
+            if (TipologiaFinestra == 2)
+            {
+                Close();
+                return;
+            }
+
             this.DialogResult = false;
             this.Close();
         }
