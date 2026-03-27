@@ -1,0 +1,418 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <SolidColorBrush x:Key="AppWindowBackgroundBrush" Color="#F6F0E9" />
+    <SolidColorBrush x:Key="AppSurfaceBrush" Color="#FFFDF9F4" />
+    <SolidColorBrush x:Key="AppSurfaceMutedBrush" Color="#FFF7F0E9" />
+    <SolidColorBrush x:Key="AppSurfaceStrongBrush" Color="#FFEDE1D3" />
+    <SolidColorBrush x:Key="AppBorderBrush" Color="#FFD7C8B7" />
+    <SolidColorBrush x:Key="AppSubtleBorderBrush" Color="#FFE8DDD1" />
+    <SolidColorBrush x:Key="AppTextPrimaryBrush" Color="#FF172131" />
+    <SolidColorBrush x:Key="AppMutedTextBrush" Color="#FF72665D" />
+    <SolidColorBrush x:Key="AppAccentBrush" Color="#FFB56A41" />
+    <SolidColorBrush x:Key="AppAccentSoftBrush" Color="#FFF6E6D8" />
+    <SolidColorBrush x:Key="AppAccentDeepBrush" Color="#FF51362A" />
+    <SolidColorBrush x:Key="AppDangerBrush" Color="#FFCC4B4B" />
+    <SolidColorBrush x:Key="AppOverlayBrush" Color="#7A0E1724" />
+    <SolidColorBrush x:Key="AppCurrentRowBrush" Color="#FFF6EBDD" />
+    <SolidColorBrush x:Key="AppPresentationMessageBrush" Color="#E7F0FB" />
+
+    <LinearGradientBrush x:Key="AppPresentationBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#081019" Offset="0" />
+        <GradientStop Color="#0E1B2D" Offset="0.55" />
+        <GradientStop Color="#14293B" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="AppMainWindowBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFF7F0E8" Offset="0" />
+        <GradientStop Color="#FFF1E7DD" Offset="0.48" />
+        <GradientStop Color="#FFF7F3EE" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="AppHeroSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFFFFAF5" Offset="0" />
+        <GradientStop Color="#FFF6EDE3" Offset="1" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="AppInsetSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#F7FFFFFF" Offset="0" />
+        <GradientStop Color="#FFF8F3ED" Offset="1" />
+    </LinearGradientBrush>
+
+    <RadialGradientBrush x:Key="AppBackdropOrbPrimaryBrush" RadiusX="0.8" RadiusY="0.8">
+        <GradientStop Color="#66E6BB97" Offset="0" />
+        <GradientStop Color="#00E6BB97" Offset="1" />
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="AppBackdropOrbSecondaryBrush" RadiusX="0.8" RadiusY="0.8">
+        <GradientStop Color="#55B4C2D8" Offset="0" />
+        <GradientStop Color="#00B4C2D8" Offset="1" />
+    </RadialGradientBrush>
+
+    <RadialGradientBrush x:Key="AppBackdropOrbTertiaryBrush" RadiusX="0.8" RadiusY="0.8">
+        <GradientStop Color="#44F3D8BF" Offset="0" />
+        <GradientStop Color="#00F3D8BF" Offset="1" />
+    </RadialGradientBrush>
+
+    <Style x:Key="AppBaseWindowStyle" TargetType="{x:Type Window}">
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        <Setter Property="TextElement.FontWeight" Value="Regular" />
+        <Setter Property="TextElement.FontSize" Value="14" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+        <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
+        <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" />
+        <Setter Property="Background" Value="{StaticResource AppWindowBackgroundBrush}" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppBorderlessDialogWindowStyle"
+           TargetType="{x:Type Window}"
+           BasedOn="{StaticResource AppBaseWindowStyle}">
+        <Setter Property="ResizeMode" Value="NoResize" />
+        <Setter Property="WindowStyle" Value="None" />
+        <Setter Property="AllowsTransparency" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style x:Key="AppTopmostBorderlessDialogWindowStyle"
+           TargetType="{x:Type Window}"
+           BasedOn="{StaticResource AppBorderlessDialogWindowStyle}">
+        <Setter Property="Topmost" Value="True" />
+    </Style>
+
+    <Style x:Key="AppPresentationWindowStyle"
+           TargetType="{x:Type Window}"
+           BasedOn="{StaticResource AppBaseWindowStyle}">
+        <Setter Property="Background" Value="{StaticResource AppPresentationBackgroundBrush}" />
+        <Setter Property="ResizeMode" Value="NoResize" />
+        <Setter Property="WindowStyle" Value="None" />
+    </Style>
+
+    <Style x:Key="AppOverlayWindowStyle"
+           TargetType="{x:Type Window}"
+           BasedOn="{StaticResource AppBaseWindowStyle}">
+        <Setter Property="WindowStyle" Value="None" />
+        <Setter Property="AllowsTransparency" Value="True" />
+        <Setter Property="Background" Value="{StaticResource AppOverlayBrush}" />
+        <Setter Property="Topmost" Value="True" />
+        <Setter Property="ShowInTaskbar" Value="False" />
+        <Setter Property="ResizeMode" Value="NoResize" />
+    </Style>
+
+    <Style x:Key="AppShellCardStyle"
+           TargetType="{x:Type materialDesign:Card}"
+           BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+        <Setter Property="Margin" Value="24" />
+        <Setter Property="UniformCornerRadius" Value="30" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+    </Style>
+
+    <Style x:Key="AppSectionCardStyle"
+           TargetType="{x:Type materialDesign:Card}"
+           BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+        <Setter Property="Margin" Value="14,14,14,0" />
+        <Setter Property="UniformCornerRadius" Value="24" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+    </Style>
+
+    <Style x:Key="AppBottomSectionCardStyle"
+           TargetType="{x:Type materialDesign:Card}"
+           BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+        <Setter Property="Margin" Value="14" />
+        <Setter Property="UniformCornerRadius" Value="24" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+    </Style>
+
+    <Style x:Key="AppFooterSurfaceCardStyle"
+           TargetType="{x:Type materialDesign:Card}"
+           BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="UniformCornerRadius" Value="0" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceStrongBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1,1,1,0" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+    </Style>
+
+    <Style x:Key="AppHeroPanelBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{StaticResource AppHeroSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="28" />
+        <Setter Property="Padding" Value="28" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppPanelBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="Padding" Value="22" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppInsetPanelBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{StaticResource AppInsetSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="22" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppChipBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{StaticResource AppAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppCloseToolButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignToolButton}">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="14" />
+    </Style>
+
+    <Style x:Key="AppChromeIconButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+        <Setter Property="Width" Value="46" />
+        <Setter Property="Height" Value="46" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="16" />
+    </Style>
+
+    <Style x:Key="AppPillOutlineButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource AppAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
+    </Style>
+
+    <Style x:Key="AppDangerOutlinedButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+        <Setter Property="Foreground" Value="{StaticResource AppDangerBrush}" />
+        <Setter Property="Background" Value="#14CC4B4B" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppDangerBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
+    </Style>
+
+    <Style x:Key="AppPrimaryButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignRaisedButton}">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="Padding" Value="20,10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
+    </Style>
+
+    <Style x:Key="AppSecondaryButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
+    </Style>
+
+    <Style x:Key="AppSubtleFlatButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignFlatButton}">
+        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="16" />
+    </Style>
+
+    <Style x:Key="AppTransportPrimaryButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignFloatingActionButton}">
+        <Setter Property="Width" Value="76" />
+        <Setter Property="Height" Value="76" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="28" />
+    </Style>
+
+    <Style x:Key="AppTransportSecondaryButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
+        <Setter Property="Width" Value="56" />
+        <Setter Property="Height" Value="56" />
+        <Setter Property="Foreground" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="20" />
+    </Style>
+
+    <Style x:Key="AppWindowTitleTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="AppAccentWindowTitleTextStyle"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource AppWindowTitleTextStyle}">
+        <Setter Property="Foreground" Value="{StaticResource AppAccentBrush}" />
+    </Style>
+
+    <Style x:Key="AppPageTitleTextStyle"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource AppWindowTitleTextStyle}">
+        <Setter Property="FontSize" Value="30" />
+    </Style>
+
+    <Style x:Key="AppAccentPageTitleTextStyle"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource AppPageTitleTextStyle}">
+        <Setter Property="Foreground" Value="{StaticResource AppAccentBrush}" />
+    </Style>
+
+    <Style x:Key="AppMainEyebrowTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+    </Style>
+
+    <Style x:Key="AppMainHeroTitleTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="34" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="AppMainSupportTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="24" />
+    </Style>
+
+    <Style x:Key="AppSectionHeaderTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="AppMetricLabelTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+    </Style>
+
+    <Style x:Key="AppMetricValueTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="AppChipTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="AppSubtitleTextBlockStyle"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource MaterialDesignSubtitle2TextBlock}">
+        <Setter Property="Opacity" Value="1" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="AppSectionCaptionTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+    </Style>
+
+    <Style x:Key="AppMutedCaptionTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="Opacity" Value="0.95" />
+        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+    </Style>
+
+    <Style x:Key="AppDialogBodyTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Opacity" Value="0.95" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="23" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="AppDialogInputTextBoxStyle"
+           TargetType="{x:Type TextBox}"
+           BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Opacity" Value="0.98" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="MinHeight" Value="72" />
+        <Setter Property="Padding" Value="12,10" />
+    </Style>
+
+    <Style x:Key="AppListContainerBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppPresentationTimerTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="AppPresentationMessageTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{StaticResource AppPresentationMessageBrush}" />
+    </Style>
+</ResourceDictionary>

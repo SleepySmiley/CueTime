@@ -6,26 +6,12 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="14"
-        TextOptions.TextFormattingMode="Ideal" 
-        TextOptions.TextRenderingMode="Auto"
-        Background="Transparent"
-        FontFamily="{DynamicResource MaterialDesignFont}"
-        
+        Style="{StaticResource AppBorderlessDialogWindowStyle}"
         Title="Player Musicale" Height="550" Width="450"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        WindowStyle="None"
-        AllowsTransparency="True"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-    <materialDesign:Card Margin="16" 
-                         UniformCornerRadius="16" 
-                         Background="{DynamicResource MaterialDesignPaper}"
-                         materialDesign:ElevationAssist.Elevation="Dp8">
+    <materialDesign:Card Style="{StaticResource AppShellCardStyle}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -39,14 +25,14 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <iconPacks:PackIconMaterial Kind="MusicCircle" Width="28" Height="28" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                    <TextBlock Text="Player Musicale" FontSize="20" FontWeight="SemiBold" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                    <iconPacks:PackIconMaterial Kind="MusicCircle" Width="28" Height="28" Foreground="{StaticResource AppAccentBrush}"/>
+                    <TextBlock Text="Player Musicale" Margin="12,0,0,0" Style="{StaticResource AppAccentWindowTitleTextStyle}"/>
                 </StackPanel>
 
                 <Button Grid.Column="1" x:Name="BtnChiudi" Click="BtnChiudi_Click" 
-                        Style="{StaticResource MaterialDesignToolButton}" 
+                        Style="{StaticResource AppCloseToolButtonStyle}"
                         Foreground="{DynamicResource MaterialDesignBodyLight}"
-                        Width="30" Height="30" Padding="0">
+                        >
                     <iconPacks:PackIconMaterial Kind="Close" Width="20" Height="20"/>
                 </Button>
             </Grid>
@@ -54,12 +40,12 @@
             <Separator Grid.Row="0" VerticalAlignment="Bottom" Margin="16,0" Opacity="0.5"/>
 
             <Grid Grid.Row="1" Margin="16,8">
-                <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="8">
+                <Border Style="{StaticResource AppListContainerBorderStyle}">
                     <ListView x:Name="ListBrani" ScrollViewer.VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="4,8">
-                                    <iconPacks:PackIconMaterial Kind="MusicNote" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                    <iconPacks:PackIconMaterial Kind="MusicNote" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="{StaticResource AppMutedTextBrush}"/>
                                     <TextBlock Text="{Binding}" VerticalAlignment="Center" FontWeight="Medium"/>
                                 </StackPanel>
                             </DataTemplate>
@@ -68,11 +54,7 @@
                 </Border>
             </Grid>
 
-            <materialDesign:Card Grid.Row="2" 
-                                 Margin="0" 
-                                 Background="{DynamicResource MaterialDesignDarkSeparatorBackground}" 
-                                 UniformCornerRadius="0"
-                                 materialDesign:ElevationAssist.Elevation="Dp4">
+            <materialDesign:Card Grid.Row="2" Style="{StaticResource AppFooterSurfaceCardStyle}">
                 <Grid Margin="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -92,14 +74,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="TxtTempoTrascorso" Grid.Column="0" Text="00:00" FontSize="12" Opacity="0.7" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="TxtTempoTrascorso" Grid.Column="0" Text="00:00" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource AppMutedCaptionTextStyle}"/>
 
                         <Slider x:Name="SliderProgresso" Grid.Column="1" 
                                 Minimum="0" Maximum="100" Value="0" 
                                 TickFrequency="1" TickPlacement="None"
                                 materialDesign:SliderAssist.OnlyShowFocusVisualWhileDragging="True"/>
 
-                        <TextBlock x:Name="TxtTempoTotale" Grid.Column="2" Text="00:00" FontSize="12" Opacity="0.7" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        <TextBlock x:Name="TxtTempoTotale" Grid.Column="2" Text="00:00" FontSize="12" VerticalAlignment="Center" Margin="8,0,0,0" Style="{StaticResource AppMutedCaptionTextStyle}"/>
                     </Grid>
 
                     <Grid Grid.Row="2">
@@ -140,10 +122,10 @@
                         <materialDesign:PopupBox Grid.Column="6" 
                                                  ToolTip="Volume" Padding="0" VerticalAlignment="Center">
                             <materialDesign:PopupBox.ToggleContent>
-                                <iconPacks:PackIconMaterial Kind="VolumeHigh" Width="24" Height="24" Margin="8" Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                <iconPacks:PackIconMaterial Kind="VolumeHigh" Width="24" Height="24" Margin="8" Foreground="{StaticResource AppMutedTextBrush}"/>
                             </materialDesign:PopupBox.ToggleContent>
                             <StackPanel Margin="16" Width="100">
-                                <TextBlock Text="Volume" HorizontalAlignment="Center" Opacity="0.7" Margin="0,0,0,8"/>
+                                <TextBlock Text="Volume" HorizontalAlignment="Center" Margin="0,0,0,8" Style="{StaticResource AppMutedCaptionTextStyle}"/>
                                 <Slider x:Name="SliderVolume" Minimum="0" Maximum="1" Value="0.5" 
                                         TickFrequency="0.1" TickPlacement="None"/>
                             </StackPanel>

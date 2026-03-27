@@ -8,26 +8,12 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="14"
-        TextOptions.TextFormattingMode="Ideal" 
-        TextOptions.TextRenderingMode="Auto"
-        Background="Transparent"
-        FontFamily="{DynamicResource MaterialDesignFont}"
-        
+        Style="{StaticResource AppBorderlessDialogWindowStyle}"
         Title="Impostazioni" Height="500" Width="600"
         WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        WindowStyle="None"
-        AllowsTransparency="True"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
-    <materialDesign:Card Margin="16" 
-                         UniformCornerRadius="12" 
-                         Background="{DynamicResource MaterialDesignPaper}"
-                         materialDesign:ElevationAssist.Elevation="Dp8">
+    <materialDesign:Card Style="{StaticResource AppShellCardStyle}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -35,26 +21,18 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <materialDesign:Card Grid.Row="0" 
-                                 Margin="12,12,12,0" 
-                                 UniformCornerRadius="12" 
-                                 materialDesign:ElevationAssist.Elevation="Dp4">
+            <materialDesign:Card Grid.Row="0" Style="{StaticResource AppSectionCardStyle}">
                 <Grid Margin="16">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <iconPacks:PackIconMaterial Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                        <TextBlock Text="Opzioni" 
+                        <iconPacks:PackIconMaterial Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" Foreground="{StaticResource AppAccentBrush}"/>
+                        <TextBlock Text="Opzioni"
                                    Margin="16,0,0,0"
-                                   FontSize="24" 
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"/>
+                                   Style="{StaticResource AppAccentPageTitleTextStyle}"/>
                     </StackPanel>
                 </Grid>
             </materialDesign:Card>
 
-            <materialDesign:Card Grid.Row="1" 
-                                 Margin="12,12,12,0" 
-                                 UniformCornerRadius="12" 
-                                 materialDesign:ElevationAssist.Elevation="Dp4">
+            <materialDesign:Card Grid.Row="1" Style="{StaticResource AppSectionCardStyle}">
 
                 <TabControl materialDesign:ColorZoneAssist.Mode="Standard" 
                             TabStripPlacement="Top"
@@ -70,7 +48,7 @@
                         </TabItem.Header>
                         <Grid Margin="16">
                             <StackPanel>
-                                <TextBlock Text="Comportamento Applicazione" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
+                                <TextBlock Text="Comportamento Applicazione" Margin="0,0,0,10" Style="{StaticResource AppSectionCaptionTextStyle}"/>
                                 <Label Content="Scegliere schermo secondario" HorizontalAlignment="Left"/>
                                 <StackPanel Orientation="Horizontal" Margin="4,0,0,0">
                                     <ComboBox x:Name="cmbSchermi" 
@@ -81,7 +59,7 @@
                                               VerticalAlignment="Center"/>
                                     <Button x:Name="btnIdentifica" Content="Identifica"
                                             Margin="16,0,0,0"
-                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            Style="{StaticResource AppSecondaryButtonStyle}"
                                             VerticalAlignment="Center" Click="btnIdentifica_Click"/>
                                 </StackPanel>
                             </StackPanel>
@@ -97,7 +75,7 @@
                         </TabItem.Header>
                         <Grid Margin="16">
                             <StackPanel>
-                                <TextBlock Text="Tema Grafico" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
+                                <TextBlock Text="Tema Grafico" Margin="0,0,0,10" Style="{StaticResource AppSectionCaptionTextStyle}"/>
                                 <RadioButton Content="Tema Chiaro" IsChecked="True" Margin="0,5"/>
                                 <RadioButton Content="Tema Scuro" Margin="0,5"/>
                             </StackPanel>
@@ -121,7 +99,7 @@
 
                                 <StackPanel Grid.Column="0">
 
-                                    <TextBlock Text="Infrasettimanale" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                    <TextBlock Text="Infrasettimanale" Style="{StaticResource AppSubtitleTextBlockStyle}" Margin="0,0,0,16"/>
                                     <Grid Margin="0,0,0,24">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -140,7 +118,7 @@
 
                                     <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="0,0,0,24"/>
 
-                                    <TextBlock Text="Fine Settimana" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                    <TextBlock Text="Fine Settimana" Style="{StaticResource AppSubtitleTextBlockStyle}" Margin="0,0,0,16"/>
                                     <Grid Margin="0,0,0,16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -156,7 +134,7 @@
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Visita del Sorvegliante" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,16"/>
+                                    <TextBlock Text="Visita del Sorvegliante" Style="{StaticResource AppSubtitleTextBlockStyle}" Margin="0,0,0,16"/>
 
                                     <DatePicker x:Name="DatePrimaVisita" 
                                                 materialDesign:HintAssist.Hint="Data Prima Visita" 
@@ -187,7 +165,7 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                                <TextBlock Text="Gestione Salvataggi" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,12"/>
+                                <TextBlock Text="Gestione Salvataggi" Style="{StaticResource AppSubtitleTextBlockStyle}" Margin="0,0,0,12"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -204,19 +182,18 @@
 
                                     <Button x:Name="BtnSalvaAdunanza" Grid.Column="1" 
                                             Content="Salva" 
-                                            Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                            Style="{StaticResource AppSecondaryButtonStyle}" 
                                             Margin="0,0,8,0" 
                                             VerticalAlignment="Bottom" Click="BtnSalvaAdunanza_Click"/>
 
                                     <Button x:Name="BtnCaricaAdunanza" Grid.Column="3" 
                                             Content="Carica Selezionata" 
-                                            Style="{StaticResource MaterialDesignFlatButton}" 
+                                            Style="{StaticResource AppPrimaryButtonStyle}" 
                                             VerticalAlignment="Bottom" Click="BtnCaricaAdunanza_Click"/>
 
                                     <Button x:Name="BtnEliminaAdunanza" Grid.Column="2" 
                                             Content="Elimina" 
-                                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                                            Foreground="#EF5350" BorderBrush="#EF5350"
+                                            Style="{StaticResource AppDangerOutlinedButtonStyle}"
                                             Margin="8,0,0,0"
                                             VerticalAlignment="Bottom" Click="BtnEliminaAdunanza_Click"/>
                                 </Grid>
@@ -228,16 +205,16 @@
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Text="Adunanze Salvate" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Opacity="0.6" Margin="0,0,0,8"/>
+                                <TextBlock Grid.Row="0" Text="Adunanze Salvate" Style="{StaticResource AppSubtitleTextBlockStyle}" Margin="0,0,0,8"/>
 
-                                <Border Grid.Row="1" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="1" CornerRadius="4">
+                                <Border Grid.Row="1" Style="{StaticResource AppListContainerBorderStyle}">
                                     <ListView x:Name="ListAdunanzeSalvate"
                                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                                               MouseDoubleClick="ListAdunanzeSalvate_MouseDoubleClick">
                                         <ListView.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Margin="4">
-                                                    <iconPacks:PackIconMaterial Kind="FileDocumentOutline" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                                                    <iconPacks:PackIconMaterial Kind="FileDocumentOutline" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource AppAccentBrush}"/>
                                                     <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </DataTemplate>
@@ -250,14 +227,11 @@
                 </TabControl>
             </materialDesign:Card>
 
-            <materialDesign:Card Grid.Row="2" 
-                                 Margin="12,12,12,12" 
-                                 UniformCornerRadius="12" 
-                                 materialDesign:ElevationAssist.Elevation="Dp4">
+            <materialDesign:Card Grid.Row="2" Style="{StaticResource AppBottomSectionCardStyle}">
                 <Grid Margin="16">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Annulla" Click="BtnAnnulla_Click" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0"/>
-                        <Button Content="Salva" Click="BtnSalva_Click" Width="100" Height="40" materialDesign:ButtonAssist.CornerRadius="15"/>
+                        <Button Content="Annulla" Click="BtnAnnulla_Click" Style="{StaticResource AppSubtleFlatButtonStyle}" Margin="0,0,8,0"/>
+                        <Button Content="Salva" Click="BtnSalva_Click" Width="110" Height="42" Style="{StaticResource AppPrimaryButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </materialDesign:Card>
