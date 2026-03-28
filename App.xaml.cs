@@ -21,8 +21,23 @@ namespace InTempo
             Settings.TemaSelezionato = ThemeManager.ApplyTheme(Settings.TemaSelezionato, Settings.TemaPersonalizzato);
         }
 
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        {
+            if (Current.MainWindow is MainWindow finestraPrincipale)
+            {
+                finestraPrincipale.AssicuraSalvataggioStatistichePrimaDellaChiusura();
+            }
+
+            base.OnSessionEnding(e);
+        }
+
         protected override void OnExit(ExitEventArgs e)
         {
+            if (Current.MainWindow is MainWindow finestraPrincipale)
+            {
+                finestraPrincipale.AssicuraSalvataggioStatistichePrimaDellaChiusura();
+            }
+
             Settings.TemaSelezionato = ThemeManager.ApplyTheme(Settings.TemaSelezionato, Settings.TemaPersonalizzato);
             SettingsStore.Save(Settings);
 

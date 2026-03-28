@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using InTempo.Classes.Statistics;
 using InTempo.Classes.Utilities;
 using InTempo.Classes.Utilities.Impostazioni;
 
@@ -26,6 +27,10 @@ namespace InTempo.Classes.NonAbstract
         private TimeSpan _tempoResiduo;
 
         public bool LastLoadIsCurrentWeek { get; private set; } = true;
+
+        public TipoAdunanzaStatistiche TipoAdunanzaCorrente { get; private set; } = TipoAdunanzaStatistiche.Sconosciuta;
+
+        public DateTime DataRiferimentoCorrente { get; private set; } = DateTime.Today;
 
         public Adunanza() : this(new ImpostazioniAdunanze())
         {
@@ -154,9 +159,11 @@ namespace InTempo.Classes.NonAbstract
             TempoResiduo = TimeSpan.Zero;
             TempoTotaleRiferimento = TimeSpan.Zero;
             TempoConsumatoPartiRimosse = TimeSpan.Zero;
+            DataRiferimentoCorrente = dataRiferimento;
             Current = null;
             ReplaceParti(partiCaricate);
             NormalizzaSchemaSorveglianteSeNecessario(today, dataRiferimento, isSettimanaVisitaSorvegliante);
+            TipoAdunanzaCorrente = ResolveMeetingType(today, isSettimanaVisitaSorvegliante);
 
             if (Parti.Count > 0)
             {
@@ -274,6 +281,23 @@ namespace InTempo.Classes.NonAbstract
         private static bool IsWeekendMeeting(DayOfWeek today)
         {
             return today == DayOfWeek.Saturday || today == DayOfWeek.Sunday;
+        }
+
+        private TipoAdunanzaStatistiche ResolveMeetingType(DayOfWeek today, bool isSettimanaVisitaSorvegliante)
+        {
+            if (Parti.Any(parte => parte.NomeParte.Contains("commemorazione", StringComparison.OrdinalIgnoreCase)))
+            {
+                return TipoAdunanzaStatistiche.Commemorazione;
+            }
+
+            if (isSettimanaVisitaSorvegliante)
+            {
+                return TipoAdunanzaStatistiche.Sorvegliante;
+            }
+
+            return IsWeekendMeeting(today)
+                ? TipoAdunanzaStatistiche.Finesettimanale
+                : TipoAdunanzaStatistiche.Infrasettimanale;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

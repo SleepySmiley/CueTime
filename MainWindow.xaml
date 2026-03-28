@@ -360,7 +360,7 @@
 
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="188" />
                     <ColumnDefinition Width="10" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="12" />
@@ -370,39 +370,63 @@
                 <Border Grid.Column="0"
                         MinHeight="102"
                         Style="{StaticResource AppPanelBorderStyle}"
-                        Padding="8,10">
-                    <DockPanel LastChildFill="True">
-                        <StackPanel DockPanel.Dock="Left"
-                                    Width="54"
-                                    Margin="0,0,8,0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
-                            <Button Width="50"
-                                    Height="50"
-                                    HorizontalAlignment="Center"
-                                    Style="{StaticResource AppChromeIconButtonStyle}"
-                                    ToolTip="Impostazioni"
-                                    Click="Button_Click">
-                                <iconPacks:PackIconMaterial Kind="Cog"
-                                                            Width="22"
-                                                            Height="22" />
-                            </Button>
+                        Padding="10,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                            <Button x:Name="btnMusica"
-                                    Width="50"
-                                    Height="50"
-                                    Margin="0,4,0,0"
-                                    HorizontalAlignment="Center"
-                                    Style="{StaticResource AppChromeIconButtonStyle}"
-                                    ToolTip="Musica"
-                                    Click="btnMusica_Click">
-                                <iconPacks:PackIconMaterial Kind="Music"
-                                                            Width="22"
-                                                            Height="22" />
-                            </Button>
-                        </StackPanel>
+                        <materialDesign:PopupBox Grid.Column="0"
+                                                 PlacementMode="BottomAndAlignLeftEdges"
+                                                 StaysOpen="False"
+                                                  Padding="0">
+                            <materialDesign:PopupBox.ToggleContent>
+                                <Border Width="56"
+                                        Height="56"
+                                        Background="{DynamicResource AppAccentSoftBrush}"
+                                        CornerRadius="18">
+                                    <iconPacks:PackIconMaterial Kind="Menu"
+                                                                Width="24"
+                                                                Height="24"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                Foreground="{DynamicResource AppAccentDeepBrush}" />
+                                </Border>
+                            </materialDesign:PopupBox.ToggleContent>
 
-                        <Grid VerticalAlignment="Center">
+                            <StackPanel MinWidth="220" Margin="6">
+                                <Button Margin="0,0,0,8"
+                                        Click="Button_Click"
+                                        Style="{StaticResource AppSecondaryButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <iconPacks:PackIconMaterial Kind="Cog" Width="18" Height="18" Margin="0,0,8,0" />
+                                        <TextBlock Text="Impostazioni" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Margin="0,0,0,8"
+                                        Click="btnMusica_Click"
+                                        Style="{StaticResource AppSecondaryButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <iconPacks:PackIconMaterial Kind="Music" Width="18" Height="18" Margin="0,0,8,0" />
+                                        <TextBlock Text="Musica" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Click="btnStatistiche_Click"
+                                        Style="{StaticResource AppPrimaryButtonStyle}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <iconPacks:PackIconMaterial Kind="ChartBoxOutline" Width="18" Height="18" Margin="0,0,8,0" />
+                                        <TextBlock Text="Statistiche" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </materialDesign:PopupBox>
+
+                        <Grid Grid.Column="2"
+                              VerticalAlignment="Center">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
@@ -423,7 +447,7 @@
                                            Style="{StaticResource AppMetricValueTextStyle}" />
                             </Viewbox>
                         </Grid>
-                    </DockPanel>
+                    </Grid>
                 </Border>
 
                 <Border Grid.Column="2"

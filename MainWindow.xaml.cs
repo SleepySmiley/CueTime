@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using InTempo.Classes.NonAbstract;
+using InTempo.Classes.Statistics;
 using InTempo.Classes.Utilities;
 using InTempo.Classes.Utilities.Theming;
 using InTempo.Classes.View;
@@ -18,6 +19,8 @@ namespace InTempo
     public partial class MainWindow : Window
     {
         private readonly FinestraTimer _finestratimer;
+        private readonly GestoreStatisticheAdunanze _gestoreStatistiche;
+        private StatisticheAdunanzeWindow? _finestraStatistiche;
         private PlayerMusicale player;
         private bool _isPaused = true;
 
@@ -40,7 +43,9 @@ namespace InTempo
             SourceInitialized += MainWindow_SourceInitialized;
 
             DatiAdunanza = new Adunanza(App.Settings);
-            LogicTimer = new TimerLogics(DatiAdunanza, App.Settings);
+            _gestoreStatistiche = new GestoreStatisticheAdunanze();
+            LogicTimer = new TimerLogics(DatiAdunanza, App.Settings, _gestoreStatistiche);
+            LogicTimer.UltimaParteFuoriTempoMassimoRaggiunto += LogicTimer_UltimaParteFuoriTempoMassimoRaggiunto;
             player = new PlayerMusicale(LogicTimer, App.Settings);
 
             AvviaOrologio();
@@ -115,7 +120,15 @@ namespace InTempo
                 return;
             }
 
+            Parte? partePrecedente = DatiAdunanza.Current;
+            int indicePrecedente = DatiAdunanza.Parti.IndexOf(partePrecedente);
             DatiAdunanza.Avanti();
+            _gestoreStatistiche.RegistraCambioParte(
+                partePrecedente,
+                DatiAdunanza.Current,
+                TipoCambioParteStatistiche.ManualeAvanti,
+                indicePrecedente,
+                DatiAdunanza.Parti.IndexOf(DatiAdunanza.Current));
             CheckCantico();
             LogicTimer.AggiornaGrafica();
             AggiornaStatoNavigazioneParti();
@@ -128,7 +141,15 @@ namespace InTempo
                 return;
             }
 
+            Parte? partePrecedente = DatiAdunanza.Current;
+            int indicePrecedente = DatiAdunanza.Parti.IndexOf(partePrecedente);
             DatiAdunanza.Indietro();
+            _gestoreStatistiche.RegistraCambioParte(
+                partePrecedente,
+                DatiAdunanza.Current,
+                TipoCambioParteStatistiche.ManualeIndietro,
+                indicePrecedente,
+                DatiAdunanza.Parti.IndexOf(DatiAdunanza.Current));
             CheckCantico();
             LogicTimer.AggiornaGrafica();
             AggiornaStatoNavigazioneParti();
@@ -184,8 +205,7 @@ namespace InTempo
                 return;
             }
 
-            bool wasRunning = LogicTimer.IsRunning;
-            LogicTimer.StopTimer();
+            bool wasRunning = PausaPerOperazioneParti(MotivoPausaStatistiche.AggiuntaParte);
 
             int indice = DatiAdunanza.Parti.IndexOf(parteSelezionata);
             ModificaParte finestra = new ModificaParte();
@@ -193,13 +213,11 @@ namespace InTempo
             if (finestra.ShowDialog() == true)
             {
                 DatiAdunanza.Parti.Insert(indice + 1, finestra.ParteCopia);
+                _gestoreStatistiche.RegistraAggiuntaParte(finestra.ParteCopia);
                 LogicTimer.AggiornaGrafica();
             }
 
-            if (wasRunning)
-            {
-                LogicTimer.StartTimer();
-            }
+            RiprendiDopoOperazioneParti(wasRunning);
         }
 
         private void MenuItemElimina_Click(object sender, RoutedEventArgs e)
@@ -210,11 +228,12 @@ namespace InTempo
                 return;
             }
 
-            bool wasRunning = LogicTimer.IsRunning;
-            LogicTimer.StopTimer();
+            bool wasRunning = PausaPerOperazioneParti(MotivoPausaStatistiche.RimozioneParte);
             LogicTimer.RegistraRimozioneParte(parteSelezionata);
+            bool eraParteCorrente = parteSelezionata == DatiAdunanza.Current;
+            int indicePrecedente = DatiAdunanza.Parti.IndexOf(parteSelezionata);
 
-            if (parteSelezionata == DatiAdunanza.Current)
+            if (eraParteCorrente)
             {
                 if (DatiAdunanza.Parti[0] == DatiAdunanza.Current)
                 {
@@ -224,16 +243,21 @@ namespace InTempo
                 {
                     DatiAdunanza.Indietro();
                 }
+
+                _gestoreStatistiche.RegistraCambioParte(
+                    parteSelezionata,
+                    DatiAdunanza.Current,
+                    TipoCambioParteStatistiche.RimozioneParteCorrente,
+                    indicePrecedente,
+                    DatiAdunanza.Current != null ? DatiAdunanza.Parti.IndexOf(DatiAdunanza.Current) : null);
             }
 
             DatiAdunanza.Parti.Remove(parteSelezionata);
+            _gestoreStatistiche.RegistraRimozioneParte(parteSelezionata, eraParteCorrente);
             LogicTimer.AggiornaGrafica();
             CheckCantico();
 
-            if (wasRunning)
-            {
-                LogicTimer.StartTimer();
-            }
+            RiprendiDopoOperazioneParti(wasRunning);
         }
 
         private void MenuItemModifica_Click(object sender, RoutedEventArgs e)
@@ -244,8 +268,7 @@ namespace InTempo
                 return;
             }
 
-            bool wasRunning = LogicTimer.IsRunning;
-            LogicTimer.StopTimer();
+            bool wasRunning = PausaPerOperazioneParti(MotivoPausaStatistiche.ModificaParte);
 
             ModificaParte finestra = new ModificaParte(parteSelezionata);
 
@@ -254,6 +277,7 @@ namespace InTempo
                 int index = DatiAdunanza.Parti.IndexOf(parteSelezionata);
                 if (index != -1)
                 {
+                    SnapshotParteStatistiche snapshotPrima = SnapshotParteStatistiche.DaParte(parteSelezionata, index + 1);
                     TimeSpan differenzaTempo = finestra.ParteCopia.TempoParte - parteSelezionata.TempoParte;
 
                     Parte target = DatiAdunanza.Parti[index];
@@ -263,16 +287,15 @@ namespace InTempo
                     target.TipoParte = finestra.ParteCopia.TipoParte;
                     target.ColoreParte = finestra.ParteCopia.ColoreParte;
                     target.TempoScorrevole += differenzaTempo;
+                    SnapshotParteStatistiche snapshotDopo = SnapshotParteStatistiche.DaParte(target, index + 1);
+                    _gestoreStatistiche.RegistraModificaParte(target, snapshotPrima, snapshotDopo);
                 }
             }
 
             LogicTimer.AggiornaGrafica();
             CheckCantico();
 
-            if (wasRunning)
-            {
-                LogicTimer.StartTimer();
-            }
+            RiprendiDopoOperazioneParti(wasRunning);
         }
 
         public void Caricamento()
@@ -344,6 +367,7 @@ namespace InTempo
                 txtTimer.Visibility = Visibility.Visible;
                 btnCommentoSchermo.IsEnabled = true;
                 LogicTimer.StartTimer();
+                _gestoreStatistiche.IniziaSessione(DatiAdunanza);
                 CheckCantico();
                 AggiornaStatoNavigazioneParti();
                 return;
@@ -367,16 +391,7 @@ namespace InTempo
             _isPaused = true;
             IconaStatoTimer = "Play";
 
-            LogicTimer.StopTimer();
-            LogicTimer.ResetCompleto();
-            _finestratimer.CambiaVista(VistaPresentazione.Orologio, string.Empty, System.Windows.Media.Brushes.White);
-
-            txtTimer.Visibility = Visibility.Collapsed;
-            txtOrologio.Visibility = Visibility.Visible;
-            btnCommentoSchermo.IsEnabled = false;
-
-            Orologio.Start();
-            AggiornaStatoNavigazioneParti();
+            ConcludiAdunanzaSenzaConferma(MotivoChiusuraStatistiche.Reset);
         }
 
         private void AggiornaStatoNavigazioneParti()
@@ -388,7 +403,10 @@ namespace InTempo
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            AssicuraSalvataggioStatistichePrimaDellaChiusura();
+
             _finestratimer?.Close();
+            _finestraStatistiche?.Close();
             player?.Close();
         }
 
@@ -405,6 +423,27 @@ namespace InTempo
         {
             player.Owner ??= this;
             player.Show();
+        }
+
+        private void btnStatistiche_Click(object sender, RoutedEventArgs e)
+        {
+            if (_finestraStatistiche == null || !_finestraStatistiche.IsLoaded)
+            {
+                _finestraStatistiche = new StatisticheAdunanzeWindow(_gestoreStatistiche)
+                {
+                    Owner = this
+                };
+            }
+
+            _finestraStatistiche.RefreshData();
+
+            if (_finestraStatistiche.IsVisible)
+            {
+                _finestraStatistiche.Activate();
+                return;
+            }
+
+            _finestraStatistiche.Show();
         }
 
         private void RicreaPlayerMusicale()
@@ -540,6 +579,71 @@ namespace InTempo
             CheckCantico();
             txtOrologio.Visibility = Visibility.Collapsed;
             txtTimer.Visibility = Visibility.Visible;
+        }
+
+        private bool PausaPerOperazioneParti(MotivoPausaStatistiche motivo)
+        {
+            bool wasRunning = LogicTimer.IsRunning;
+            if (!wasRunning)
+            {
+                return false;
+            }
+
+            _gestoreStatistiche.RegistraPausa(motivo);
+            LogicTimer.StopTimer();
+            return true;
+        }
+
+        private void RiprendiDopoOperazioneParti(bool wasRunning)
+        {
+            if (!wasRunning)
+            {
+                return;
+            }
+
+            LogicTimer.StartTimer();
+            _gestoreStatistiche.RegistraRipresa(DatiAdunanza.Current);
+        }
+
+        public void AssicuraSalvataggioStatistichePrimaDellaChiusura()
+        {
+            if (!_gestoreStatistiche.SessioneAttiva)
+            {
+                return;
+            }
+
+            LogicTimer.StopTimer();
+            _gestoreStatistiche.TerminaSessione(MotivoChiusuraStatistiche.ChiusuraApplicazione);
+        }
+
+        private void LogicTimer_UltimaParteFuoriTempoMassimoRaggiunto(object? sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (_isPaused)
+                {
+                    return;
+                }
+
+                _isPaused = true;
+                IconaStatoTimer = "Play";
+                ConcludiAdunanzaSenzaConferma(MotivoChiusuraStatistiche.Completata);
+            });
+        }
+
+        private void ConcludiAdunanzaSenzaConferma(MotivoChiusuraStatistiche motivoChiusura)
+        {
+            LogicTimer.StopTimer();
+            _gestoreStatistiche.TerminaSessione(motivoChiusura);
+            LogicTimer.ResetCompleto();
+            _finestratimer.CambiaVista(VistaPresentazione.Orologio, string.Empty, System.Windows.Media.Brushes.White);
+
+            txtTimer.Visibility = Visibility.Collapsed;
+            txtOrologio.Visibility = Visibility.Visible;
+            btnCommentoSchermo.IsEnabled = false;
+
+            Orologio.Start();
+            AggiornaStatoNavigazioneParti();
         }
 
         private const int GWL_EXSTYLE = -20;
