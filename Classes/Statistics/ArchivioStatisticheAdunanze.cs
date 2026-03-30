@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
-using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.NonAbstract;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.Statistics
+namespace CueTime.Classes.Statistics
 {
     public sealed class SnapshotParteStatistiche
     {
@@ -736,7 +736,7 @@ namespace InTempo.Classes.Statistics
                 basePath = Path.GetTempPath();
             }
 
-            return Path.Combine(basePath, "InTempo", "stats");
+            return Path.Combine(basePath, "CueTime", "stats");
         }
 
         private string CreaNomeFileDettaglio(DateTimeOffset inizioUtc)
@@ -778,3 +778,4 @@ namespace InTempo.Classes.Statistics
         }
     }
 }
+

@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.Utilities.Theming
+namespace CueTime.Classes.Utilities.Theming
 {
     public static class ThemeManager
     {
@@ -216,7 +216,7 @@ namespace InTempo.Classes.Utilities.Theming
 
         private static ResourceDictionary LoadPalette(AppThemeDefinition theme)
         {
-            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "InTempo";
+            string assemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "CueTime";
             string uri = $"pack://application:,,,/{assemblyName};component/{theme.PalettePath}";
 
             return new ResourceDictionary
@@ -334,3 +334,4 @@ namespace InTempo.Classes.Utilities.Theming
         }
     }
 }
+

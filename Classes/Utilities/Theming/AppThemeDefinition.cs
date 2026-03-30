@@ -1,6 +1,6 @@
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
-namespace InTempo.Classes.Utilities.Theming
+namespace CueTime.Classes.Utilities.Theming
 {
     public sealed class AppThemeDefinition
     {
@@ -37,3 +37,4 @@ namespace InTempo.Classes.Utilities.Theming
         }
     }
 }
+

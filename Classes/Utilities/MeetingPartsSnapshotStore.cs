@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using InTempo.Classes.NonAbstract;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal enum MeetingSnapshotKind
     {
@@ -204,7 +204,7 @@ namespace InTempo.Classes.Utilities
                 basePath = Path.GetTempPath();
             }
 
-            return Path.Combine(basePath, "InTempo", "cache", "snapshots");
+            return Path.Combine(basePath, "CueTime", "cache", "snapshots");
         }
 
         private sealed class ParteSnapshotRecord
@@ -223,3 +223,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

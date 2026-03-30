@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 
-namespace InTempo.Classes.Utilities.Monitors
+namespace CueTime.Classes.Utilities.Monitors
 {
 
 
@@ -83,6 +83,7 @@ namespace InTempo.Classes.Utilities.Monitors
             // Facciamo partire la ricerca
             EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, callback, IntPtr.Zero);
 
+            Monitors = listaMonitor;
             return listaMonitor;
         }
 

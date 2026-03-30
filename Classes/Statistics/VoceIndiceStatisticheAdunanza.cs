@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace InTempo.Classes.Statistics
+namespace CueTime.Classes.Statistics
 {
     public enum TipoAdunanzaStatistiche
     {
@@ -153,3 +153,4 @@ namespace InTempo.Classes.Statistics
         }
     }
 }
+

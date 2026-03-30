@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Linq;
-using InTempo.Classes.Utilities.Monitors;
-using InTempo.Classes.Utilities.Theming;
+using CueTime.Classes.Utilities.Monitors;
+using CueTime.Classes.Utilities.Theming;
 
-namespace InTempo.Classes.Utilities.Impostazioni
+namespace CueTime.Classes.Utilities.Impostazioni
 {
     public class ImpostazioniAdunanze
     {
@@ -109,3 +109,4 @@ namespace InTempo.Classes.Utilities.Impostazioni
         }
     }
 }
+

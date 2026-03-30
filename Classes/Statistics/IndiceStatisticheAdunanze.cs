@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace InTempo.Classes.Statistics
+namespace CueTime.Classes.Statistics
 {
     public sealed class IndiceStatisticheAdunanze
     {
@@ -69,3 +69,4 @@ namespace InTempo.Classes.Statistics
         }
     }
 }
+

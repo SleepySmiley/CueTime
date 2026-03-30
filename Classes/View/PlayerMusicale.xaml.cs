@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -8,10 +9,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.Utilities.Impostazioni;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class PlayerMusicale : Window
     {
@@ -25,6 +26,7 @@ namespace InTempo.Classes.View
         private bool _staTrascinandoSlider;
         private bool _suppressSelectionChanged;
         private bool _initialFolderLoaded;
+        private bool _consentiChiusuraDefinitiva;
 
         public PlayerMusicale(TimerLogics timerLogics, ImpostazioniAdunanze settings)
         {
@@ -121,7 +123,7 @@ namespace InTempo.Classes.View
             {
                 FinestraPopUP avviso = new FinestraPopUP(
                     "Attenzione",
-                    "Non è possibile riprodurre un brano mentre il timer è attivo. Per favore, ferma il timer prima di cambiare brano.",
+                    "Non e possibile riprodurre un brano mentre il timer e attivo. Ferma il timer prima di cambiare brano.",
                     ConfigurazionePulsantiPopup.Ok);
                 avviso.ShowDialog();
                 return;
@@ -168,7 +170,7 @@ namespace InTempo.Classes.View
             {
                 FinestraPopUP avviso = new FinestraPopUP(
                     "Attenzione",
-                    "Non è possibile riprodurre la musica mentre il timer è attivo. Per favore, ferma il timer prima di riprodurre la musica.",
+                    "Non e possibile riprodurre la musica mentre il timer e attivo. Ferma il timer prima di riprodurre la musica.",
                     ConfigurazionePulsantiPopup.Ok);
                 avviso.ShowDialog();
                 return;
@@ -314,6 +316,7 @@ namespace InTempo.Classes.View
                 fileTrovati = await Task.Run(() =>
                     Directory.EnumerateFiles(cartellaSelezionata)
                         .Where(IsAudioSupportato)
+                        .OrderBy(file => Path.GetFileName(file), StringComparer.CurrentCultureIgnoreCase)
                         .ToArray());
             }
             catch (Exception ex)
@@ -363,12 +366,28 @@ namespace InTempo.Classes.View
                 return false;
             }
 
-            if (cartellaSelezionata.StartsWith(@"\\", StringComparison.Ordinal))
+            try
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(cartellaSelezionata);
+                if (!directoryInfo.Exists || (directoryInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    return false;
+                }
+
+                string? root = Path.GetPathRoot(directoryInfo.FullName);
+                if (string.IsNullOrWhiteSpace(root))
+                {
+                    return false;
+                }
+
+                DriveInfo drive = new DriveInfo(root);
+                return drive.IsReady
+                    && (drive.DriveType == DriveType.Fixed || drive.DriveType == DriveType.Removable);
+            }
+            catch (Exception)
             {
                 return false;
             }
-
-            return Directory.Exists(cartellaSelezionata);
         }
 
         private void SvuotaPlayer()
@@ -399,5 +418,32 @@ namespace InTempo.Classes.View
                 || estensione == ".wma"
                 || estensione == ".m4a";
         }
+
+        public void PrepareForShutdown()
+        {
+            _consentiChiusuraDefinitiva = true;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (!_consentiChiusuraDefinitiva)
+            {
+                e.Cancel = true;
+                Hide();
+                return;
+            }
+
+            _timer.Stop();
+            _timer.Tick -= Timer_Tick;
+            SliderVolume.ValueChanged -= SliderVolume_ValueChanged;
+            SliderProgresso.PreviewMouseLeftButtonUp -= SliderProgresso_MouseUp;
+            ListBrani.SelectionChanged -= ListBrani_SelectionChanged;
+            _player.MediaOpened -= Player_MediaOpened;
+            _player.MediaEnded -= Player_MediaEnded;
+            _player.Stop();
+            _player.Close();
+            base.OnClosing(e);
+        }
     }
 }
+

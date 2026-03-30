@@ -1,6 +1,6 @@
-using System.Windows;
+﻿using System.Windows;
 
-namespace InTempo.Classes.Utilities.Monitors
+namespace CueTime.Classes.Utilities.Monitors
 {
     public class Monitor
     {
@@ -27,3 +27,4 @@ namespace InTempo.Classes.Utilities.Monitors
         }
     }
 }
+

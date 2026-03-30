@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal sealed class HtmlParteParser
     {
@@ -17,7 +17,7 @@ namespace InTempo.Classes.Utilities
         private static readonly string[] MwbMinistryAllowedParts =
         {
             "Iniziare una conversazione",
-            "Coltivare l’interesse",
+            "Coltivare l'interesse",
             "Fare discepoli",
             "Spiegare quello in cui si crede",
             "Discorso"
@@ -581,7 +581,13 @@ namespace InTempo.Classes.Utilities
                 .Replace("é", "e")
                 .Replace("ì", "i")
                 .Replace("ò", "o")
-                .Replace("ù", "u");
+                .Replace("ù", "u")
+                .Replace("Ã ", "a")
+                .Replace("Ã¨", "e")
+                .Replace("Ã©", "e")
+                .Replace("Ã¬", "i")
+                .Replace("Ã²", "o")
+                .Replace("Ã¹", "u");
 
             return normalized switch
             {
@@ -602,3 +608,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

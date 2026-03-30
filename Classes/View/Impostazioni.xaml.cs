@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -9,14 +9,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.Utilities.Impostazioni;
-using InTempo.Classes.Utilities.Monitors;
-using InTempo.Classes.Utilities.Theming;
-using MonitorInfo = InTempo.Classes.Utilities.Monitors.Monitor;
+using CueTime.Classes.NonAbstract;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Utilities.Monitors;
+using CueTime.Classes.Utilities.Theming;
+using MonitorInfo = CueTime.Classes.Utilities.Monitors.Monitor;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class Impostazioni : Window, INotifyPropertyChanged
     {
@@ -127,7 +127,7 @@ namespace InTempo.Classes.View
             {
                 FinestraPopUP errore = new FinestraPopUP(
                     "Dati non validi",
-                    $"Il giorno selezionato per l'adunanza {tipoAdunanza} non è valido.",
+                    $"Il giorno selezionato per l'adunanza {tipoAdunanza} non e valido.",
                     ConfigurazionePulsantiPopup.Ok);
                 errore.ShowDialog();
                 return false;
@@ -283,7 +283,7 @@ namespace InTempo.Classes.View
             {
                 FinestraPopUP errore = new FinestraPopUP(
                     "Errore",
-                    "Si è verificato un problema durante il salvataggio.",
+                    "Si e verificato un problema durante il salvataggio.",
                     ConfigurazionePulsantiPopup.Ok);
                 errore.ShowDialog();
             }
@@ -319,6 +319,16 @@ namespace InTempo.Classes.View
 
         private void CaricaAdunanzaSelezionata()
         {
+            if (Logiche.IsRunning)
+            {
+                FinestraPopUP avviso = new FinestraPopUP(
+                    "Attenzione",
+                    "Ferma l'adunanza corrente prima di caricare un salvataggio.",
+                    ConfigurazionePulsantiPopup.Ok);
+                avviso.ShowDialog();
+                return;
+            }
+
             string nomeFile = ListAdunanzeSalvate.SelectedItem as string ?? string.Empty;
             Adunanza? adunanzaCaricata = GestoreSalvataggi.CaricaAdunanza(nomeFile);
 
@@ -387,7 +397,7 @@ namespace InTempo.Classes.View
             {
                 FinestraPopUP successo = new FinestraPopUP(
                     "Eliminata",
-                    $"L'adunanza '{nomeFile}' è stata eliminata.",
+                    $"L'adunanza '{nomeFile}' e stata eliminata.",
                     ConfigurazionePulsantiPopup.Ok);
                 successo.ShowDialog();
                 AggiornaListaSalvataggi();
@@ -420,7 +430,7 @@ namespace InTempo.Classes.View
             {
                 FinestraPopUP errore = new FinestraPopUP(
                     "Dati non validi",
-                    "La prima data non può essere successiva alla seconda data.",
+                    "La prima data non puo essere successiva alla seconda data.",
                     ConfigurazionePulsantiPopup.Ok);
                 errore.ShowDialog();
                 return false;
@@ -574,3 +584,4 @@ namespace InTempo.Classes.View
         }
     }
 }
+

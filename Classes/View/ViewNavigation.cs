@@ -1,4 +1,4 @@
-namespace InTempo.Classes.View
+﻿namespace CueTime.Classes.View
 {
     public enum VistaPresentazione
     {
@@ -23,3 +23,4 @@ namespace InTempo.Classes.View
         ConfermaAnnulla = 2
     }
 }
+

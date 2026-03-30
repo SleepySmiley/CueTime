@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -6,11 +6,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using InTempo.Classes.Statistics;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Statistics;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.Utilities.Impostazioni;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class Adunanza : INotifyPropertyChanged
     {
@@ -399,3 +399,4 @@ namespace InTempo.Classes.NonAbstract
         }
     }
 }
+

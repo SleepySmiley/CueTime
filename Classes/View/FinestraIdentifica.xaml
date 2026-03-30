@@ -1,7 +1,8 @@
-<Window x:Class="InTempo.Classes.View.FinestraIdentifica"
+﻿<Window x:Class="CueTime.Classes.View.FinestraIdentifica"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Style="{StaticResource AppOverlayWindowStyle}"
+        Icon="pack://application:,,,/cuetime_icon.ico"
         Title="Identifica">
 
     <Grid>
@@ -14,3 +15,5 @@
                    VerticalAlignment="Center" />
     </Grid>
 </Window>
+
+

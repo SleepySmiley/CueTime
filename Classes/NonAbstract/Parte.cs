@@ -3,9 +3,9 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class Parte : INotifyPropertyChanged
     {
@@ -211,3 +211,4 @@ namespace InTempo.Classes.NonAbstract
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+

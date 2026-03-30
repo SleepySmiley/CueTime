@@ -1,9 +1,9 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System;
-using InTempo.Classes.Abstract;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.Abstract;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class Finesettimanale : RiunioniGenerali
     {
@@ -38,3 +38,4 @@ namespace InTempo.Classes.NonAbstract
         }
     }
 }
+

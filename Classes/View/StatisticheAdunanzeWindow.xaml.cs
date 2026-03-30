@@ -1,17 +1,19 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using InTempo.Classes.Statistics;
+using CueTime.Classes.Statistics;
+using CueTime.Classes.Utilities;
 using MahApps.Metro.IconPacks;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class StatisticheAdunanzeWindow : Window, INotifyPropertyChanged
     {
@@ -30,6 +32,7 @@ namespace InTempo.Classes.View
 
         private readonly GestoreStatisticheAdunanze _gestoreStatistiche;
         private SessioneStoricoItemViewModel? _sessioneSelezionata;
+        private Task? _refreshTask;
         private string _rangeStoricoText = "Nessuna sessione registrata";
         private string _notaFooter = "In attesa del primo salvataggio";
         private string _dettaglioTitolo = "Nessuna sessione selezionata";
@@ -44,7 +47,6 @@ namespace InTempo.Classes.View
             InitializeComponent();
             _gestoreStatistiche = gestoreStatistiche ?? throw new ArgumentNullException(nameof(gestoreStatistiche));
             DataContext = this;
-            RefreshData();
         }
 
         public ObservableCollection<StatisticaCardItemViewModel> MetrichePanoramica { get; } = new ObservableCollection<StatisticaCardItemViewModel>();
@@ -250,28 +252,63 @@ namespace InTempo.Classes.View
             ? "Ripristina"
             : "Ingrandisci";
 
-        public void RefreshData()
+        public Task RefreshDataAsync()
+        {
+            if (_refreshTask == null || _refreshTask.IsCompleted)
+            {
+                _refreshTask = RefreshDataCoreAsync();
+            }
+
+            return _refreshTask;
+        }
+
+        private async Task RefreshDataCoreAsync()
         {
             string? selectedSessionId = SessioneSelezionata?.SessionId;
-            IReadOnlyList<VoceIndiceStatisticheAdunanza> storico = _gestoreStatistiche.CaricaStoricoLeggero();
-            RisultatiStatisticheStoriche risultati = _gestoreStatistiche.CalcolaStatisticheStoriche();
+            bool statoAbilitazionePrecedente = IsEnabled;
+            Cursor cursorePrecedente = Cursor;
 
-            AggiornaRangeStorico(storico);
-            AggiornaMetrichePanoramica(storico, risultati);
-            AggiornaPuntiChiave(risultati);
-            AggiornaGraficoAndamento(risultati.AndamentoUltime10Adunanze);
-            AggiornaConfrontiPerTipo(risultati);
-            AggiornaGraduatorieParti(risultati);
-            AggiornaStoricoSessioni(storico);
+            try
+            {
+                IsEnabled = false;
+                Cursor = Cursors.Wait;
 
-            NotaFooter = HasStorico
-                ? $"{StoricoSessioni.Count} sessioni indicizzate"
-                : "In attesa del primo salvataggio";
+                (IReadOnlyList<VoceIndiceStatisticheAdunanza> Storico, RisultatiStatisticheStoriche Risultati) dati =
+                    await Task.Run(() => (
+                        _gestoreStatistiche.CaricaStoricoLeggero(),
+                        _gestoreStatistiche.CalcolaStatisticheStoriche()));
 
-            SessioneSelezionata = StoricoSessioni.FirstOrDefault(item => string.Equals(item.SessionId, selectedSessionId, StringComparison.Ordinal))
-                ?? StoricoSessioni.FirstOrDefault();
+                AggiornaRangeStorico(dati.Storico);
+                AggiornaMetrichePanoramica(dati.Storico, dati.Risultati);
+                AggiornaPuntiChiave(dati.Risultati);
+                AggiornaGraficoAndamento(dati.Risultati.AndamentoUltime10Adunanze);
+                AggiornaConfrontiPerTipo(dati.Risultati);
+                AggiornaGraduatorieParti(dati.Risultati);
+                AggiornaStoricoSessioni(dati.Storico);
 
-            AggiornaVisibilita();
+                NotaFooter = HasStorico
+                    ? $"{StoricoSessioni.Count} sessioni indicizzate"
+                    : "In attesa del primo salvataggio";
+
+                SessioneSelezionata = StoricoSessioni.FirstOrDefault(item => string.Equals(item.SessionId, selectedSessionId, StringComparison.Ordinal))
+                    ?? StoricoSessioni.FirstOrDefault();
+
+                AggiornaVisibilita();
+            }
+            catch (Exception ex)
+            {
+                AppLogger.LogError("Errore durante l'aggiornamento della finestra statistiche.", ex);
+                new FinestraPopUP(
+                    "Errore",
+                    "Impossibile aggiornare le statistiche in questo momento.",
+                    ConfigurazionePulsantiPopup.Ok).ShowDialog();
+            }
+            finally
+            {
+                IsEnabled = statoAbilitazionePrecedente;
+                Cursor = cursorePrecedente;
+                _refreshTask = null;
+            }
         }
 
         private void AggiornaMetrichePanoramica(IReadOnlyList<VoceIndiceStatisticheAdunanza> storico, RisultatiStatisticheStoriche risultati)
@@ -305,7 +342,7 @@ namespace InTempo.Classes.View
                     new StatisticaCardItemViewModel(
                         "Mese top",
                         FormatMonthKey(risultati.MeseConPiuAdunanzeInOrario),
-                        "Mese con più adunanze concluse in orario.")
+                        "Mese con piu adunanze concluse in orario.")
                 });
         }
 
@@ -395,8 +432,8 @@ namespace InTempo.Classes.View
                 StoricoSessioni,
                 storico.Select(item => new SessioneStoricoItemViewModel(
                     item.SessionId,
-                    $"{FormatTipoAdunanza(item.TipoAdunanza)} • {item.DataRiferimentoAdunanza:dd MMM yyyy}",
-                    $"{FormatDateTime(item.InizioUtc)} • {FormatDateTime(item.FineUtc)}",
+                    $"{FormatTipoAdunanza(item.TipoAdunanza)} | {item.DataRiferimentoAdunanza:dd MMM yyyy}",
+                    $"{FormatDateTime(item.InizioUtc)} | {FormatDateTime(item.FineUtc)}",
                     item.TerminataInOrario ? "In orario" : "Fuori tempo",
                     $"{item.NumeroPartiInOrario}/{item.NumeroTotaleParti} parti in orario",
                     FormatSignedDuration(item.ScostamentoFinale),
@@ -427,8 +464,8 @@ namespace InTempo.Classes.View
                 return;
             }
 
-            DettaglioTitolo = $"{FormatTipoAdunanza(sessione.TipoAdunanza)} • {sessione.DataRiferimentoAdunanza:dddd dd MMMM yyyy}";
-            DettaglioSottotitolo = $"Inizio reale {FormatDateTime(sessione.InizioUtc)} • Fine reale {FormatDateTime(sessione.FineUtc)}";
+            DettaglioTitolo = $"{FormatTipoAdunanza(sessione.TipoAdunanza)} | {sessione.DataRiferimentoAdunanza:dddd dd MMMM yyyy}";
+            DettaglioSottotitolo = $"Inizio reale {FormatDateTime(sessione.InizioUtc)} | Fine reale {FormatDateTime(sessione.FineUtc)}";
             DettaglioBadge = sessione.TerminataInOrario ? "In orario" : "Fuori tempo";
             DettaglioMotivoChiusura = $"Chiusura: {FormatMotivoChiusura(sessione.MotivoChiusura)}";
             DettaglioParteCritica = string.IsNullOrWhiteSpace(sessione.NomeParteConSforamentoMassimo)
@@ -460,8 +497,8 @@ namespace InTempo.Classes.View
                     .ThenBy(item => item.OrdineOriginale)
                     .Select(item => new ParteDettaglioItemViewModel(
                         item.OrdineOriginale.ToString(ItalianCulture),
-                        item.OrdineEffettivo?.ToString(ItalianCulture) ?? "—",
-                        item.NumeroParte?.ToString(ItalianCulture) ?? "—",
+                        item.OrdineEffettivo?.ToString(ItalianCulture) ?? "-",
+                        item.NumeroParte?.ToString(ItalianCulture) ?? "-",
                         item.NomeParte,
                         item.TipoParte,
                         FormatDuration(item.DurataPrevistaAllAvvio),
@@ -469,13 +506,13 @@ namespace InTempo.Classes.View
                         FormatDuration(item.DurataRealeEffettiva),
                         FormatSignedDuration(item.DifferenzaPrevistaAllAvvioEReale),
                         FormatSignedDuration(item.DifferenzaPrevistaAllInizioParteEReale),
-                        item.EAndataFuoriTempo ? "Sì" : "No",
+                        item.EAndataFuoriTempo ? "Si" : "No",
                         FormatDuration(item.TempoTotaleSottoZero),
                         FormatDateTime(item.TimestampInizioSottoZeroUtc),
                         item.NumeroModifiche.ToString(ItalianCulture),
-                        item.EStataSaltata ? "Sì" : "No",
-                        item.EStataRimossa ? "Sì" : "No",
-                        item.EStataAggiuntaInCorso ? "Sì" : "No",
+                        item.EStataSaltata ? "Si" : "No",
+                        item.EStataRimossa ? "Si" : "No",
+                        item.EStataAggiuntaInCorso ? "Si" : "No",
                         FormatDateTime(item.OraEsattaInizioUtc),
                         FormatDateTime(item.OraEsattaFineUtc))));
 
@@ -492,14 +529,15 @@ namespace InTempo.Classes.View
                 sessione.CambiParte.Select(item => new CambioParteDettaglioItemViewModel(
                     FormatDateTime(item.TimestampUtc),
                     FormatTipoCambio(item.Tipo),
-                    item.PartePrecedente ?? "—",
-                    item.ParteSuccessiva ?? "—",
+                    item.PartePrecedente ?? "-",
+                    item.ParteSuccessiva ?? "-",
                     $"{FormatIndice(item.IndicePartePrecedente)} -> {FormatIndice(item.IndiceParteSuccessiva)}")));
 
             ReplaceCollection(
                 ModificheDettaglio,
                 sessione.Parti
                     .SelectMany(parte => parte.Modifiche.Select(modifica => new ModificaParteDettaglioItemViewModel(
+                        modifica.TimestampUtc,
                         FormatDateTime(modifica.TimestampUtc),
                         parte.NomeParteAllAvvioAdunanza,
                         modifica.ValorePrecedente.NomeParte,
@@ -507,7 +545,7 @@ namespace InTempo.Classes.View
                         FormatDuration(modifica.ValorePrecedente.TempoParte),
                         FormatDuration(modifica.ValoreNuovo.TempoParte),
                         $"{modifica.ValorePrecedente.OrdineOriginale} -> {modifica.ValoreNuovo.OrdineOriginale}")))
-                    .OrderBy(item => item.Ora)
+                    .OrderBy(item => item.TimestampUtc)
                     .ToList());
         }
 
@@ -542,7 +580,7 @@ namespace InTempo.Classes.View
 
         private void BtnAggiorna_Click(object sender, RoutedEventArgs e)
         {
-            RefreshData();
+            _ = RefreshDataAsync();
         }
 
         private void BtnChiudi_Click(object sender, RoutedEventArgs e)
@@ -631,7 +669,7 @@ namespace InTempo.Classes.View
             return new StatisticaCardItemViewModel(
                 titolo,
                 FormatSignedDuration(voce.ScostamentoFinale),
-                $"{FormatTipoAdunanza(voce.TipoAdunanza)} • {voce.DataRiferimentoAdunanza:dd MMM yyyy}{(migliore ? " migliore" : " peggiore")}");
+                $"{FormatTipoAdunanza(voce.TipoAdunanza)} | {voce.DataRiferimentoAdunanza:dd MMM yyyy}{(migliore ? " migliore" : " peggiore")}");
         }
 
         private Brush GetBrush(string key, Brush fallback)
@@ -728,16 +766,16 @@ namespace InTempo.Classes.View
 
         private static string FormatDouble(double value) => value.ToString("0.##", ItalianCulture);
 
-        private static string FormatIndice(int? index) => index.HasValue ? (index.Value + 1).ToString(ItalianCulture) : "—";
+        private static string FormatIndice(int? index) => index.HasValue ? (index.Value + 1).ToString(ItalianCulture) : "-";
 
         private static string FormatDateTime(DateTimeOffset? value)
         {
             return value.HasValue
                 ? value.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss", ItalianCulture)
-                : "—";
+                : "-";
         }
 
-        private static string FormatDuration(TimeSpan? value) => value.HasValue ? FormatDuration(value.Value) : "—";
+        private static string FormatDuration(TimeSpan? value) => value.HasValue ? FormatDuration(value.Value) : "-";
 
         private static string FormatDuration(TimeSpan value)
         {
@@ -746,7 +784,7 @@ namespace InTempo.Classes.View
             return $"{totalHours:00}:{absolute.Minutes:00}:{absolute.Seconds:00}";
         }
 
-        private static string FormatSignedDuration(TimeSpan? value) => value.HasValue ? FormatSignedDuration(value.Value) : "—";
+        private static string FormatSignedDuration(TimeSpan? value) => value.HasValue ? FormatSignedDuration(value.Value) : "-";
 
         private static string FormatSignedDuration(TimeSpan value)
         {
@@ -859,7 +897,7 @@ namespace InTempo.Classes.View
             OraInizio = oraInizio;
             OraFine = oraFine;
 
-            OrdiniDisplay = ordineEffettivo == "—" || ordineEffettivo == "-" ? ordineOriginale : $"{ordineOriginale} -> {ordineEffettivo}";
+            OrdiniDisplay = ordineEffettivo == "-" ? ordineOriginale : $"{ordineOriginale} -> {ordineEffettivo}";
             PrevistaDisplay = durataPrevistaQuandoParteInizia;
             DeltaDisplay = deltaInizio;
             StatoParte = CreaStatoParte(numeroModifiche, saltata, rimossa, aggiunta);
@@ -921,7 +959,6 @@ namespace InTempo.Classes.View
         private static bool IsFlagTrue(string value)
         {
             return string.Equals(value, "Si", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(value, "Sì", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(value, "Yes", StringComparison.OrdinalIgnoreCase);
         }
     }
@@ -966,8 +1003,9 @@ namespace InTempo.Classes.View
 
     public sealed class ModificaParteDettaglioItemViewModel
     {
-        public ModificaParteDettaglioItemViewModel(string ora, string parte, string nomePrecedente, string nomeNuovo, string durataPrecedente, string durataNuova, string ordine)
+        public ModificaParteDettaglioItemViewModel(DateTimeOffset timestampUtc, string ora, string parte, string nomePrecedente, string nomeNuovo, string durataPrecedente, string durataNuova, string ordine)
         {
+            TimestampUtc = timestampUtc;
             Ora = ora;
             Parte = parte;
             NomePrecedente = nomePrecedente;
@@ -979,6 +1017,7 @@ namespace InTempo.Classes.View
             DurataCambio = $"{durataPrecedente} -> {durataNuova}";
         }
 
+        public DateTimeOffset TimestampUtc { get; }
         public string Ora { get; }
         public string Parte { get; }
         public string NomePrecedente { get; }
@@ -990,3 +1029,4 @@ namespace InTempo.Classes.View
         public string DurataCambio { get; }
     }
 }
+

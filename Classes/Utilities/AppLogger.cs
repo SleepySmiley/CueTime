@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal static class AppLogger
     {
         private static readonly object SyncRoot = new object();
         private static readonly string LogDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "InTempo",
+            "CueTime",
             "logs");
 
         private static readonly string LogFilePath = Path.Combine(LogDirectoryPath, "app.log");
@@ -56,3 +56,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

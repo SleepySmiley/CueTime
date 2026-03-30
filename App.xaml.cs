@@ -1,10 +1,10 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
-using InTempo.Classes.Utilities.Impostazioni;
-using InTempo.Classes.Utilities.Theming;
+using CueTime.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Utilities.Theming;
 
-namespace InTempo
+namespace CueTime
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -46,3 +46,4 @@ namespace InTempo
     }
 
 }
+

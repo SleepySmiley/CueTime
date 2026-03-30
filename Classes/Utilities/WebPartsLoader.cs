@@ -1,13 +1,13 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
-using InTempo.Classes.NonAbstract;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     public static class WebPartsLoader
     {
@@ -133,13 +133,17 @@ namespace InTempo.Classes.Utilities
 
             if (TryGetCachedMeetingArticleHtml(WebMeetingKind.Midweek, out string cachedDetailHtml))
             {
-                ObservableCollection<Parte> parti = Factory.CreateParti(Parser.ParseMidweekFromHtml(cachedDetailHtml));
-                if (parti.Count > 0)
+                try
                 {
+                    ObservableCollection<Parte> parti = ParseMidweekOrThrow(cachedDetailHtml, "articolo infrasettimanale nella cache corrente");
                     LastCacheLoadIsCurrentWeek = true;
                     PersistCurrentWeekSnapshot(WebMeetingKind.Midweek, DateTime.Today, parti);
                     AppLogger.LogInfo("Parti dell'infrasettimanale caricate dalla cache corrente.");
                     return parti;
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogWarning("La cache corrente dell'infrasettimanale non ha prodotto parti utilizzabili.", ex);
                 }
             }
 
@@ -152,13 +156,17 @@ namespace InTempo.Classes.Utilities
 
             if (Cache.TryLoadLatestArticleHtml(WebMeetingKind.Midweek, out string latestCachedHtml))
             {
-                ObservableCollection<Parte> parti = Factory.CreateParti(Parser.ParseMidweekFromHtml(latestCachedHtml));
-                if (parti.Count > 0)
+                try
                 {
+                    ObservableCollection<Parte> parti = ParseMidweekOrThrow(latestCachedHtml, "ultima cache dell'infrasettimanale");
                     LastCacheLoadIsCurrentWeek = false;
                     PersistLatestSnapshot(WebMeetingKind.Midweek, parti);
                     AppLogger.LogInfo("Parti dell'infrasettimanale caricate dall'ultima cache disponibile.");
                     return parti;
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.LogWarning("Anche l'ultima cache dell'infrasettimanale non ha prodotto parti utilizzabili.", ex);
                 }
             }
 
@@ -211,7 +219,7 @@ namespace InTempo.Classes.Utilities
             }
             catch (Exception ex)
             {
-                AppLogger.LogWarning("Errore durante il caricamento dei cantici del fine settimana. Verrà usato lo schema stock.", ex);
+                AppLogger.LogWarning("Errore durante il caricamento dei cantici del fine settimana. Verra usato lo schema stock.", ex);
                 LastCacheLoadIsCurrentWeek = false;
                 PersistLatestSnapshot(WebMeetingKind.Weekend, stock);
                 return stock;
@@ -237,12 +245,7 @@ namespace InTempo.Classes.Utilities
                 }
 
                 string detailHtml = await GetMeetingArticleHtmlAsync(WebMeetingKind.Midweek, bypassCache, preferStudyForWeekend: true).ConfigureAwait(false);
-                ObservableCollection<Parte> parti = Factory.CreateParti(Parser.ParseMidweekFromHtml(detailHtml));
-
-                if (parti.Count == 0)
-                {
-                    AppLogger.LogWarning("Il parser non ha estratto nessuna parte dall'articolo infrasettimanale corrente.");
-                }
+                ObservableCollection<Parte> parti = ParseMidweekOrThrow(detailHtml, "articolo infrasettimanale corrente");
 
                 LastCacheLoadIsCurrentWeek = true;
                 PersistCurrentWeekSnapshot(WebMeetingKind.Midweek, DateTime.Today, parti);
@@ -250,23 +253,35 @@ namespace InTempo.Classes.Utilities
             }
             catch (Exception ex)
             {
+                AppLogger.LogWarning("Errore durante il caricamento web dell'infrasettimanale corrente. Provo le alternative locali.", ex);
+
                 if (Cache.TryLoadLatestArticleHtml(WebMeetingKind.Midweek, out string cachedHtml))
                 {
-                    AppLogger.LogWarning("Errore durante il caricamento web dell'infrasettimanale. Uso l'ultima cache disponibile.", ex);
-                    ObservableCollection<Parte> parti = Factory.CreateParti(Parser.ParseMidweekFromHtml(cachedHtml));
-
-                    if (parti.Count == 0)
+                    try
                     {
-                        AppLogger.LogWarning("Anche l'ultima cache disponibile dell'infrasettimanale ha prodotto zero parti.");
+                        ObservableCollection<Parte> parti = ParseMidweekOrThrow(cachedHtml, "ultima cache disponibile dell'infrasettimanale");
+                        LastCacheLoadIsCurrentWeek = false;
+                        PersistLatestSnapshot(WebMeetingKind.Midweek, parti);
+                        return parti;
                     }
-
-                    LastCacheLoadIsCurrentWeek = false;
-                    PersistLatestSnapshot(WebMeetingKind.Midweek, parti);
-                    return parti;
+                    catch (Exception cacheEx)
+                    {
+                        AppLogger.LogWarning("Anche l'ultima cache disponibile dell'infrasettimanale non ha prodotto parti utilizzabili.", cacheEx);
+                    }
                 }
 
-                AppLogger.LogError("Errore critico durante il caricamento dell'infrasettimanale.", ex);
-                throw;
+                if (TryGetLatestSnapshot(WebMeetingKind.Midweek, out ObservableCollection<Parte> latestSnapshot))
+                {
+                    LastCacheLoadIsCurrentWeek = false;
+                    AppLogger.LogInfo("Parti dell'infrasettimanale caricate dall'ultima snapshot disponibile.");
+                    return latestSnapshot;
+                }
+
+                ObservableCollection<Parte> stock = Factory.BuildMidweekStock();
+                LastCacheLoadIsCurrentWeek = false;
+                PersistLatestSnapshot(WebMeetingKind.Midweek, stock);
+                AppLogger.LogWarning("Nessuna sorgente infrasettimanale utilizzabile trovata. Uso uno schema locale immediato.");
+                return stock;
             }
             finally
             {
@@ -386,7 +401,12 @@ namespace InTempo.Classes.Utilities
                 return new WeekendSongSelection(null, null);
             }
 
-            string studyUrl = Fetcher.BuildAbsoluteUrl(studyHref);
+            if (!Fetcher.TryBuildAllowedUrl(studyHref, out string studyUrl))
+            {
+                AppLogger.LogWarning($"Il link dello studio settimanale '{studyHref}' non è nella allowlist autorizzata.");
+                return new WeekendSongSelection(null, null);
+            }
+
             string wtHtml = await Fetcher.GetStringAsync(studyUrl, DetailPageTimeoutMs).ConfigureAwait(false);
             Cache.TryWriteText(cachePath, wtHtml);
             return Parser.ExtractWeekendSongsFromWtStudyHtml(wtHtml);
@@ -421,12 +441,12 @@ namespace InTempo.Classes.Utilities
                     }
                     catch (Exception ex)
                     {
-                        AppLogger.LogWarning($"Il link cache '{cachedLink}' non è più valido o raggiungibile.", ex);
+                        AppLogger.LogWarning($"Il link cache '{cachedLink}' non e piu valido o raggiungibile.", ex);
                     }
                 }
                 else
                 {
-                    AppLogger.LogWarning($"Il link cache '{cachedLink}' non è nella allowlist host autorizzata e verrà ignorato.");
+                    AppLogger.LogWarning($"Il link cache '{cachedLink}' non e nella allowlist host autorizzata e verra ignorato.");
                 }
             }
 
@@ -445,7 +465,11 @@ namespace InTempo.Classes.Utilities
                 throw new InvalidOperationException("Link non trovato per l'adunanza richiesta.");
             }
 
-            string detailUrl = Fetcher.BuildAbsoluteUrl(href);
+            if (!Fetcher.TryBuildAllowedUrl(href, out string detailUrl))
+            {
+                throw new InvalidOperationException("Il link estratto dall'articolo non è nella allowlist autorizzata.");
+            }
+
             string detailHtml = await Fetcher.GetStringAsync(detailUrl, DetailPageTimeoutMs).ConfigureAwait(false);
             Cache.TryWriteText(detailCache, detailHtml);
 
@@ -473,6 +497,17 @@ namespace InTempo.Classes.Utilities
             (int year, int week) = WebPartsCache.GetIsoWeek(targetDate);
             string cachePath = Cache.GetWeekendStudyCachePath(year, week);
             return Cache.TryReadFreshText(cachePath, targetDate, out cachedHtml);
+        }
+
+        private static ObservableCollection<Parte> ParseMidweekOrThrow(string html, string source)
+        {
+            ObservableCollection<Parte> parti = Factory.CreateParti(Parser.ParseMidweekFromHtml(html));
+            if (parti.Count == 0)
+            {
+                throw new InvalidOperationException($"Nessuna parte estratta da {source}.");
+            }
+
+            return parti;
         }
 
         private static bool TryGetCachedSnapshot(WebMeetingKind kind, DateTime referenceDate, out ObservableCollection<Parte> parti)
@@ -523,3 +558,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

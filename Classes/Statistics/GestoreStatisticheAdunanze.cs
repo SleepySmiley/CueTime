@@ -1,17 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using InTempo.Classes.NonAbstract;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Statistics
+namespace CueTime.Classes.Statistics
 {
     public sealed class GestoreStatisticheAdunanze
     {
+        private static readonly TimeSpan TimerCheckpointInterval = TimeSpan.FromSeconds(15);
         private readonly ArchivioStatisticheAdunanze _archivio;
         private readonly TimeProvider _timeProvider;
         private readonly Dictionary<Parte, StatisticheParteAdunanza> _mappaParti = new Dictionary<Parte, StatisticheParteAdunanza>();
         private StatisticheAdunanzaSessione? _sessioneCorrente;
         private Parte? _parteCorrenteAttiva;
+        private DateTimeOffset? _lastTimerCheckpointUtc;
+        private bool _sessioneCorrenteDirty;
 
         public GestoreStatisticheAdunanze(ArchivioStatisticheAdunanze? archivio = null, TimeProvider? timeProvider = null)
         {
@@ -76,7 +79,7 @@ namespace InTempo.Classes.Statistics
                 });
             }
 
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         public void TerminaSessione(MotivoChiusuraStatistiche motivo)
@@ -97,24 +100,20 @@ namespace InTempo.Classes.Statistics
 
             _sessioneCorrente.FineUtc = nowUtc;
             _sessioneCorrente.UltimoAggiornamentoUtc = nowUtc;
-            _sessioneCorrente.RicalcolaRiepilogo(nowUtc);
             _sessioneCorrente.MotivoChiusura = DeterminaMotivoChiusura(motivo);
             _sessioneCorrente.Stato = _sessioneCorrente.MotivoChiusura == MotivoChiusuraStatistiche.Crash
                 ? StatoSessioneStatistiche.Interrotta
                 : StatoSessioneStatistiche.Chiusa;
-            _sessioneCorrente.RicalcolaRiepilogo(nowUtc);
             if (_sessioneCorrente.EAdunanzaNulla())
             {
                 _archivio.EliminaSessione(_sessioneCorrente);
             }
             else
             {
-                PersistiSessione();
+                PersistiSessioneForzata();
             }
 
-            _sessioneCorrente = null;
-            _parteCorrenteAttiva = null;
-            _mappaParti.Clear();
+            ResetStatoSessioneCorrente();
         }
 
         public void RegistraPausa(MotivoPausaStatistiche motivo)
@@ -136,7 +135,7 @@ namespace InTempo.Classes.Statistics
                     Motivo = motivo
                 });
                 _sessioneCorrente.UltimoAggiornamentoUtc = nowUtc;
-                PersistiSessione();
+                PersistiSessioneForzata();
             }
         }
 
@@ -160,7 +159,7 @@ namespace InTempo.Classes.Statistics
             }
 
             _sessioneCorrente.UltimoAggiornamentoUtc = nowUtc;
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         public void RegistraCambioParte(
@@ -194,7 +193,7 @@ namespace InTempo.Classes.Statistics
             }
 
             _sessioneCorrente.UltimoAggiornamentoUtc = nowUtc;
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         public void RegistraScorrimentoTimer(
@@ -225,8 +224,8 @@ namespace InTempo.Classes.Statistics
             }
 
             _sessioneCorrente.UltimoAggiornamentoUtc = fineIntervalloUtc;
-            _sessioneCorrente.RicalcolaRiepilogo(fineIntervalloUtc);
-            PersistiSessione();
+            _sessioneCorrenteDirty = true;
+            PersistiSessioneSeCheckpointScaduto(fineIntervalloUtc);
         }
 
         public void RegistraAggiuntaParte(Parte parteAggiunta)
@@ -250,7 +249,7 @@ namespace InTempo.Classes.Statistics
             _sessioneCorrente.Parti.Add(statisticheParte);
             _mappaParti[parteAggiunta] = statisticheParte;
             _sessioneCorrente.UltimoAggiornamentoUtc = GetNowUtc();
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         public void RegistraRimozioneParte(Parte parteRimossa, bool eraParteCorrente)
@@ -272,7 +271,7 @@ namespace InTempo.Classes.Statistics
             statisticheParte.EStataSaltata = !statisticheParte.OraEsattaInizioUtc.HasValue;
             statisticheParte.OraEsattaFineUtc ??= nowUtc;
             _sessioneCorrente.UltimoAggiornamentoUtc = nowUtc;
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         public void RegistraModificaParte(Parte parteModificata, SnapshotParteStatistiche snapshotPrima, SnapshotParteStatistiche snapshotDopo)
@@ -295,7 +294,7 @@ namespace InTempo.Classes.Statistics
             statisticheParte.TipoParte = parteModificata.TipoParte;
             statisticheParte.NumeroParte = parteModificata.NumeroParte;
             _sessioneCorrente.UltimoAggiornamentoUtc = nowUtc;
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         public void RegistraResetParte(Parte parteResettata)
@@ -308,7 +307,7 @@ namespace InTempo.Classes.Statistics
             StatisticheParteAdunanza statisticheParte = OttieniORegistraParte(parteResettata);
             statisticheParte.NomeParte = parteResettata.NomeParte;
             _sessioneCorrente.UltimoAggiornamentoUtc = GetNowUtc();
-            PersistiSessione();
+            PersistiSessioneForzata();
         }
 
         private DateTimeOffset GetNowUtc()
@@ -380,15 +379,43 @@ namespace InTempo.Classes.Statistics
             _parteCorrenteAttiva = null;
         }
 
-        private void PersistiSessione()
+        private void PersistiSessioneSeCheckpointScaduto(DateTimeOffset riferimentoUtc)
+        {
+            if (_sessioneCorrente == null || !_sessioneCorrenteDirty)
+            {
+                return;
+            }
+
+            if (!_lastTimerCheckpointUtc.HasValue
+                || riferimentoUtc - _lastTimerCheckpointUtc.Value >= TimerCheckpointInterval)
+            {
+                PersistiSessioneForzata();
+            }
+        }
+
+        private void PersistiSessioneForzata()
         {
             if (_sessioneCorrente == null)
             {
                 return;
             }
 
+            _sessioneCorrenteDirty = true;
             _sessioneCorrente.RicalcolaRiepilogo(_sessioneCorrente.FineUtc ?? _sessioneCorrente.UltimoAggiornamentoUtc);
-            _archivio.SalvaSessione(_sessioneCorrente);
+            if (_archivio.SalvaSessione(_sessioneCorrente))
+            {
+                _sessioneCorrenteDirty = false;
+                _lastTimerCheckpointUtc = _sessioneCorrente.UltimoAggiornamentoUtc;
+            }
+        }
+
+        private void ResetStatoSessioneCorrente()
+        {
+            _sessioneCorrente = null;
+            _parteCorrenteAttiva = null;
+            _mappaParti.Clear();
+            _sessioneCorrenteDirty = false;
+            _lastTimerCheckpointUtc = null;
         }
 
         private MotivoChiusuraStatistiche DeterminaMotivoChiusura(MotivoChiusuraStatistiche motivoRichiesto)
@@ -409,3 +436,4 @@ namespace InTempo.Classes.Statistics
         }
     }
 }
+

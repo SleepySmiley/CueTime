@@ -1,6 +1,6 @@
-# InTempo
+# CueTime
 
-InTempo e una applicazione desktop WPF per la gestione dei tempi delle adunanze, la presentazione del timer su schermo esterno, il caricamento dei dati dal web e la gestione della musica pre/post adunanza.
+CueTime e un'applicazione desktop WPF per la gestione dei tempi delle adunanze, la presentazione del timer su schermo esterno, il caricamento dei dati dal web e la gestione della musica pre e post adunanza.
 
 ## Proprieta e licenza
 
@@ -26,13 +26,13 @@ Il software viene fornito "cosi com'e", senza garanzie.
 Compilazione da riga di comando:
 
 ```powershell
-dotnet build InTempo.csproj -nologo
+dotnet build CueTime.csproj -nologo
 ```
 
 Pulizia completa dei file generati:
 
 ```powershell
-dotnet clean InTempo.csproj -nologo
+dotnet clean CueTime.csproj -nologo
 ```
 
 ## Avvio
@@ -40,12 +40,12 @@ dotnet clean InTempo.csproj -nologo
 Esecuzione da riga di comando:
 
 ```powershell
-dotnet run --project InTempo.csproj
+dotnet run --project CueTime.csproj
 ```
 
 Da Visual Studio:
-- apri `InTempo.slnx`
-- imposta `InTempo` come progetto di avvio
+- apri `CueTime.slnx`
+- imposta `CueTime` come progetto di avvio
 - premi `F5` oppure `Ctrl+F5`
 
 ## Configurazione
@@ -64,12 +64,13 @@ Le modifiche vengono raccolte localmente nella finestra Impostazioni e confermat
 
 ## Percorsi di storage
 
-InTempo salva i dati in queste cartelle:
+CueTime salva i dati in queste cartelle:
 
-- Impostazioni: `%APPDATA%\InTempo\settings.json`
-- Salvataggi adunanze: `%LOCALAPPDATA%\InTempo\AdunanzeSalvate`
-- Cache web: `%LOCALAPPDATA%\InTempo\cache`
-- Log applicativi: `%LOCALAPPDATA%\InTempo\logs\app.log`
+- Impostazioni: `%APPDATA%\CueTime\settings.json`
+- Salvataggi adunanze: `%LOCALAPPDATA%\CueTime\AdunanzeSalvate`
+- Cache web: `%LOCALAPPDATA%\CueTime\cache`
+- Log applicativi: `%LOCALAPPDATA%\CueTime\logs\app.log`
+- Statistiche: `%LOCALAPPDATA%\CueTime\stats`
 
 La cache contiene:
 - HTML delle pagine gia scaricate
@@ -100,21 +101,22 @@ WebPartsLoader
 
 Responsabilita principali:
 
-- `App.xaml.cs`: bootstrap applicazione, caricamento/salvataggio impostazioni, applicazione tema
+- `App.xaml.cs`: bootstrap applicazione, caricamento e salvataggio impostazioni, applicazione tema
 - `MainWindow`: coordinamento UI principale, navigazione tra parti, apertura finestre secondarie
 - `Adunanza`: stato dell'adunanza corrente e collezione delle parti
-- `TimerLogics`: logica del timer, pause/riprese, grafica sincronizzata con la parte corrente
+- `TimerLogics`: logica del timer, pause e riprese, grafica sincronizzata con la parte corrente
 - `FinestraTimer`: finestra esterna dedicata alla presentazione del timer
 - `PlayerMusicale`: gestione playlist locale e riproduzione audio
 - `Impostazioni`: editing impostazioni, monitor, date, tema, salvataggi adunanza
 - `WebPartsLoader`: orchestrazione del caricamento web mantenendo invariata l'API pubblica
 - `WebFetcher`: richieste HTTP con fallback limitato
-- `WebPartsCache`: lettura/scrittura cache disco
+- `WebPartsCache`: lettura e scrittura cache su disco
 - `HtmlParteParser`: parsing HTML in dati grezzi
 - `ParteFactory`: costruzione dei modelli `Parte`
 - `SettingsStore`: persistenza atomica delle impostazioni
 - `GestoreSalvataggi`: persistenza delle adunanze salvate manualmente
 - `AppLogger`: logging su `Debug` e su file locale
+- `GestoreStatisticheAdunanze`: archivio e calcolo delle statistiche storiche
 
 ## Sorgenti web e sicurezza
 
@@ -126,22 +128,14 @@ Il caricamento web usa una allowlist di host consentiti per i link letti dalla c
 
 I link cache fuori allowlist vengono ignorati e registrati nei log.
 
-## Test
+## Verifica
 
-Il repository include un primo progetto di test automatici: `InTempo.Tests`.
-
-Esecuzione test:
+Al momento nel repository non sono presenti test automatici. La verifica minima consigliata e:
 
 ```powershell
-dotnet test InTempo.Tests\InTempo.Tests.csproj -nologo
+dotnet build CueTime.csproj -nologo
+dotnet run --project CueTime.csproj
 ```
-
-Copertura iniziale:
-- `TimerLogics`
-- `SettingsStore`
-- `GestoreSalvataggi`
-- `ThemeManager.ApplyTheme`
-- validazione host URL cache
 
 ## Troubleshooting
 
@@ -150,26 +144,26 @@ Copertura iniziale:
 Esegui una pulizia completa e ricompila:
 
 ```powershell
-dotnet clean InTempo.csproj -nologo
-dotnet build InTempo.csproj -nologo
+dotnet clean CueTime.csproj -nologo
+dotnet build CueTime.csproj -nologo
 ```
 
 ### Il caricamento web non restituisce le parti
 
 - verifica la connettivita Internet
 - controlla che i siti `jw.org` e `wol.jw.org` siano raggiungibili
-- consulta `%LOCALAPPDATA%\InTempo\logs\app.log`
-- se necessario svuota `%LOCALAPPDATA%\InTempo\cache`
+- consulta `%LOCALAPPDATA%\CueTime\logs\app.log`
+- se necessario svuota `%LOCALAPPDATA%\CueTime\cache`
 
 ### La musica non compare nella playlist
 
 - verifica che `PercorsoCartellaMusica` punti a una cartella locale esistente
-- i percorsi UNC (`\\server\share`) vengono rifiutati intenzionalmente
+- sono accettate solo cartelle su unita locali fisse o rimovibili
 - controlla che i file abbiano un'estensione audio supportata
 
 ### Le impostazioni sembrano corrotte o non leggibili
 
-- controlla `%APPDATA%\InTempo\settings.json`
+- controlla `%APPDATA%\CueTime\settings.json`
 - in caso di file non valido, l'app tenta di creare un backup `settings.invalid-*.json`
 - dopo il backup vengono ricreate impostazioni di default
 
@@ -183,5 +177,4 @@ dotnet build InTempo.csproj -nologo
 
 - mantenere separati trasporto HTTP, cache, parsing e costruzione modelli
 - evitare stato globale mutabile dove non strettamente necessario
-- non usare catch vuoti: registrare sempre gli errori tramite `AppLogger`
-- usare test automatici per la logica non UI prima di introdurre nuove regressioni
+- registrare sempre gli errori rilevanti tramite `AppLogger`

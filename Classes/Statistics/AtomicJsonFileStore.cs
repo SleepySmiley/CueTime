@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.Statistics
+namespace CueTime.Classes.Statistics
 {
     internal static class AtomicJsonFileStore
     {
@@ -105,3 +105,4 @@ namespace InTempo.Classes.Statistics
         }
     }
 }
+

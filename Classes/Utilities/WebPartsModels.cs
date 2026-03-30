@@ -1,6 +1,6 @@
-#nullable enable
+﻿#nullable enable
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal enum WebMeetingKind
     {
@@ -37,3 +37,4 @@ namespace InTempo.Classes.Utilities
         long TempoScorrevoleTicks,
         int? Number);
 }
+

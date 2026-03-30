@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace InTempo.Classes.View.UserControls
+namespace CueTime.Classes.View.UserControls
 {
     /// <summary>
     /// Interaction logic for VistaSoloScritta.xaml
@@ -32,3 +32,4 @@ namespace InTempo.Classes.View.UserControls
         }
     }
 }
+

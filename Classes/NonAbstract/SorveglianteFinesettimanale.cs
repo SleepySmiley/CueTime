@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class SorveglianteFinesettimanale : Finesettimanale
     {
@@ -209,3 +209,4 @@ namespace InTempo.Classes.NonAbstract
         }
     }
 }
+

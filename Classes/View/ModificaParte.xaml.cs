@@ -1,10 +1,10 @@
-using InTempo.Classes.NonAbstract;
+﻿using CueTime.Classes.NonAbstract;
 using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class ModificaParte : Window
     {
@@ -76,3 +76,4 @@ namespace InTempo.Classes.View
         }
     }
 }
+

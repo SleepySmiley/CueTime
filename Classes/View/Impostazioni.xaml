@@ -1,16 +1,17 @@
-﻿<Window x:Class="InTempo.Classes.View.Impostazioni"
+﻿<Window x:Class="CueTime.Classes.View.Impostazioni"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InTempo.Classes.View"
-        xmlns:utilMonitors="clr-namespace:InTempo.Classes.Utilities.Monitors"
-        xmlns:utilTheme="clr-namespace:InTempo.Classes.Utilities.Theming"
+        xmlns:local="clr-namespace:CueTime.Classes.View"
+        xmlns:utilMonitors="clr-namespace:CueTime.Classes.Utilities.Monitors"
+        xmlns:utilTheme="clr-namespace:CueTime.Classes.Utilities.Theming"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Style="{StaticResource AppBorderlessDialogWindowStyle}"
         Title="Impostazioni" Height="610" Width="720"
+        Icon="pack://application:,,,/cuetime_icon.ico"
         WindowStartupLocation="CenterOwner"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
@@ -347,4 +348,8 @@
         </Grid>
     </materialDesign:Card>
 </Window>
+
+
+
+
 

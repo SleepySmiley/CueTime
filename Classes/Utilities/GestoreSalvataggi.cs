@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using InTempo.Classes.NonAbstract;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     public static class GestoreSalvataggi
     {
         private static readonly string cartellaSalvataggi = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "InTempo",
+            "CueTime",
             "AdunanzeSalvate");
 
         public static bool SalvaAdunanza(Adunanza dati, string nomeFile)
@@ -172,3 +172,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 using System.Windows.Threading;
-using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Statistics;
-using InTempo.Classes.Utilities.Impostazioni;
+using CueTime.Classes.NonAbstract;
+using CueTime.Classes.Statistics;
+using CueTime.Classes.Utilities.Impostazioni;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     public class TimerLogics : INotifyPropertyChanged
     {
@@ -436,3 +436,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

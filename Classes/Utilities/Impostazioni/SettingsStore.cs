@@ -1,15 +1,14 @@
-using System;
+﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
-using InTempo.Classes.Utilities;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.Utilities.Impostazioni
+namespace CueTime.Classes.Utilities.Impostazioni
 {
     public static class SettingsStore
     {
         private static readonly string AppName =
-            Assembly.GetEntryAssembly()?.GetName().Name ?? "InTempo";
+            "CueTime";
 
         private static readonly string FolderPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
@@ -46,7 +45,7 @@ namespace InTempo.Classes.Utilities.Impostazioni
             }
             catch (Exception ex)
             {
-                AppLogger.LogWarning($"Impossibile leggere le impostazioni da '{filePath}'. Verrà creato un backup se possibile.", ex);
+                AppLogger.LogWarning($"Impossibile leggere le impostazioni da '{filePath}'. Verra creato un backup se possibile.", ex);
                 BackupUnreadableSettingsFile(filePath);
                 return new ImpostazioniAdunanze();
             }
@@ -62,7 +61,7 @@ namespace InTempo.Classes.Utilities.Impostazioni
             string? folderPath = Path.GetDirectoryName(filePath);
             if (string.IsNullOrWhiteSpace(folderPath))
             {
-                throw new InvalidOperationException("Il percorso file delle impostazioni non è valido.");
+                throw new InvalidOperationException("Il percorso file delle impostazioni non e valido.");
             }
 
             Directory.CreateDirectory(folderPath);
@@ -120,3 +119,4 @@ namespace InTempo.Classes.Utilities.Impostazioni
         }
     }
 }
+

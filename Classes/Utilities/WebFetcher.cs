@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -7,13 +7,14 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal sealed class WebFetcher
     {
         private const string WeeklyRootUrl = @"https://wol.jw.org/it/wol/meetings/r6/lp-i";
         private const string BaseUrl = "https://wol.jw.org";
         private const string MemorialPageUrl = "https://www.jw.org/it/testimoni-di-geova/commemorazione/";
+        private static readonly Uri BaseUri = new Uri(BaseUrl);
 
         private static readonly HttpClient ClientWinChrome = CreateHttpClient(
             useProxy: false,
@@ -26,6 +27,8 @@ namespace InTempo.Classes.Utilities
         private static readonly HttpClient ClientProxy = CreateHttpClient(
             useProxy: true,
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+
+        private const int MaxRedirects = 5;
 
         private static readonly (HttpClient Client, int DelayMs)[] PrimaryFetchStrategies =
         {
@@ -108,10 +111,20 @@ namespace InTempo.Classes.Utilities
                 return absolute.ToString();
             }
 
+            if (Uri.TryCreate(BaseUri, href, out Uri? resolved))
+            {
+                return resolved.ToString();
+            }
+
             return BaseUrl + href;
         }
 
         public bool TryBuildAllowedCachedUrl(string href, out string url)
+        {
+            return TryBuildAllowedUrl(href, out url);
+        }
+
+        public bool TryBuildAllowedUrl(string href, out string url)
         {
             url = string.Empty;
 
@@ -120,19 +133,14 @@ namespace InTempo.Classes.Utilities
                 return false;
             }
 
-            if (Uri.TryCreate(href, UriKind.Absolute, out Uri? absolute))
+            if (!Uri.TryCreate(href, UriKind.Absolute, out Uri? absolute))
             {
-                if (!IsAllowedCachedUrl(absolute.ToString()))
-                {
-                    return false;
-                }
-
-                url = absolute.ToString();
-                return true;
+                url = BuildAbsoluteUrl(href);
+                return IsAllowedCachedUrl(url);
             }
 
-            url = BuildAbsoluteUrl(href);
-            return true;
+            url = absolute.ToString();
+            return IsAllowedCachedUrl(url);
         }
 
         internal static bool IsAllowedCachedUrl(string? url)
@@ -152,10 +160,44 @@ namespace InTempo.Classes.Utilities
 
         private static async Task<string> SendAsync(HttpClient client, string url, CancellationToken cancellationToken)
         {
-            using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, url);
-            using HttpResponseMessage resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-            resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            if (!IsAllowedCachedUrl(url))
+            {
+                throw new InvalidOperationException($"L'URL '{url}' non è nella allowlist autorizzata.");
+            }
+
+            Uri currentUri = new Uri(url, UriKind.Absolute);
+
+            for (int redirectCount = 0; ; redirectCount++)
+            {
+                using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, currentUri);
+                using HttpResponseMessage resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+
+                if (IsRedirectStatus(resp.StatusCode))
+                {
+                    if (redirectCount >= MaxRedirects)
+                    {
+                        throw new HttpRequestException($"Numero massimo di redirect superato per '{url}'.");
+                    }
+
+                    Uri? location = resp.Headers.Location;
+                    if (location == null)
+                    {
+                        throw new HttpRequestException($"Redirect senza Location valido per '{currentUri}'.");
+                    }
+
+                    Uri nextUri = location.IsAbsoluteUri ? location : new Uri(currentUri, location);
+                    if (!IsAllowedCachedUrl(nextUri.ToString()))
+                    {
+                        throw new HttpRequestException($"Redirect fuori allowlist bloccato verso '{nextUri}'.");
+                    }
+
+                    currentUri = nextUri;
+                    continue;
+                }
+
+                resp.EnsureSuccessStatusCode();
+                return await resp.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         private static string BuildWeekUrl(int year, int week)
@@ -170,7 +212,8 @@ namespace InTempo.Classes.Utilities
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 UseProxy = useProxy,
                 Proxy = null,
-                DefaultProxyCredentials = CredentialCache.DefaultCredentials
+                DefaultProxyCredentials = CredentialCache.DefaultCredentials,
+                AllowAutoRedirect = false
             };
 
             HttpClient client = new HttpClient(handler, disposeHandler: true);
@@ -180,5 +223,15 @@ namespace InTempo.Classes.Utilities
             client.DefaultRequestHeaders.TryAddWithoutValidation("Cache-Control", "max-age=0");
             return client;
         }
+
+        private static bool IsRedirectStatus(HttpStatusCode statusCode)
+        {
+            return statusCode == HttpStatusCode.MovedPermanently
+                || statusCode == HttpStatusCode.Found
+                || statusCode == HttpStatusCode.SeeOther
+                || statusCode == HttpStatusCode.TemporaryRedirect
+                || statusCode == HttpStatusCode.PermanentRedirect;
+        }
     }
 }
+

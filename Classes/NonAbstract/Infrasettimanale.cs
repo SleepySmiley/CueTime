@@ -1,8 +1,8 @@
-using System.Collections.ObjectModel;
-using InTempo.Classes.Abstract;
-using InTempo.Classes.Utilities;
+﻿using System.Collections.ObjectModel;
+using CueTime.Classes.Abstract;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class Infrasettimanale : RiunioniGenerali
     {
@@ -35,3 +35,4 @@ namespace InTempo.Classes.NonAbstract
         }
     }
 }
+

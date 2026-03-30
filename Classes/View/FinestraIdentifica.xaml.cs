@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Threading;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class FinestraIdentifica : Window
     {
@@ -25,3 +25,4 @@ namespace InTempo.Classes.View
         }
     }
 }
+

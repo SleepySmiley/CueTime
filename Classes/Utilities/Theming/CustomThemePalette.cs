@@ -1,4 +1,4 @@
-namespace InTempo.Classes.Utilities.Theming
+﻿namespace CueTime.Classes.Utilities.Theming
 {
     public sealed class CustomThemePalette
     {
@@ -125,3 +125,4 @@ namespace InTempo.Classes.Utilities.Theming
         }
     }
 }
+

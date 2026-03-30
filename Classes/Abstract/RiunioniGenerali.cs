@@ -1,10 +1,11 @@
-using System.Collections.ObjectModel;
-using InTempo.Classes.NonAbstract;
+﻿using System.Collections.ObjectModel;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Abstract
+namespace CueTime.Classes.Abstract
 {
     public abstract class RiunioniGenerali
     {
         public abstract ObservableCollection<Parte> Parti { get; set; }
     }
 }
+

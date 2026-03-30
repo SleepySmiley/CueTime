@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     public class OrarioAdunanza
     {
@@ -47,3 +47,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

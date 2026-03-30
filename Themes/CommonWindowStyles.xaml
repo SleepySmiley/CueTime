@@ -60,6 +60,8 @@
         <GradientStop Color="#00F3D8BF" Offset="1" />
     </RadialGradientBrush>
 
+
+
     <Style x:Key="AppBaseWindowStyle" TargetType="{x:Type Window}">
         <Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDesignBody}" />
         <Setter Property="TextElement.FontWeight" Value="Regular" />
@@ -459,4 +461,6 @@
         <Setter Property="Foreground" Value="{DynamicResource AppPresentationMessageBrush}" />
     </Style>
 </ResourceDictionary>
+
+
 

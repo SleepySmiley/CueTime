@@ -1,4 +1,4 @@
-using InTempo.Classes.Utilities.Theming;
+﻿using CueTime.Classes.Utilities.Theming;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class ThemeCustomizerWindow : Window, INotifyPropertyChanged
     {
@@ -205,3 +205,4 @@ namespace InTempo.Classes.View
         }
     }
 }
+

@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal sealed class WebPartsCache
     {
@@ -17,7 +17,6 @@ namespace InTempo.Classes.Utilities
         public WebPartsCache()
         {
             CacheDirectory = BuildCacheDir();
-            LegacyCacheDirectory = BuildLegacyCacheDir();
             CachePurgeMarkerPath = Path.Combine(CacheDirectory, "_last_weekly_purge.txt");
 
             try
@@ -28,13 +27,9 @@ namespace InTempo.Classes.Utilities
             {
                 AppLogger.LogWarning($"Impossibile creare la cartella cache '{CacheDirectory}'.", ex);
             }
-
-            TryMigrateLegacyCacheDirectory();
         }
 
         public string CacheDirectory { get; }
-
-        private string LegacyCacheDirectory { get; }
 
         private string CachePurgeMarkerPath { get; }
 
@@ -342,47 +337,6 @@ namespace InTempo.Classes.Utilities
             }
         }
 
-        private void TryMigrateLegacyCacheDirectory()
-        {
-            try
-            {
-                if (!Directory.Exists(LegacyCacheDirectory) || string.Equals(LegacyCacheDirectory, CacheDirectory, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-
-                Directory.CreateDirectory(CacheDirectory);
-
-                bool copiedAnyFile = false;
-                foreach (string legacyFilePath in Directory.GetFiles(LegacyCacheDirectory))
-                {
-                    string fileName = Path.GetFileName(legacyFilePath);
-                    if (string.IsNullOrWhiteSpace(fileName))
-                    {
-                        continue;
-                    }
-
-                    string targetPath = Path.Combine(CacheDirectory, fileName);
-                    if (File.Exists(targetPath))
-                    {
-                        continue;
-                    }
-
-                    File.Copy(legacyFilePath, targetPath, overwrite: false);
-                    copiedAnyFile = true;
-                }
-
-                if (copiedAnyFile)
-                {
-                    AppLogger.LogInfo($"Cache legacy migrata da '{LegacyCacheDirectory}' a '{CacheDirectory}'.");
-                }
-            }
-            catch (Exception ex)
-            {
-                AppLogger.LogWarning($"Impossibile migrare la cache legacy da '{LegacyCacheDirectory}' a '{CacheDirectory}'.", ex);
-            }
-        }
-
         private void DeleteStaleCacheFiles(int currentYear, int currentWeek)
         {
             try
@@ -458,19 +412,7 @@ namespace InTempo.Classes.Utilities
                 basePath = Path.GetTempPath();
             }
 
-            return Path.Combine(basePath, "InTempo", "cache");
-        }
-
-        private static string BuildLegacyCacheDir()
-        {
-            string basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
-            if (string.IsNullOrWhiteSpace(basePath))
-            {
-                basePath = Path.GetTempPath();
-            }
-
-            return Path.Combine(basePath, "InTime", "cache");
+            return Path.Combine(basePath, "CueTime", "cache");
         }
 
         private bool TryReadSnapshot(string path, bool requireFresh, DateTime now, out IReadOnlyList<ParteSnapshotData> snapshot)
@@ -521,3 +463,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

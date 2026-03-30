@@ -1,4 +1,4 @@
-<Window x:Class="InTempo.Classes.View.StatisticheAdunanzeWindow"
+﻿<Window x:Class="CueTime.Classes.View.StatisticheAdunanzeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         Style="{StaticResource AppBorderlessDialogWindowStyle}"
         Title="Statistiche Adunanze"
+        Icon="pack://application:,,,/cuetime_icon.ico"
         Height="920"
         Width="1420"
         MinHeight="760"
@@ -688,9 +689,9 @@
                                                     <RowDefinition Height="*" />
                                                 </Grid.RowDefinitions>
                                                 <StackPanel>
-                                                    <TextBlock Text="Top 5 parti che più spesso sforano"
+                                                    <TextBlock Text="Top 5 parti che piu spesso sforano"
                                                                Style="{StaticResource AppSectionHeaderTextStyle}" />
-                                                    <TextBlock Text="Quante volte la stessa parte è andata sotto zero nello storico."
+                                                    <TextBlock Text="Quante volte la stessa parte e andata sotto zero nello storico."
                                                                Margin="0,6,0,0"
                                                                Style="{StaticResource AppMutedCaptionTextStyle}" />
                                                 </StackPanel>
@@ -744,7 +745,7 @@
                                                                                     Height="40"
                                                                                     HorizontalAlignment="Center"
                                                                                     Foreground="{DynamicResource AppMutedTextBrush}" />
-                                                        <TextBlock Text="Nessuna parte è ancora andata fuori tempo nello storico registrato."
+                                                        <TextBlock Text="Nessuna parte e ancora andata fuori tempo nello storico registrato."
                                                                    Margin="0,10,0,0"
                                                                    TextAlignment="Center"
                                                                    Style="{StaticResource AppMutedCaptionTextStyle}" />
@@ -760,9 +761,9 @@
                                                     <RowDefinition Height="*" />
                                                 </Grid.RowDefinitions>
                                                 <StackPanel>
-                                                    <TextBlock Text="Top 5 parti con sforamento medio più alto"
+                                                    <TextBlock Text="Top 5 parti con sforamento medio piu alto"
                                                                Style="{StaticResource AppSectionHeaderTextStyle}" />
-                                                    <TextBlock Text="Le parti che mediamente accumulano più ritardo quando vanno fuori tempo."
+                                                    <TextBlock Text="Le parti che mediamente accumulano piu ritardo quando vanno fuori tempo."
                                                                Margin="0,6,0,0"
                                                                Style="{StaticResource AppMutedCaptionTextStyle}" />
                                                 </StackPanel>
@@ -816,7 +817,7 @@
                                                                                     Height="40"
                                                                                     HorizontalAlignment="Center"
                                                                                     Foreground="{DynamicResource AppMutedTextBrush}" />
-                                                        <TextBlock Text="Nessuna media sforamento disponibile perché non ci sono ritardi registrati sulle parti."
+                                                        <TextBlock Text="Nessuna media sforamento disponibile perche non ci sono ritardi registrati sulle parti."
                                                                    Margin="0,10,0,0"
                                                                    TextAlignment="Center"
                                                                    Style="{StaticResource AppMutedCaptionTextStyle}" />
@@ -1163,3 +1164,7 @@
         </materialDesign:Card>
     </Grid>
 </Window>
+
+
+
+

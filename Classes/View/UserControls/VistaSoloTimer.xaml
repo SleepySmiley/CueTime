@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="InTempo.Classes.View.UserControls.VistaSoloTimer"
+﻿<UserControl x:Class="CueTime.Classes.View.UserControls.VistaSoloTimer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid Margin="48">
@@ -10,3 +10,4 @@
         </Viewbox>
     </Grid>
 </UserControl>
+

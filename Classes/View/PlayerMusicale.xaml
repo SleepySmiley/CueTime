@@ -1,4 +1,4 @@
-﻿<Window x:Class="InTempo.Classes.View.PlayerMusicale"
+﻿<Window x:Class="CueTime.Classes.View.PlayerMusicale"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         Style="{StaticResource AppBorderlessDialogWindowStyle}"
         Title="Player Musicale" Height="550" Width="450"
+        Icon="pack://application:,,,/cuetime_icon.ico"
         WindowStartupLocation="CenterOwner"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
@@ -292,4 +293,8 @@
         </Grid>
     </materialDesign:Card>
 </Window>
+
+
+
+
 

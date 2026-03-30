@@ -1,8 +1,8 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
-namespace InTempo.Classes.Utilities.Theming
+namespace CueTime.Classes.Utilities.Theming
 {
     public sealed class ThemeColorEditorItem : INotifyPropertyChanged
     {
@@ -94,3 +94,4 @@ namespace InTempo.Classes.Utilities.Theming
         }
     }
 }
+

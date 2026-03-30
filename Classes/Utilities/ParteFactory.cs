@@ -1,12 +1,12 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
-using InTempo.Classes.NonAbstract;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     internal sealed class ParteFactory
     {
@@ -194,3 +194,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

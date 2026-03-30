@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Linq;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     internal class SorveglianteInfrasettimanale : Infrasettimanale
     {
@@ -78,3 +78,4 @@ namespace InTempo.Classes.NonAbstract
         }
     }
 }
+

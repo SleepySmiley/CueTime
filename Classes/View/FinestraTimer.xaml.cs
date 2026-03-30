@@ -1,10 +1,10 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Threading;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.Utilities.Impostazioni;
-using InTempo.Classes.View.UserControls;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.Utilities.Impostazioni;
+using CueTime.Classes.View.UserControls;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class FinestraTimer : Window
     {
@@ -63,3 +63,4 @@ namespace InTempo.Classes.View
         }
     }
 }
+

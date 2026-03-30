@@ -1,20 +1,18 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
-using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Statistics;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.Utilities.Theming;
-using InTempo.Classes.View;
+using CueTime.Classes.NonAbstract;
+using CueTime.Classes.Statistics;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.View;
 
-namespace InTempo
+namespace CueTime
 {
     public partial class MainWindow : Window
     {
@@ -309,7 +307,6 @@ namespace InTempo
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string themeStateBefore = CreateThemeStateSnapshot();
             Impostazioni finestra = new Impostazioni(LogicTimer, App.Settings)
             {
                 Owner = this
@@ -318,11 +315,6 @@ namespace InTempo
             if (finestra.ShowDialog() == true)
             {
                 _finestratimer.ApplicaMonitorScelto();
-                if (!string.Equals(themeStateBefore, CreateThemeStateSnapshot(), StringComparison.Ordinal))
-                {
-                    RicreaPlayerMusicale();
-                }
-
                 SincronizzaStatoVisuale();
             }
         }
@@ -380,7 +372,7 @@ namespace InTempo
 
             FinestraPopUP avvertimento = new FinestraPopUP(
                 "Attenzione",
-                "Sei sicuro di voler fermare il timer? \nL'adunanza verrà conclusa e resettata.",
+                "Sei sicuro di voler fermare il timer?\nL'adunanza verra conclusa e resettata.",
                 ConfigurazionePulsantiPopup.ConfermaAnnulla);
             avvertimento.ShowDialog();
             if (avvertimento.DialogResult != true)
@@ -407,6 +399,7 @@ namespace InTempo
 
             _finestratimer?.Close();
             _finestraStatistiche?.Close();
+            player?.PrepareForShutdown();
             player?.Close();
         }
 
@@ -422,10 +415,17 @@ namespace InTempo
         private void btnMusica_Click(object sender, RoutedEventArgs e)
         {
             player.Owner ??= this;
+            if (player.IsVisible)
+            {
+                player.Activate();
+                return;
+            }
+
             player.Show();
+            player.Activate();
         }
 
-        private void btnStatistiche_Click(object sender, RoutedEventArgs e)
+        private async void btnStatistiche_Click(object sender, RoutedEventArgs e)
         {
             if (_finestraStatistiche == null || !_finestraStatistiche.IsLoaded)
             {
@@ -435,39 +435,13 @@ namespace InTempo
                 };
             }
 
-            _finestraStatistiche.RefreshData();
-
-            if (_finestraStatistiche.IsVisible)
+            if (!_finestraStatistiche.IsVisible)
             {
-                _finestraStatistiche.Activate();
-                return;
+                _finestraStatistiche.Show();
             }
 
-            _finestraStatistiche.Show();
-        }
-
-        private void RicreaPlayerMusicale()
-        {
-            bool wasVisible = player.IsVisible;
-            Window? previousOwner = player.Owner;
-
-            player.Close();
-            player = new PlayerMusicale(LogicTimer, App.Settings)
-            {
-                Owner = previousOwner ?? this
-            };
-
-            if (wasVisible)
-            {
-                player.Show();
-            }
-        }
-
-        private string CreateThemeStateSnapshot()
-        {
-            string themeKey = ThemeManager.GetThemeOrDefault(App.Settings.TemaSelezionato, App.Settings.TemaPersonalizzato).Key;
-            string customPalette = JsonSerializer.Serialize(App.Settings.TemaPersonalizzato ?? ThemeManager.CreateDefaultCustomTheme());
-            return $"{themeKey}|{customPalette}";
+            await _finestraStatistiche.RefreshDataAsync();
+            _finestraStatistiche.Activate();
         }
 
         private static void LogStartupError(Exception ex)
@@ -671,3 +645,4 @@ namespace InTempo
             uint uFlags);
     }
 }
+
