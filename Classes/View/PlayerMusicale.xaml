@@ -9,8 +9,7 @@
         Style="{StaticResource AppBorderlessDialogWindowStyle}"
         Title="Player Musicale" Height="550" Width="450"
         Icon="pack://application:,,,/cuetime_icon.ico"
-        WindowStartupLocation="CenterOwner"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
         <Style x:Key="PlayerListViewStyle"
@@ -159,12 +158,24 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <iconPacks:PackIconMaterial Kind="MusicCircle" Width="28" Height="28" Foreground="{DynamicResource AppAccentBrush}"/>
-                    <TextBlock Text="Player Musicale" Margin="12,0,0,0" Style="{StaticResource AppAccentWindowTitleTextStyle}"/>
-                </StackPanel>
 
-                <Button Grid.Column="1" x:Name="BtnChiudi" Click="BtnChiudi_Click" 
+                <Border Grid.Column="0"
+                        Background="Transparent"
+                        MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <iconPacks:PackIconMaterial Kind="MusicCircle"
+                                                    Width="28"
+                                                    Height="28"
+                                                    Foreground="{DynamicResource AppAccentBrush}"/>
+                        <TextBlock Text="Player Musicale"
+                                   Margin="12,0,0,0"
+                                   Style="{StaticResource AppAccentWindowTitleTextStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <Button Grid.Column="1"
+                        x:Name="BtnChiudi"
+                        Click="BtnChiudi_Click"
                         Style="{StaticResource AppCloseToolButtonStyle}">
                     <iconPacks:PackIconMaterial Kind="Close"
                                                 Width="20"
@@ -207,11 +218,14 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock x:Name="TxtBranoCorrente" Grid.Row="0" 
-                               Text="Nessun brano in riproduzione" 
-                               HorizontalAlignment="Center" 
-                               FontWeight="Bold" FontSize="16" 
-                               Margin="0,0,0,8" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="TxtBranoCorrente"
+                               Grid.Row="0"
+                               Text="Nessun brano in riproduzione"
+                               HorizontalAlignment="Center"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               Margin="0,0,0,8"
+                               TextTrimming="CharacterEllipsis"/>
 
                     <Grid Grid.Row="1" Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
@@ -219,14 +233,31 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="TxtTempoTrascorso" Grid.Column="0" Text="00:00" FontSize="12" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource AppMutedCaptionTextStyle}"/>
 
-                        <Slider x:Name="SliderProgresso" Grid.Column="1" 
+                        <TextBlock x:Name="TxtTempoTrascorso"
+                                   Grid.Column="0"
+                                   Text="00:00"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Style="{StaticResource AppMutedCaptionTextStyle}"/>
+
+                        <Slider x:Name="SliderProgresso"
+                                Grid.Column="1"
                                 Style="{StaticResource PlayerProgressSliderStyle}"
-                                Minimum="0" Maximum="100" Value="0" 
-                                TickFrequency="1" TickPlacement="None"/>
+                                Minimum="0"
+                                Maximum="100"
+                                Value="0"
+                                TickFrequency="1"
+                                TickPlacement="None"/>
 
-                        <TextBlock x:Name="TxtTempoTotale" Grid.Column="2" Text="00:00" FontSize="12" VerticalAlignment="Center" Margin="8,0,0,0" Style="{StaticResource AppMutedCaptionTextStyle}"/>
+                        <TextBlock x:Name="TxtTempoTotale"
+                                   Grid.Column="2"
+                                   Text="00:00"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"
+                                   Style="{StaticResource AppMutedCaptionTextStyle}"/>
                     </Grid>
 
                     <Grid Grid.Row="2">
@@ -240,61 +271,94 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <Button x:Name="BtnApriCartella" Grid.Column="0" Click="BtnApriCartella_Click"
-                                Style="{StaticResource PlayerActionMiniButtonStyle}" 
-                                ToolTip="Carica cartella brani" Width="40" Height="40">
+                        <Button x:Name="BtnApriCartella"
+                                Grid.Column="0"
+                                Click="BtnApriCartella_Click"
+                                Style="{StaticResource PlayerActionMiniButtonStyle}"
+                                ToolTip="Carica cartella brani"
+                                Width="40"
+                                Height="40">
                             <iconPacks:PackIconMaterial Kind="FolderMusic" Width="20" Height="20"/>
                         </Button>
 
-                        <Button x:Name="BtnPrecedente" Grid.Column="2" Click="BtnPrecedente_Click"
-                                Style="{StaticResource PlayerTransportButtonStyle}" 
-                                ToolTip="Brano precedente" Width="48" Height="48" Margin="0,0,8,0">
+                        <Button x:Name="BtnPrecedente"
+                                Grid.Column="2"
+                                Click="BtnPrecedente_Click"
+                                Style="{StaticResource PlayerTransportButtonStyle}"
+                                ToolTip="Brano precedente"
+                                Width="48"
+                                Height="48"
+                                Margin="0,0,8,0">
                             <iconPacks:PackIconMaterial Kind="SkipPrevious" Width="28" Height="28"/>
                         </Button>
 
-                        <Button x:Name="BtnPlayPausa" Grid.Column="3" Click="BtnPlayPausa_Click"
-                                Style="{StaticResource PlayerTransportPrimaryButtonStyle}" 
-                                ToolTip="Play / Pausa" Width="56" Height="56">
+                        <Button x:Name="BtnPlayPausa"
+                                Grid.Column="3"
+                                Click="BtnPlayPausa_Click"
+                                Style="{StaticResource PlayerTransportPrimaryButtonStyle}"
+                                ToolTip="Play / Pausa"
+                                Width="56"
+                                Height="56">
                             <iconPacks:PackIconMaterial x:Name="IconaPlayPausa" Kind="Play" Width="32" Height="32"/>
                         </Button>
 
-                        <Button x:Name="BtnSuccessivo" Grid.Column="4" Click="BtnSuccessivo_Click"
-                                Style="{StaticResource PlayerTransportButtonStyle}" 
-                                ToolTip="Brano successivo" Width="48" Height="48" Margin="8,0,0,0">
+                        <Button x:Name="BtnSuccessivo"
+                                Grid.Column="4"
+                                Click="BtnSuccessivo_Click"
+                                Style="{StaticResource PlayerTransportButtonStyle}"
+                                ToolTip="Brano successivo"
+                                Width="48"
+                                Height="48"
+                                Margin="8,0,0,0">
                             <iconPacks:PackIconMaterial Kind="SkipNext" Width="28" Height="28"/>
                         </Button>
 
-                        <materialDesign:PopupBox Grid.Column="6" 
-                                                 ToolTip="Volume" Padding="0" VerticalAlignment="Center">
+                        <materialDesign:PopupBox x:Name="PopupVolume"
+                         Grid.Column="6"
+                         ToolTip="Volume"
+                         Padding="0"
+                         VerticalAlignment="Center"
+                         PopupMode="Click"
+                         StaysOpen="True">
                             <materialDesign:PopupBox.ToggleContent>
                                 <Border Background="{DynamicResource AppSurfaceBrush}"
-                                        BorderBrush="{DynamicResource AppBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="16"
-                                        Padding="8">
+                BorderBrush="{DynamicResource AppBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="16"
+                Padding="8">
                                     <iconPacks:PackIconMaterial Kind="VolumeHigh"
-                                                                Width="24"
-                                                                Height="24"
-                                                                Foreground="{DynamicResource AppAccentDeepBrush}"/>
+                                        Width="24"
+                                        Height="24"
+                                        Foreground="{DynamicResource AppAccentDeepBrush}"/>
                                 </Border>
                             </materialDesign:PopupBox.ToggleContent>
-                            <StackPanel Margin="16" Width="100">
-                                <TextBlock Text="Volume" HorizontalAlignment="Center" Margin="0,0,0,8" Style="{StaticResource AppMutedCaptionTextStyle}"/>
-                                <Slider x:Name="SliderVolume"
-                                        Style="{StaticResource PlayerSliderStyle}"
-                                        Minimum="0" Maximum="1" Value="0.5" 
-                                        TickFrequency="0.1" TickPlacement="None"/>
-                            </StackPanel>
-                        </materialDesign:PopupBox>
 
+                            <Border x:Name="PopupVolumeContent"
+            Background="Transparent"
+            Focusable="True"
+            IsVisibleChanged="PopupVolumeContent_IsVisibleChanged"
+            LostKeyboardFocus="PopupVolumeContent_LostKeyboardFocus">
+                                <StackPanel Margin="16" Width="100">
+                                    <TextBlock Text="Volume"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,8"
+                       Style="{StaticResource AppMutedCaptionTextStyle}"/>
+
+                                    <Slider x:Name="SliderVolume"
+                    Style="{StaticResource PlayerSliderStyle}"
+                    Minimum="0"
+                    Maximum="1"
+                    Value="0.5"
+                    TickFrequency="0.1"
+                    TickPlacement="None"
+                    FocusVisualStyle="{x:Null}"
+                    Focusable="False"/>
+                                </StackPanel>
+                            </Border>
+                        </materialDesign:PopupBox>
                     </Grid>
                 </Grid>
             </materialDesign:Card>
         </Grid>
     </materialDesign:Card>
 </Window>
-
-
-
-
-
