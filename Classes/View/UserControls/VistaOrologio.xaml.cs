@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace InTempo.Classes.View.UserControls
+namespace CueTime.Classes.View.UserControls
 {
     public partial class VistaOrologio : UserControl
     {

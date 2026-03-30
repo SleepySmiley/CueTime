@@ -1,4 +1,4 @@
-﻿using InTempo.Classes.Utilities;
+﻿using CueTime.Classes.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace InTempo.Classes.View.UserControls
+namespace CueTime.Classes.View.UserControls
 {
     /// <summary>
     /// Interaction logic for VistaMista.xaml
@@ -34,3 +34,4 @@ namespace InTempo.Classes.View.UserControls
         }
     }
 }
+

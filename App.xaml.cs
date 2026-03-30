@@ -1,9 +1,10 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
-using InTempo.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Utilities.Theming;
 
-namespace InTempo
+namespace CueTime
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -16,13 +17,28 @@ namespace InTempo
         {
             base.OnStartup(e);
 
-            // Carico le impostazioni dal file
             Settings = SettingsStore.Load();
+            Settings.TemaSelezionato = ThemeManager.ApplyTheme(Settings.TemaSelezionato, Settings.TemaPersonalizzato);
+        }
+
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        {
+            if (Current.MainWindow is MainWindow finestraPrincipale)
+            {
+                finestraPrincipale.AssicuraSalvataggioStatistichePrimaDellaChiusura();
+            }
+
+            base.OnSessionEnding(e);
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            // Salvo le impostazioni su file
+            if (Current.MainWindow is MainWindow finestraPrincipale)
+            {
+                finestraPrincipale.AssicuraSalvataggioStatistichePrimaDellaChiusura();
+            }
+
+            Settings.TemaSelezionato = ThemeManager.ApplyTheme(Settings.TemaSelezionato, Settings.TemaPersonalizzato);
             SettingsStore.Save(Settings);
 
             base.OnExit(e);
@@ -30,3 +46,4 @@ namespace InTempo
     }
 
 }
+

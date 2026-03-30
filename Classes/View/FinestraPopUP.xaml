@@ -1,33 +1,19 @@
-﻿<Window x:Class="InTempo.Classes.View.FinestraPopUP"
+﻿<Window x:Class="CueTime.Classes.View.FinestraPopUP"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InTempo.Classes.View"
+        xmlns:local="clr-namespace:CueTime.Classes.View"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        TextElement.FontWeight="Regular"
-        TextElement.FontSize="14"
-        TextOptions.TextFormattingMode="Ideal" 
-        TextOptions.TextRenderingMode="Auto"
-        FontFamily="{DynamicResource MaterialDesignFont}"
-        
+        Style="{StaticResource AppTopmostBorderlessDialogWindowStyle}"
         Title="FinestraPopUP" Width="450" 
+        Icon="pack://application:,,,/cuetime_icon.ico"
         SizeToContent="Height"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
-        WindowStyle="None"
-        AllowsTransparency="True"
-        Background="Transparent"
-        Topmost="True" 
         Closing="Window_Closing"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
-    <materialDesign:Card Margin="16" 
-                         UniformCornerRadius="12" 
-                         Background="{DynamicResource MaterialDesignPaper}"
-                         materialDesign:ElevationAssist.Elevation="Dp8">
+    <materialDesign:Card Style="{StaticResource AppShellCardStyle}">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -44,42 +30,30 @@
 
                 <Button x:Name="BtnChiudiIcona"
                         Grid.Column="0"
-                        Style="{StaticResource MaterialDesignToolButton}"
+                        Style="{StaticResource AppCloseToolButtonStyle}"
                         Foreground="{DynamicResource MaterialDesignBody}"
-                        Width="30" Height="30"
-                        Padding="0"
                         Margin="0,0,12,0"
-                        VerticalAlignment="Center"
                         Click="BtnChiudiIcona_Click"
                         ToolTip="Chiudi">
-                    <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
+                    <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{DynamicResource AppAccentBrush}"/>
                 </Button>
 
-                <Label x:Name="lblTitolo" 
-                       Grid.Column="1"
-                       Content="{Binding Titolo}" 
-                       FontSize="20" 
-                       FontWeight="SemiBold" 
-                       VerticalAlignment="Center"
-                       Padding="0"/>
+                <TextBlock x:Name="lblTitolo"
+                           Grid.Column="1"
+                           Text="{Binding Titolo}"
+                           Style="{StaticResource AppAccentWindowTitleTextStyle}"/>
             </Grid>
 
             <StackPanel Grid.Row="1" Margin="24,0,24,24">
                 <TextBlock x:Name="txbTesto" 
                            Text="{Binding TestoMessaggio}" 
-                           TextWrapping="Wrap" 
-                           FontSize="15" 
-                           Opacity="0.8"
-                           Foreground="Black"
+                           Style="{StaticResource AppDialogBodyTextStyle}"
                            Visibility="Collapsed"/>
 
                 <TextBox x:Name="txtTesto" 
-                         Text="{Binding TestoInput, UpdateSourceTrigger=PropertyChanged}" 
-                         TextWrapping="Wrap" 
+                         Text="{Binding TestoInput, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource AppDialogInputTextBoxStyle}"
                          Margin="0,12,0,0" 
-                         FontSize="15" 
-                         Opacity="0.8"
-                         Foreground="Black"
                          Visibility="Collapsed"
                          TextChanged="txtTesto_TextChanged"/>
 
@@ -87,7 +61,7 @@
                            TextWrapping="Wrap"
                            Margin="0,8,0,0"
                            FontSize="13"
-                           Foreground="#EF5350"
+                           Foreground="{DynamicResource AppInputErrorBrush}"
                            Visibility="Collapsed"/>
             </StackPanel>
 
@@ -98,18 +72,22 @@
 
                 <Button x:Name="BtnPredefinito1" 
                         Content="Cancel" 
-                        MinWidth="120"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        MinWidth="132"
+                        Style="{StaticResource AppSecondaryButtonStyle}"
                         materialDesign:ButtonAssist.CornerRadius="15"
                         Margin="0,0,8,0" Click="BtnPredefinito1_Click"/>
 
                 <Button x:Name="BtnPredefinito2" 
                         Content="OK" 
-                        MinWidth="120"
-                        materialDesign:ButtonAssist.CornerRadius="15" Click="BtnPredefinito2_Click"/>
+                        MinWidth="132"
+                        Style="{StaticResource AppPrimaryButtonStyle}"
+                        Click="BtnPredefinito2_Click"/>
 
             </StackPanel>
 
         </Grid>
     </materialDesign:Card>
 </Window>
+
+
+

@@ -1,45 +1,54 @@
-﻿using InTempo.Classes.NonAbstract;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Windows;
+using CueTime.Classes.NonAbstract;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     public static class GestoreSalvataggi
     {
         private static readonly string cartellaSalvataggi = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "InTempo",
+            "CueTime",
             "AdunanzeSalvate");
 
         public static bool SalvaAdunanza(Adunanza dati, string nomeFile)
         {
+            return SalvaAdunanza(dati, nomeFile, cartellaSalvataggi);
+        }
+
+        internal static bool SalvaAdunanza(Adunanza dati, string nomeFile, string cartellaRadice)
+        {
             try
             {
-                CreaCartella();
-                if (!TryBuildSafeSavePath(nomeFile, out string percorsoFile))
+                CreaCartella(cartellaRadice);
+                if (!TryBuildSafeSavePath(nomeFile, cartellaRadice, out string percorsoFile))
                 {
                     return false;
                 }
 
                 string json = JsonSerializer.Serialize(dati);
                 File.WriteAllText(percorsoFile, json);
-
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                AppLogger.LogError($"Errore durante il salvataggio dell'adunanza '{nomeFile}'.", ex);
                 return false;
             }
         }
 
         public static Adunanza? CaricaAdunanza(string nomeFile)
         {
+            return CaricaAdunanza(nomeFile, cartellaSalvataggi);
+        }
+
+        internal static Adunanza? CaricaAdunanza(string nomeFile, string cartellaRadice)
+        {
             try
             {
-                if (!TryBuildSafeSavePath(nomeFile, out string percorsoFile))
+                if (!TryBuildSafeSavePath(nomeFile, cartellaRadice, out string percorsoFile))
                 {
                     return null;
                 }
@@ -52,22 +61,28 @@ namespace InTempo.Classes.Utilities
                 string json = File.ReadAllText(percorsoFile);
                 return JsonSerializer.Deserialize<Adunanza>(json);
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.LogError($"Errore durante il caricamento dell'adunanza '{nomeFile}'.", ex);
                 return null;
             }
         }
 
         public static List<string> OttieniListaSalvataggi()
         {
+            return OttieniListaSalvataggi(cartellaSalvataggi);
+        }
+
+        internal static List<string> OttieniListaSalvataggi(string cartellaRadice)
+        {
             List<string> lista = new List<string>();
 
-            if (!Directory.Exists(cartellaSalvataggi))
+            if (!Directory.Exists(cartellaRadice))
             {
                 return lista;
             }
 
-            string[] files = Directory.GetFiles(cartellaSalvataggi, "*.json");
+            string[] files = Directory.GetFiles(cartellaRadice, "*.json");
 
             foreach (string file in files)
             {
@@ -79,17 +94,27 @@ namespace InTempo.Classes.Utilities
 
         public static void CreaCartella()
         {
-            if (!Directory.Exists(cartellaSalvataggi))
+            CreaCartella(cartellaSalvataggi);
+        }
+
+        internal static void CreaCartella(string cartellaRadice)
+        {
+            if (!Directory.Exists(cartellaRadice))
             {
-                Directory.CreateDirectory(cartellaSalvataggi);
+                Directory.CreateDirectory(cartellaRadice);
             }
         }
 
         public static bool EliminaAdunanza(string nomeFile)
         {
+            return EliminaAdunanza(nomeFile, cartellaSalvataggi);
+        }
+
+        internal static bool EliminaAdunanza(string nomeFile, string cartellaRadice)
+        {
             try
             {
-                if (!TryBuildSafeSavePath(nomeFile, out string percorsoFile))
+                if (!TryBuildSafeSavePath(nomeFile, cartellaRadice, out string percorsoFile))
                 {
                     return false;
                 }
@@ -99,15 +124,19 @@ namespace InTempo.Classes.Utilities
                     File.Delete(percorsoFile);
                     return true;
                 }
+
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.LogError($"Errore durante l'eliminazione dell'adunanza '{nomeFile}'.", ex);
                 return false;
             }
         }
 
-        private static bool TryBuildSafeSavePath(string nomeFile, out string percorsoFile)
+        public static string GetSaveDirectoryPath() => cartellaSalvataggi;
+
+        private static bool TryBuildSafeSavePath(string nomeFile, string cartellaRadice, out string percorsoFile)
         {
             percorsoFile = string.Empty;
 
@@ -129,7 +158,7 @@ namespace InTempo.Classes.Utilities
                 return false;
             }
 
-            string root = Path.GetFullPath(cartellaSalvataggi);
+            string root = Path.GetFullPath(cartellaRadice);
             string candidate = Path.GetFullPath(Path.Combine(root, $"{baseName}.json"));
             string rootWithSep = root.EndsWith(Path.DirectorySeparatorChar) ? root : root + Path.DirectorySeparatorChar;
 
@@ -143,3 +172,4 @@ namespace InTempo.Classes.Utilities
         }
     }
 }
+

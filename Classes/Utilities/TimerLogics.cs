@@ -1,19 +1,35 @@
-﻿using InTempo.Classes.NonAbstract;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using CueTime.Classes.NonAbstract;
+using CueTime.Classes.Statistics;
+using CueTime.Classes.Utilities.Impostazioni;
 
-namespace InTempo.Classes.Utilities
+namespace CueTime.Classes.Utilities
 {
     public class TimerLogics : INotifyPropertyChanged
     {
-        private DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Render);
+        private readonly DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Send);
+        private readonly ImpostazioniAdunanze _settings;
+        private readonly GestoreStatisticheAdunanze? _gestoreStatistiche;
+        private DateTime? _ultimoPreavvisoPerOrarioInizio;
+        private DateTime _ultimoTickUtc;
+        private bool _notificaAutoStopUltimaParteInviata;
+        private string _testoSchermoPrincipale = "00:00:00";
+        private Brush? _orologioBrush = Brushes.White;
+        private Brush? _timerBrush;
+        private Brush? _tempoResiduoBrush;
+
+        public event EventHandler? UltimaParteFuoriTempoMassimoRaggiunto;
+
         public Adunanza AdunanzaCorrente { get; set; }
 
-        public static bool IsRunning { get; private set; } = false;
+        public bool IsRunning { get; private set; }
 
-        private string _testoSchermoPrincipale = "00:00:00";
+        public bool CheckTimerPreAdunanza { get; set; }
 
         public string TestoSchermoPrincipale
         {
@@ -28,7 +44,6 @@ namespace InTempo.Classes.Utilities
             }
         }
 
-        private Brush? _orologioBrush = Brushes.White;
         public Brush? OrologioBrush
         {
             get => _orologioBrush;
@@ -42,7 +57,6 @@ namespace InTempo.Classes.Utilities
             }
         }
 
-        private Brush? _timerBrush;
         public Brush? TimerBrush
         {
             get => _timerBrush;
@@ -55,23 +69,25 @@ namespace InTempo.Classes.Utilities
                 }
             }
         }
-        private Brush? _temporesiduobrush;
+
         public Brush? TempoResiduoBrush
         {
-            get => _temporesiduobrush;
+            get => _tempoResiduoBrush;
             set
             {
-                if (_temporesiduobrush != value)
+                if (_tempoResiduoBrush != value)
                 {
-                    _temporesiduobrush = value;
+                    _tempoResiduoBrush = value;
                     OnPropertyChanged();
                 }
             }
         }
 
-        public TimerLogics(Adunanza adunanzaCorrente)
+        public TimerLogics(Adunanza adunanzaCorrente, ImpostazioniAdunanze settings, GestoreStatisticheAdunanze? gestoreStatistiche = null)
         {
             AdunanzaCorrente = adunanzaCorrente;
+            _settings = settings;
+            _gestoreStatistiche = gestoreStatistiche;
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
             RicalcolaTempoResiduo();
@@ -81,33 +97,81 @@ namespace InTempo.Classes.Utilities
 
         public void StartTimer()
         {
-            if (!IsRunning)
+            if (IsRunning)
             {
-                IsRunning = true;
-                CheckTimerPreAdunanza = false;
-                AggiornaGrafica(); // Aggiorna subito la grafica per evitare ritardi visivi
-                timer.Start();
+                return;
             }
+
+            IsRunning = true;
+            CheckTimerPreAdunanza = false;
+            _ultimoTickUtc = DateTime.UtcNow;
+            AggiornaGrafica();
+            OnPropertyChanged(nameof(IsRunning));
+            timer.Start();
+        }
+
+        public void PauseTimer()
+        {
+            StopTimer();
+        }
+
+        public void ResumeTimer()
+        {
+            StartTimer();
         }
 
         public void StopTimer()
         {
-            if (IsRunning)
+            if (!IsRunning)
             {
-                timer.Stop();
-                IsRunning = false;
+                return;
             }
+
+            timer.Stop();
+            _ultimoTickUtc = DateTime.MinValue;
+            IsRunning = false;
+            OnPropertyChanged(nameof(IsRunning));
         }
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
-            if (AdunanzaCorrente.Current != null)
+            DateTime nowUtc = DateTime.UtcNow;
+            if (_ultimoTickUtc == DateTime.MinValue)
             {
-                AdunanzaCorrente.Current.TempoScorrevole = AdunanzaCorrente.Current.TempoScorrevole.Add(TimeSpan.FromSeconds(-1));
-                RicalcolaTempoResiduo();
-                CheckColorParte();
-                CheckColorTempoResiduo();
+                _ultimoTickUtc = nowUtc;
+                return;
             }
+
+            TimeSpan intervallo = nowUtc - _ultimoTickUtc;
+            if (intervallo <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            _ultimoTickUtc = nowUtc;
+            AvanzaTimerDi(intervallo, new DateTimeOffset(nowUtc, TimeSpan.Zero));
+        }
+
+        internal void AvanzaTimerDi(TimeSpan intervallo, DateTimeOffset? fineIntervalloUtc = null)
+        {
+            if (AdunanzaCorrente.Current == null || intervallo <= TimeSpan.Zero)
+            {
+                return;
+            }
+
+            Parte parteCorrente = AdunanzaCorrente.Current;
+            TimeSpan tempoPrima = parteCorrente.TempoScorrevole;
+            parteCorrente.TempoScorrevole = parteCorrente.TempoScorrevole.Subtract(intervallo);
+            RicalcolaTempoResiduo();
+            CheckColorParte();
+            CheckColorTempoResiduo();
+            _gestoreStatistiche?.RegistraScorrimentoTimer(
+                parteCorrente,
+                intervallo,
+                tempoPrima,
+                parteCorrente.TempoScorrevole,
+                fineIntervalloUtc ?? new DateTimeOffset(DateTime.UtcNow, TimeSpan.Zero));
+            ControllaAutoStopUltimaParte(parteCorrente);
         }
 
         private void CheckColorParte()
@@ -147,10 +211,11 @@ namespace InTempo.Classes.Utilities
             }
         }
 
-        public void ResetTimerPreciso(Parte Parte)
+        public void ResetTimerPreciso(Parte parte)
         {
-            Parte.TempoScorrevole = Parte.TempoParte;
+            parte.TempoScorrevole = parte.TempoParte;
             AggiornaGrafica();
+            _gestoreStatistiche?.RegistraResetParte(parte);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -160,15 +225,16 @@ namespace InTempo.Classes.Utilities
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        //metodo per resettare tutti i timer e far ripartire un aduannza da zero 
         public void ResetCompleto()
         {
-            foreach (var parte in AdunanzaCorrente.Parti)
+            foreach (Parte parte in AdunanzaCorrente.Parti)
             {
                 parte.TempoScorrevole = parte.TempoParte;
             }
+
             AdunanzaCorrente.Current = AdunanzaCorrente.Parti.FirstOrDefault();
             AdunanzaCorrente.TempoConsumatoPartiRimosse = TimeSpan.Zero;
+            _notificaAutoStopUltimaParteInviata = false;
             RicalcolaTempoResiduo();
             CheckColorParte();
             CheckColorTempoResiduo();
@@ -198,45 +264,42 @@ namespace InTempo.Classes.Utilities
             if (orarioInizio.HasValue && isPaused)
             {
                 TimeSpan tempoMancante = orarioInizio.Value - now;
-                double sec = tempoMancante.TotalSeconds;
+                double secondiMancanti = tempoMancante.TotalSeconds;
 
-                if (sec > 0 && sec <= 60)
+                if (secondiMancanti > 0 && secondiMancanti <= 60 && _ultimoPreavvisoPerOrarioInizio != orarioInizio.Value)
                 {
-                    if (_ultimoPreavvisoPerOrarioInizio != orarioInizio.Value)
-                    {
-                        CheckTimerPreAdunanza = true;
-                        _ultimoPreavvisoPerOrarioInizio = orarioInizio.Value;
-                    }
+                    CheckTimerPreAdunanza = true;
+                    _ultimoPreavvisoPerOrarioInizio = orarioInizio.Value;
                 }
 
-                if (sec <= 0 && sec > -5)
-                    return true;
-                else
-                {
-                    return false;
-                }
+                return secondiMancanti <= 0 && secondiMancanti > -5;
             }
+
             return false;
         }
 
-        private DateTime? _ultimoPreavvisoPerOrarioInizio;
-
-        public static bool CheckTimerPreAdunanza {  get; set; } = false;
-
         private DateTime? OttieniOrarioInizioAdunanzaOggi(DateTime now)
         {
-            if (now.DayOfWeek == App.Settings.Infrasettimanale.GiornoSettimana)
+            if (now.DayOfWeek == _settings.Infrasettimanale.GiornoSettimana)
             {
-                return new DateTime(now.Year, now.Month, now.Day,
-                                    App.Settings.Infrasettimanale.OraInizio.Hour,
-                                    App.Settings.Infrasettimanale.OraInizio.Minute, 0);
+                return new DateTime(
+                    now.Year,
+                    now.Month,
+                    now.Day,
+                    _settings.Infrasettimanale.OraInizio.Hour,
+                    _settings.Infrasettimanale.OraInizio.Minute,
+                    0);
             }
 
-            if (now.DayOfWeek == App.Settings.FineSettimana.GiornoSettimana)
+            if (now.DayOfWeek == _settings.FineSettimana.GiornoSettimana)
             {
-                return new DateTime(now.Year, now.Month, now.Day,
-                                    App.Settings.FineSettimana.OraInizio.Hour,
-                                    App.Settings.FineSettimana.OraInizio.Minute, 0);
+                return new DateTime(
+                    now.Year,
+                    now.Month,
+                    now.Day,
+                    _settings.FineSettimana.OraInizio.Hour,
+                    _settings.FineSettimana.OraInizio.Minute,
+                    0);
             }
 
             return null;
@@ -256,6 +319,7 @@ namespace InTempo.Classes.Utilities
 
             return now.ToString("HH:mm:ss");
         }
+
         private void AggiornaColoreOrologio(DateTime now, DateTime? orarioInizio)
         {
             if (orarioInizio.HasValue)
@@ -264,21 +328,13 @@ namespace InTempo.Classes.Utilities
 
                 if (tempoMancante.TotalMinutes <= 30 && tempoMancante.TotalSeconds > 0)
                 {
-                    if (tempoMancante.TotalSeconds > 60)
-                    {
-                        OrologioBrush = Brushes.Green;
-                    }
-                    else if (tempoMancante.TotalSeconds > 0)
-                    {
-                        OrologioBrush = Brushes.Orange;
-                    }
-                    else
-                    {
-                        OrologioBrush = Brushes.Red;
-                    }
+                    OrologioBrush = tempoMancante.TotalSeconds > 60
+                        ? Brushes.Green
+                        : Brushes.Orange;
                     return;
                 }
             }
+
             OrologioBrush = Brushes.White;
         }
 
@@ -295,8 +351,6 @@ namespace InTempo.Classes.Utilities
             TimeSpan tempoProgrammatoCorrente = AdunanzaCorrente.CalcolaTempoTotaleParti();
             TimeSpan correzionePartiVisibili = CalcolaCorrezioneResiduoPartiVisibili();
 
-            // Il residuo confronta il totale originale con la durata finale proiettata:
-            // programma visibile corrente, correzione di parti gia' lavorate e tempo gia' consumato su parti rimosse.
             AdunanzaCorrente.TempoResiduo =
                 AdunanzaCorrente.TempoTotaleRiferimento
                 - tempoProgrammatoCorrente
@@ -365,5 +419,21 @@ namespace InTempo.Classes.Utilities
             return consumato > TimeSpan.Zero ? consumato : TimeSpan.Zero;
         }
 
+        private void ControllaAutoStopUltimaParte(Parte parteCorrente)
+        {
+            if (_notificaAutoStopUltimaParteInviata
+                || AdunanzaCorrente.Parti.Count == 0
+                || !ReferenceEquals(parteCorrente, AdunanzaCorrente.Parti.LastOrDefault()))
+            {
+                return;
+            }
+
+            if (parteCorrente.TempoScorrevole <= TimeSpan.FromMinutes(-2))
+            {
+                _notificaAutoStopUltimaParteInviata = true;
+                UltimaParteFuoriTempoMassimoRaggiunto?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 }
+

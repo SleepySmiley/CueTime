@@ -1,14 +1,14 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.Utilities.Impostazioni
+namespace CueTime.Classes.Utilities.Impostazioni
 {
     public static class SettingsStore
     {
         private static readonly string AppName =
-            Assembly.GetEntryAssembly()?.GetName().Name ?? "InTempo";
+            "CueTime";
 
         private static readonly string FolderPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AppName);
@@ -24,67 +24,99 @@ namespace InTempo.Classes.Utilities.Impostazioni
 
         public static ImpostazioniAdunanze Load()
         {
+            return LoadFromPath(FilePath);
+        }
+
+        public static ImpostazioniAdunanze LoadFromPath(string filePath)
+        {
             try
             {
-                if (!File.Exists(FilePath))
+                if (!File.Exists(filePath))
+                {
                     return new ImpostazioniAdunanze();
+                }
 
-                string json = File.ReadAllText(FilePath);
+                string json = File.ReadAllText(filePath);
+                ImpostazioniAdunanze settings = JsonSerializer.Deserialize<ImpostazioniAdunanze>(json, JsonOptions)
+                    ?? new ImpostazioniAdunanze();
 
-                var s = JsonSerializer.Deserialize<ImpostazioniAdunanze>(json, JsonOptions)
-                        ?? new ImpostazioniAdunanze();
-
-                s.Normalizza();
-                return s;
+                settings.Normalizza();
+                return settings;
             }
-            catch
+            catch (Exception ex)
             {
-                BackupUnreadableSettingsFile();
+                AppLogger.LogWarning($"Impossibile leggere le impostazioni da '{filePath}'. Verra creato un backup se possibile.", ex);
+                BackupUnreadableSettingsFile(filePath);
                 return new ImpostazioniAdunanze();
             }
         }
 
         public static void Save(ImpostazioniAdunanze settings)
         {
-            Directory.CreateDirectory(FolderPath);
+            SaveToPath(settings, FilePath);
+        }
+
+        public static void SaveToPath(ImpostazioniAdunanze settings, string filePath)
+        {
+            string? folderPath = Path.GetDirectoryName(filePath);
+            if (string.IsNullOrWhiteSpace(folderPath))
+            {
+                throw new InvalidOperationException("Il percorso file delle impostazioni non e valido.");
+            }
+
+            Directory.CreateDirectory(folderPath);
 
             settings ??= new ImpostazioniAdunanze();
             settings.Normalizza();
 
             string json = JsonSerializer.Serialize(settings, JsonOptions);
-
-            // Scrittura “atomica” (riduce il rischio di file corrotto)
-            string tmp = FilePath + ".tmp";
+            string tmp = filePath + ".tmp";
             File.WriteAllText(tmp, json);
 
-            if (File.Exists(FilePath))
-                File.Replace(tmp, FilePath, null);
+            if (File.Exists(filePath))
+            {
+                File.Replace(tmp, filePath, null);
+            }
             else
-                File.Move(tmp, FilePath);
+            {
+                File.Move(tmp, filePath);
+            }
         }
 
-        // comodo per debug
         public static string GetSettingsPath() => FilePath;
 
-        private static void BackupUnreadableSettingsFile()
+        public static string GetSettingsDirectoryPath() => FolderPath;
+
+        private static void BackupUnreadableSettingsFile(string filePath)
         {
             try
             {
-                if (!File.Exists(FilePath))
+                if (!File.Exists(filePath))
+                {
                     return;
+                }
 
-                Directory.CreateDirectory(FolderPath);
+                string? folderPath = Path.GetDirectoryName(filePath);
+                if (string.IsNullOrWhiteSpace(folderPath))
+                {
+                    return;
+                }
+
+                Directory.CreateDirectory(folderPath);
 
                 string backupName = $"settings.invalid-{DateTime.Now:yyyyMMdd-HHmmss}.json";
-                string backupPath = Path.Combine(FolderPath, backupName);
+                string backupPath = Path.Combine(folderPath, backupName);
 
                 if (!File.Exists(backupPath))
-                    File.Copy(FilePath, backupPath, overwrite: false);
+                {
+                    File.Copy(filePath, backupPath, overwrite: false);
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // non bloccare l'avvio se anche il backup fallisce
+                AppLogger.LogWarning($"Impossibile creare il backup del file impostazioni '{filePath}'.", ex);
             }
         }
     }
 }
+

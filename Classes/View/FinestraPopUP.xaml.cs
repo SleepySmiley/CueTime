@@ -1,168 +1,136 @@
-﻿using InTempo.Classes.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
-    /// <summary>
-    /// Logica di interazione per FinestraPopUP.xaml
-    /// </summary>
     public partial class FinestraPopUP : Window
     {
         public string Titolo { get; set; }
         public string TestoMessaggio { get; set; } = string.Empty;
         public string TestoInput { get; set; } = string.Empty;
 
-        public int TipologiaFinestra { get; set; }
+        public ModalitaPopup TipologiaFinestra { get; set; }
 
         public int? NumeroInserito { get; private set; }
 
-        private FinestraTimer? _finestratimer;
-        private bool _richiedeNumeroInteroPositivo;
+        private readonly FinestraTimer? _finestratimer;
+        private readonly bool _richiedeNumeroInteroPositivo;
 
-        public FinestraPopUP(string TitoloPassato, string TestoPassato, int Bottoni)
+        public FinestraPopUP(string titoloPassato, string testoPassato, ConfigurazionePulsantiPopup configurazionePulsanti)
         {
             InitializeComponent();
 
-            switch (Bottoni)
+            switch (configurazionePulsanti)
             {
-                case 0:
+                case ConfigurazionePulsantiPopup.Nessuno:
                     BtnPredefinito1.Visibility = Visibility.Collapsed;
                     BtnPredefinito2.Visibility = Visibility.Collapsed;
-
                     break;
-                case 1:
+                case ConfigurazionePulsantiPopup.Ok:
                     BtnPredefinito2.Visibility = Visibility.Visible;
                     BtnPredefinito1.Visibility = Visibility.Collapsed;
-
                     break;
-                case 2:
+                case ConfigurazionePulsantiPopup.ConfermaAnnulla:
                     BtnPredefinito1.Visibility = Visibility.Visible;
                     BtnPredefinito2.Visibility = Visibility.Visible;
                     break;
             }
-            Titolo = TitoloPassato;
-            TestoMessaggio = TestoPassato;
+
+            Titolo = titoloPassato;
+            TestoMessaggio = testoPassato;
             DataContext = this;
             txbTesto.Visibility = Visibility.Visible;
             txtTesto.IsReadOnly = true;
-            TipologiaFinestra = 0;
-
+            TipologiaFinestra = ModalitaPopup.Messaggio;
         }
 
-        public FinestraPopUP(string TitoloPassato, string TestoPassato, string TestoBtn1, string TestoBtn2)
+        public FinestraPopUP(string titoloPassato, string testoPassato, string testoBtn1, string testoBtn2)
         {
             InitializeComponent();
-            Titolo = TitoloPassato;
-            TestoMessaggio = TestoPassato;
+            Titolo = titoloPassato;
+            TestoMessaggio = testoPassato;
             txbTesto.Visibility = Visibility.Visible;
-            BtnPredefinito1.Content = TestoBtn1;
-            BtnPredefinito2.Content = TestoBtn2;
+            BtnPredefinito1.Content = testoBtn1;
+            BtnPredefinito2.Content = testoBtn2;
             DataContext = this;
             txtTesto.IsReadOnly = true;
-            TipologiaFinestra = 1;
+            TipologiaFinestra = ModalitaPopup.Conferma;
         }
 
-        public FinestraPopUP(string TitoloPassato, string TestoBtn1, string TestoBtn2, FinestraTimer finestraDaPassare)
+        public FinestraPopUP(string titoloPassato, string testoBtn1, string testoBtn2, FinestraTimer finestraDaPassare)
         {
             InitializeComponent();
-            Titolo = TitoloPassato;
+            Titolo = titoloPassato;
             txtTesto.Visibility = Visibility.Visible;
-            TestoInput = "";
+            TestoInput = string.Empty;
             DataContext = this;
-            BtnPredefinito1.Content = TestoBtn1;
-            BtnPredefinito2.Content = TestoBtn2;
-            TipologiaFinestra = 2;
+            BtnPredefinito1.Content = testoBtn1;
+            BtnPredefinito2.Content = testoBtn2;
+            TipologiaFinestra = ModalitaPopup.MessaggioSchermo;
             _finestratimer = finestraDaPassare;
         }
 
-        public FinestraPopUP(string TitoloPassato, string TestoPassato, string TestoBtn1, string TestoBtn2, bool richiedeNumeroInteroPositivo)
+        public FinestraPopUP(string titoloPassato, string testoPassato, string testoBtn1, string testoBtn2, bool richiedeNumeroInteroPositivo)
         {
             InitializeComponent();
-            Titolo = TitoloPassato;
-            TestoMessaggio = TestoPassato;
+            Titolo = titoloPassato;
+            TestoMessaggio = testoPassato;
             TestoInput = string.Empty;
             DataContext = this;
-            BtnPredefinito1.Content = TestoBtn1;
-            BtnPredefinito2.Content = TestoBtn2;
+            BtnPredefinito1.Content = testoBtn1;
+            BtnPredefinito2.Content = testoBtn2;
             txbTesto.Visibility = Visibility.Visible;
             txtTesto.Visibility = Visibility.Visible;
             txtTesto.IsReadOnly = false;
-            TipologiaFinestra = 3;
+            TipologiaFinestra = ModalitaPopup.Input;
             _richiedeNumeroInteroPositivo = richiedeNumeroInteroPositivo;
             Loaded += (_, _) => txtTesto.Focus();
         }
 
         private void BtnPredefinito2_Click(object sender, RoutedEventArgs e)
         {
-            if(TipologiaFinestra == 0)
+            if (TipologiaFinestra == ModalitaPopup.Messaggio || TipologiaFinestra == ModalitaPopup.Conferma)
             {
                 DialogResult = true;
                 Close();
-            }
-            else if(TipologiaFinestra == 1)
-            {
-                DialogResult = true;
-                Close();
-            }
-            else if(TipologiaFinestra == 2)
-            {
-                ApplicaMessaggio(2);
-            }
-            else if (TipologiaFinestra == 3)
-            {
-                if (!TryConfermaInput())
-                {
-                    return;
-                }
-
-                DialogResult = true;
-                Close();
-
+                return;
             }
 
+            if (TipologiaFinestra == ModalitaPopup.MessaggioSchermo)
+            {
+                ApplicaMessaggio(VistaPresentazione.Mista);
+                return;
+            }
+
+            if (!TryConfermaInput())
+            {
+                return;
+            }
+
+            DialogResult = true;
+            Close();
         }
 
         private void BtnPredefinito1_Click(object sender, RoutedEventArgs e)
         {
-            if (TipologiaFinestra == 0)
+            if (TipologiaFinestra == ModalitaPopup.Messaggio || TipologiaFinestra == ModalitaPopup.Conferma || TipologiaFinestra == ModalitaPopup.Input)
             {
                 DialogResult = false;
                 Close();
+                return;
             }
-            else if (TipologiaFinestra == 1)
-            {
-                DialogResult = false;
-                Close();
-            }
-            else if (TipologiaFinestra == 2)
-            {
-                ApplicaMessaggio(3);
-            }
-            else if (TipologiaFinestra == 3)
-            {
-                DialogResult = false;
-                Close();
-            }
+
+            ApplicaMessaggio(VistaPresentazione.SoloScritta);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(TipologiaFinestra == 2)
+            if (TipologiaFinestra == ModalitaPopup.MessaggioSchermo)
             {
-                _finestratimer?.CambiaVista(1, "", Brushes.White);
+                _finestratimer?.CambiaVista(VistaPresentazione.SoloTimer, string.Empty, Brushes.White);
             }
-                 
         }
 
         private bool TryConfermaInput()
@@ -200,7 +168,7 @@ namespace InTempo.Classes.View
             txtErroreInput.Visibility = Visibility.Collapsed;
         }
 
-        private void ApplicaMessaggio(int tipoVista)
+        private void ApplicaMessaggio(VistaPresentazione tipoVista)
         {
             string input = txtTesto.Text;
             _finestratimer?.CambiaVista(tipoVista, input, Brushes.White);
@@ -220,20 +188,21 @@ namespace InTempo.Classes.View
         {
             if (e.ButtonState == MouseButtonState.Pressed)
             {
-                this.DragMove();
+                DragMove();
             }
         }
 
         private void BtnChiudiIcona_Click(object sender, RoutedEventArgs e)
         {
-            if (TipologiaFinestra == 2)
+            if (TipologiaFinestra == ModalitaPopup.MessaggioSchermo)
             {
                 Close();
                 return;
             }
 
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
         }
     }
 }
+

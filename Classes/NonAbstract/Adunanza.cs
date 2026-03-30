@@ -1,25 +1,52 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using InTempo.Classes.Utilities.Impostazioni;
+using CueTime.Classes.Statistics;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.Utilities.Impostazioni;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class Adunanza : INotifyPropertyChanged
     {
-        private Finesettimanale _finesettimana = new Finesettimanale();
-        private Infrasettimanale _infrasettimanale = new Infrasettimanale();
-        private Sorvegliante_Infrasettimanale _sorveglianteInfrasettimanale = new Sorvegliante_Infrasettimanale();
-        private Sorvegliante_Finesettimanale _sorveglianteFinesettimanale = new Sorvegliante_Finesettimanale();
-
-
+        private static readonly MeetingPartsSnapshotStore SharedSnapshotStore = new MeetingPartsSnapshotStore();
+        private readonly ImpostazioniAdunanze _settings;
+        private readonly MeetingPartsSnapshotStore _snapshotStore;
+        private readonly Finesettimanale _finesettimana = new Finesettimanale();
+        private readonly Infrasettimanale _infrasettimanale = new Infrasettimanale();
+        private readonly SorveglianteInfrasettimanale _sorveglianteInfrasettimanale = new SorveglianteInfrasettimanale();
+        private readonly SorveglianteFinesettimanale _sorveglianteFinesettimanale = new SorveglianteFinesettimanale();
         private ObservableCollection<Parte> _parti = new ObservableCollection<Parte>();
+        private int _currentParteIndex;
+        private Parte? _current;
+        private TimeSpan _tempoResiduo;
+
+        public bool LastLoadIsCurrentWeek { get; private set; } = true;
+
+        public TipoAdunanzaStatistiche TipoAdunanzaCorrente { get; private set; } = TipoAdunanzaStatistiche.Sconosciuta;
+
+        public DateTime DataRiferimentoCorrente { get; private set; } = DateTime.Today;
+
+        public Adunanza() : this(new ImpostazioniAdunanze())
+        {
+        }
+
+        public Adunanza(ImpostazioniAdunanze settings)
+            : this(settings, null)
+        {
+        }
+
+        internal Adunanza(ImpostazioniAdunanze settings, MeetingPartsSnapshotStore? snapshotStore)
+        {
+            _settings = settings;
+            _snapshotStore = snapshotStore ?? SharedSnapshotStore;
+        }
+
         public ObservableCollection<Parte> Parti
         {
             get => _parti;
@@ -33,9 +60,6 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-        private int _currentParteIndex = 0;
-        private Parte? _current;
-
         [JsonIgnore]
         public Parte? Current
         {
@@ -43,22 +67,25 @@ namespace InTempo.Classes.NonAbstract
             set
             {
                 if (ReferenceEquals(_current, value))
+                {
                     return;
+                }
 
                 if (_current != null)
+                {
                     _current.IsCurrent = false;
+                }
 
                 _current = value;
 
                 if (_current != null)
+                {
                     _current.IsCurrent = true;
+                }
 
                 OnPropertyChanged();
             }
         }
-
-
-        private TimeSpan _tempoResiduo;
 
         [JsonIgnore]
         public TimeSpan TempoResiduo
@@ -79,16 +106,13 @@ namespace InTempo.Classes.NonAbstract
 
         public TimeSpan TempoConsumatoPartiRimosse { get; set; }
 
-
-
-        // Proprietà aggiunta per gestire la visualizzazione con +/- 
         [JsonIgnore]
         public string TempoResiduoString
         {
             get
             {
-                var ts = TempoResiduo;
-                var sign = ts > TimeSpan.Zero ? "-" : ts < TimeSpan.Zero ? "+" : "";
+                TimeSpan ts = TempoResiduo;
+                string sign = ts > TimeSpan.Zero ? "-" : ts < TimeSpan.Zero ? "+" : string.Empty;
                 ts = ts.Duration();
 
                 int totalMinutes = (int)ts.TotalMinutes;
@@ -98,52 +122,52 @@ namespace InTempo.Classes.NonAbstract
             }
         }
 
-
-        public async Task SelectedAdunanza()
+        public async Task SelectedAdunanza(bool preferCacheOnly = false)
         {
+            Stopwatch startupTimer = Stopwatch.StartNew();
             DayOfWeek today = DateTime.Now.DayOfWeek;
-            Parti.Clear();
-            TempoResiduo = TimeSpan.Zero;
-            TempoTotaleRiferimento = TimeSpan.Zero;
-            TempoConsumatoPartiRimosse = TimeSpan.Zero;
-            Current = null;
-
             DateTime oggi = DateTime.Today;
-            var dateVisita = App.Settings.DateVisitaSorvegliante ?? Array.Empty<DateTime>();
+            DateTime[] dateVisita = _settings.DateVisitaSorvegliante ?? Array.Empty<DateTime>();
+            DateTime dataRiferimento = ResolveReferenceDate(oggi, dateVisita);
             bool isSettimanaVisitaSorvegliante = dateVisita
                 .Where(ImpostazioniAdunanze.IsDataVisitaValida)
                 .Take(2)
                 .Any(data => IsInVisitWeek(oggi, data.Date));
+            MeetingSnapshotKind snapshotKind = IsWeekendMeeting(today) ? MeetingSnapshotKind.Weekend : MeetingSnapshotKind.Midweek;
+            string loadSource = preferCacheOnly ? "cache locale" : "web";
 
-            if (today == DayOfWeek.Sunday || today == DayOfWeek.Saturday)
+            ObservableCollection<Parte> partiCaricate;
+
+            if (preferCacheOnly
+                && _snapshotStore.TryLoadSnapshot(
+                    snapshotKind,
+                    isSettimanaVisitaSorvegliante,
+                    dataRiferimento,
+                    out ObservableCollection<Parte> snapshotParts,
+                    out bool isCurrentWeekSnapshot))
             {
-                if (isSettimanaVisitaSorvegliante)
-                {
-                    await _sorveglianteFinesettimanale.CaricaSchema();
-                    Parti = _sorveglianteFinesettimanale.Parti;
-                }
-                else
-                {
-                    await _finesettimana.LoadAsync();
-                    Parti = _finesettimana.Parti;
-                }
+                partiCaricate = snapshotParts;
+                loadSource = isCurrentWeekSnapshot ? "snapshot locale corrente" : "snapshot locale precedente";
+                LastLoadIsCurrentWeek = isCurrentWeekSnapshot;
             }
             else
             {
-                if (isSettimanaVisitaSorvegliante)
-                {
-                    await _sorveglianteInfrasettimanale.CaricaSchema();
-                    Parti = _sorveglianteInfrasettimanale.Parti;
-                }
-                else
-                {
-                    await _infrasettimanale.LoadAsync();
-                    Parti = _infrasettimanale.Parti;
-                }
+                partiCaricate = await CaricaPartiAsync(today, dataRiferimento, isSettimanaVisitaSorvegliante, preferCacheOnly);
+                LastLoadIsCurrentWeek = WebPartsLoader.LastCacheLoadIsCurrentWeek;
             }
+
+            TempoResiduo = TimeSpan.Zero;
+            TempoTotaleRiferimento = TimeSpan.Zero;
+            TempoConsumatoPartiRimosse = TimeSpan.Zero;
+            DataRiferimentoCorrente = dataRiferimento;
+            Current = null;
+            ReplaceParti(partiCaricate);
+            NormalizzaSchemaSorveglianteSeNecessario(today, dataRiferimento, isSettimanaVisitaSorvegliante);
+            TipoAdunanzaCorrente = ResolveMeetingType(today, isSettimanaVisitaSorvegliante);
 
             if (Parti.Count > 0)
             {
+                _snapshotStore.SaveSnapshot(snapshotKind, isSettimanaVisitaSorvegliante, dataRiferimento, Parti);
                 InizializzaTempoRiferimentoDaPartiCorrenti();
                 _currentParteIndex = 0;
                 Current = Parti[_currentParteIndex];
@@ -153,6 +177,98 @@ namespace InTempo.Classes.NonAbstract
                 _currentParteIndex = 0;
                 Current = null;
             }
+
+            AppLogger.LogInfo($"Adunanza caricata da {loadSource} in {startupTimer.ElapsedMilliseconds} ms con {Parti.Count} parti.");
+        }
+
+        private void NormalizzaSchemaSorveglianteSeNecessario(DayOfWeek today, DateTime dataRiferimento, bool isSettimanaVisitaSorvegliante)
+        {
+            if (!isSettimanaVisitaSorvegliante)
+            {
+                return;
+            }
+
+            if (IsWeekendMeeting(today))
+            {
+                _sorveglianteFinesettimanale.DataRiferimento = dataRiferimento;
+                _sorveglianteFinesettimanale.Parti = Parti;
+                _sorveglianteFinesettimanale.ModificaSchemaParti();
+                return;
+            }
+
+            _sorveglianteInfrasettimanale.Parti = Parti;
+            _sorveglianteInfrasettimanale.ModificaSchemaParti();
+        }
+
+        private async Task<ObservableCollection<Parte>> CaricaPartiAsync(
+            DayOfWeek today,
+            DateTime dataRiferimento,
+            bool isSettimanaVisitaSorvegliante,
+            bool preferCacheOnly)
+        {
+            if (preferCacheOnly)
+            {
+                if (today == DayOfWeek.Sunday || today == DayOfWeek.Saturday)
+                {
+                    if (isSettimanaVisitaSorvegliante)
+                    {
+                        _sorveglianteFinesettimanale.DataRiferimento = dataRiferimento;
+                        _sorveglianteFinesettimanale.CaricaSchemaDaCache();
+                        return _sorveglianteFinesettimanale.Parti;
+                    }
+
+                    _finesettimana.DataRiferimento = dataRiferimento;
+                    _finesettimana.LoadFromCache();
+                    return _finesettimana.Parti;
+                }
+
+                if (isSettimanaVisitaSorvegliante)
+                {
+                    _sorveglianteInfrasettimanale.CaricaSchemaDaCache();
+                    return _sorveglianteInfrasettimanale.Parti;
+                }
+
+                _infrasettimanale.LoadFromCache();
+                return _infrasettimanale.Parti;
+            }
+
+            if (today == DayOfWeek.Sunday || today == DayOfWeek.Saturday)
+            {
+                if (isSettimanaVisitaSorvegliante)
+                {
+                    _sorveglianteFinesettimanale.DataRiferimento = dataRiferimento;
+                    await _sorveglianteFinesettimanale.CaricaSchema();
+                    return _sorveglianteFinesettimanale.Parti;
+                }
+
+                _finesettimana.DataRiferimento = dataRiferimento;
+                await _finesettimana.LoadAsync();
+                return _finesettimana.Parti;
+            }
+
+            if (isSettimanaVisitaSorvegliante)
+            {
+                await _sorveglianteInfrasettimanale.CaricaSchema();
+                return _sorveglianteInfrasettimanale.Parti;
+            }
+
+            await _infrasettimanale.LoadAsync();
+            return _infrasettimanale.Parti;
+        }
+
+        private static DateTime ResolveReferenceDate(DateTime today, DateTime[] visitDates)
+        {
+            foreach (DateTime visitDate in (visitDates ?? Array.Empty<DateTime>())
+                .Where(ImpostazioniAdunanze.IsDataVisitaValida)
+                .Select(data => data.Date))
+            {
+                if (IsInVisitWeek(today, visitDate))
+                {
+                    return visitDate;
+                }
+            }
+
+            return today.Date;
         }
 
         private static bool IsInVisitWeek(DateTime today, DateTime visitStartDate)
@@ -160,6 +276,28 @@ namespace InTempo.Classes.NonAbstract
             DateTime start = visitStartDate.Date;
             DateTime end = start.AddDays(6);
             return today >= start && today <= end;
+        }
+
+        private static bool IsWeekendMeeting(DayOfWeek today)
+        {
+            return today == DayOfWeek.Saturday || today == DayOfWeek.Sunday;
+        }
+
+        private TipoAdunanzaStatistiche ResolveMeetingType(DayOfWeek today, bool isSettimanaVisitaSorvegliante)
+        {
+            if (Parti.Any(parte => parte.NomeParte.Contains("commemorazione", StringComparison.OrdinalIgnoreCase)))
+            {
+                return TipoAdunanzaStatistiche.Commemorazione;
+            }
+
+            if (isSettimanaVisitaSorvegliante)
+            {
+                return TipoAdunanzaStatistiche.Sorvegliante;
+            }
+
+            return IsWeekendMeeting(today)
+                ? TipoAdunanzaStatistiche.Finesettimanale
+                : TipoAdunanzaStatistiche.Infrasettimanale;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -171,8 +309,6 @@ namespace InTempo.Classes.NonAbstract
 
         public void Avanti()
         {
-            
-
             if (Parti.Count == 0)
             {
                 Current = null;
@@ -189,7 +325,9 @@ namespace InTempo.Classes.NonAbstract
             }
 
             if (idx >= Parti.Count - 1)
+            {
                 return;
+            }
 
             _currentParteIndex = idx + 1;
             Current = Parti[_currentParteIndex];
@@ -213,10 +351,11 @@ namespace InTempo.Classes.NonAbstract
             }
 
             if (idx <= 0)
+            {
                 return;
+            }
 
             _currentParteIndex = idx - 1;
-
             Current = Parti[_currentParteIndex];
         }
 
@@ -244,5 +383,20 @@ namespace InTempo.Classes.NonAbstract
             return Parti.Aggregate(TimeSpan.Zero, (totale, parte) => totale + parte.TempoParte);
         }
 
+        private void ReplaceParti(ObservableCollection<Parte>? nuoveParti)
+        {
+            Parti.Clear();
+
+            if (nuoveParti == null)
+            {
+                return;
+            }
+
+            foreach (Parte parte in nuoveParti)
+            {
+                Parti.Add(parte);
+            }
+        }
     }
 }
+

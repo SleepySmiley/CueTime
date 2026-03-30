@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Threading;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class FinestraIdentifica : Window
     {
@@ -14,7 +14,7 @@ namespace InTempo.Classes.View
             TxtNumero.Text = numeroTesto;
 
             // Imposta un timer per chiudere la finestra dopo 3 secondi
-            _timer = new DispatcherTimer();
+            _timer = new DispatcherTimer(DispatcherPriority.Send);
             _timer.Interval = TimeSpan.FromSeconds(3);
             _timer.Tick += (s, e) =>
             {
@@ -25,3 +25,4 @@ namespace InTempo.Classes.View
         }
     }
 }
+

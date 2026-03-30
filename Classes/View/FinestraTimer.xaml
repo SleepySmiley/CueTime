@@ -1,10 +1,15 @@
-﻿<Window x:Class="InTempo.Classes.View.FinestraTimer"
+﻿<Window x:Class="CueTime.Classes.View.FinestraTimer"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FinestraTimer" Height="450" Width="800"
-        Background="Black">
+        Title="FinestraTimer"
+        Icon="pack://application:,,,/cuetime_icon.ico"
+        Height="450"
+        Width="800"
+        Style="{StaticResource AppPresentationWindowStyle}">
 
-    <ContentControl x:Name="ContenitorePrincipale" 
-                    HorizontalAlignment="Stretch" 
-                    VerticalAlignment="Stretch"/>
+    <ContentControl x:Name="ContenitorePrincipale"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
 </Window>
+
+

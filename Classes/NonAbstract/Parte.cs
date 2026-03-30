@@ -3,8 +3,9 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
+using CueTime.Classes.Utilities;
 
-namespace InTempo.Classes.NonAbstract
+namespace CueTime.Classes.NonAbstract
 {
     public class Parte : INotifyPropertyChanged
     {
@@ -77,7 +78,10 @@ namespace InTempo.Classes.NonAbstract
                         OnPropertyChanged(nameof(ColoreParte));
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    AppLogger.LogWarning($"Impossibile convertire il colore salvato '{_coloreSalvato}' per la parte '{_nomeParte}'.", ex);
+                }
             }
         }
 
@@ -207,3 +211,4 @@ namespace InTempo.Classes.NonAbstract
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+

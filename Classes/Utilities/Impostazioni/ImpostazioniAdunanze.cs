@@ -1,7 +1,9 @@
 ﻿using System;
-using InTempo.Classes.Utilities.Monitors;
+using System.Linq;
+using CueTime.Classes.Utilities.Monitors;
+using CueTime.Classes.Utilities.Theming;
 
-namespace InTempo.Classes.Utilities.Impostazioni
+namespace CueTime.Classes.Utilities.Impostazioni
 {
     public class ImpostazioniAdunanze
     {
@@ -14,6 +16,10 @@ namespace InTempo.Classes.Utilities.Impostazioni
 
         public DateTime[] DateVisitaSorvegliante { get; set; } = CreateDefaultDateVisitaSorvegliante();
 
+        public string TemaSelezionato { get; set; } = ThemeManager.DefaultThemeKey;
+
+        public CustomThemePalette TemaPersonalizzato { get; set; } = ThemeManager.CreateDefaultCustomTheme();
+
         public ImpostazioniAdunanze()
         {
             Infrasettimanale.OraInizio = new DateTime(1, 1, 1, 20, 0, 0);
@@ -22,6 +28,8 @@ namespace InTempo.Classes.Utilities.Impostazioni
             FineSettimana.GiornoSettimana = DayOfWeek.Sunday;
             MonitorScelto = CreateDefaultMonitor();
             DateVisitaSorvegliante = CreateDefaultDateVisitaSorvegliante();
+            TemaSelezionato = ThemeManager.DefaultThemeKey;
+            TemaPersonalizzato = ThemeManager.CreateDefaultCustomTheme();
         }
 
         public void Normalizza()
@@ -49,6 +57,34 @@ namespace InTempo.Classes.Utilities.Impostazioni
             {
                 DateVisitaSorvegliante = CreateDefaultDateVisitaSorvegliante();
             }
+
+            TemaPersonalizzato ??= ThemeManager.CreateDefaultCustomTheme();
+            TemaPersonalizzato.Normalizza();
+            TemaSelezionato = ThemeManager.GetThemeOrDefault(TemaSelezionato, TemaPersonalizzato).Key;
+        }
+
+        public ImpostazioniAdunanze Clone()
+        {
+            ImpostazioniAdunanze clone = new ImpostazioniAdunanze();
+            clone.CopyFrom(this);
+            return clone;
+        }
+
+        public void CopyFrom(ImpostazioniAdunanze source)
+        {
+            source ??= new ImpostazioniAdunanze();
+            source.Normalizza();
+
+            Infrasettimanale = source.Infrasettimanale.Clone();
+            FineSettimana = source.FineSettimana.Clone();
+            MonitorScelto = source.MonitorScelto?.Clone() ?? CreateDefaultMonitor();
+            PercorsoCartellaMusica = source.PercorsoCartellaMusica ?? string.Empty;
+            DateVisitaSorvegliante = (source.DateVisitaSorvegliante ?? CreateDefaultDateVisitaSorvegliante())
+                .Select(data => data)
+                .ToArray();
+            TemaPersonalizzato = source.TemaPersonalizzato?.Clone() ?? ThemeManager.CreateDefaultCustomTheme();
+            TemaPersonalizzato.Normalizza();
+            TemaSelezionato = ThemeManager.GetThemeOrDefault(source.TemaSelezionato, TemaPersonalizzato).Key;
         }
 
         public static bool IsDataVisitaValida(DateTime data)
@@ -73,3 +109,4 @@ namespace InTempo.Classes.Utilities.Impostazioni
         }
     }
 }
+

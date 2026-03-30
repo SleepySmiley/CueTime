@@ -1,67 +1,66 @@
-﻿using InTempo.Classes.Utilities;
-using InTempo.Classes.View.UserControls;
-using System.Drawing;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Threading;
+using CueTime.Classes.Utilities;
+using CueTime.Classes.Utilities.Impostazioni;
+using CueTime.Classes.View.UserControls;
 
-namespace InTempo.Classes.View
+namespace CueTime.Classes.View
 {
     public partial class FinestraTimer : Window
     {
+        private readonly ImpostazioniAdunanze _settings;
 
         public DispatcherTimer OrologioCopia { get; set; }
 
         public TimerLogics logicaTimer { get; set; }
 
-
-        public FinestraTimer(DispatcherTimer TempoCopia, TimerLogics TimerLogic)
+        public FinestraTimer(DispatcherTimer tempoCopia, TimerLogics timerLogic, ImpostazioniAdunanze settings)
         {
             InitializeComponent();
-            logicaTimer = TimerLogic;
-            OrologioCopia = TempoCopia;
-            this.DataContext = logicaTimer;
+            logicaTimer = timerLogic;
+            OrologioCopia = tempoCopia;
+            _settings = settings;
+            DataContext = logicaTimer;
             ContenitorePrincipale.Content = new VistaOrologio();
             ApplicaMonitorScelto();
-                    
         }
 
         public void ApplicaMonitorScelto()
         {
-            var monitor = App.Settings.MonitorScelto;
+            Utilities.Monitors.Monitor? monitor = _settings.MonitorScelto;
 
             if (monitor != null)
             {
-                this.WindowStartupLocation = WindowStartupLocation.Manual;
-                this.Left = monitor.AreaTotale.Left;
-                this.Top = monitor.AreaTotale.Top;
-                this.Width = monitor.AreaTotale.Width;
-                this.Height = monitor.AreaTotale.Height;
-                this.WindowStyle = WindowStyle.None;
-                this.ResizeMode = ResizeMode.NoResize;
+                WindowStartupLocation = WindowStartupLocation.Manual;
+                Left = monitor.AreaTotale.Left;
+                Top = monitor.AreaTotale.Top;
+                Width = monitor.AreaTotale.Width;
+                Height = monitor.AreaTotale.Height;
+                WindowStyle = WindowStyle.None;
+                ResizeMode = ResizeMode.NoResize;
             }
         }
 
-        // Aggiungi questo metodo dentro FinestraTimer
-        public void CambiaVista(int tipoVista, string testoPersonalizzato, System.Windows.Media.Brush colorescritta)
+        public void CambiaVista(VistaPresentazione tipoVista, string testoPersonalizzato, System.Windows.Media.Brush colorescritta)
         {
             switch (tipoVista)
             {
-                case 1:
-                    ContenitorePrincipale.Content = new VistaSoloTimer(); 
+                case VistaPresentazione.SoloTimer:
+                    ContenitorePrincipale.Content = new VistaSoloTimer();
                     break;
-                case 2:
+                case VistaPresentazione.Mista:
                     ContenitorePrincipale.Content = new VistaMista(testoPersonalizzato, logicaTimer);
                     break;
-                case 3:
+                case VistaPresentazione.SoloScritta:
                     ContenitorePrincipale.Content = new VistaSoloScritta(testoPersonalizzato, colorescritta);
                     break;
-                case 4:
+                case VistaPresentazione.Orologio:
                     ContenitorePrincipale.Content = new VistaOrologio();
                     break;
             }
+
             logicaTimer.AggiornaGrafica();
         }
-
-
     }
 }
+

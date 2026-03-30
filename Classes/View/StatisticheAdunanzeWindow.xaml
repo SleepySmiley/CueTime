@@ -1,0 +1,1170 @@
+﻿<Window x:Class="CueTime.Classes.View.StatisticheAdunanzeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        mc:Ignorable="d"
+        Style="{StaticResource AppBorderlessDialogWindowStyle}"
+        Title="Statistiche Adunanze"
+        Icon="pack://application:,,,/cuetime_icon.ico"
+        Height="920"
+        Width="1420"
+        MinHeight="760"
+        MinWidth="1180"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        AllowsTransparency="False"
+        Background="{DynamicResource AppMainWindowBackdropBrush}"
+        StateChanged="Window_StateChanged">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0"
+                            CornerRadius="0"
+                            GlassFrameThickness="0"
+                            ResizeBorderThickness="8"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="MaterialDesign.Brush.DataGrid.Selected" Color="Transparent" />
+
+        <Style x:Key="StatisticheShellCardStyle"
+               TargetType="{x:Type materialDesign:Card}"
+               BasedOn="{StaticResource AppShellCardStyle}">
+            <Setter Property="Margin" Value="24" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=WindowState}" Value="Maximized">
+                    <Setter Property="Margin" Value="10" />
+                    <Setter Property="UniformCornerRadius" Value="20" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StatistichePrimaryTabItemStyle"
+               TargetType="{x:Type TabItem}"
+               BasedOn="{StaticResource MaterialDesignTabItem}">
+            <Setter Property="MinWidth" Value="184" />
+            <Setter Property="Padding" Value="18,14" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+
+        <Style x:Key="StatisticheSecondaryTabItemStyle"
+               TargetType="{x:Type TabItem}"
+               BasedOn="{StaticResource MaterialDesignTabItem}">
+            <Setter Property="MinWidth" Value="136" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+
+        <Style x:Key="StatisticheLegendChipBorderStyle"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource AppChipBorderStyle}">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="10,6" />
+        </Style>
+
+        <Style x:Key="StatisticheDataGridTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}" />
+        </Style>
+
+        <Style x:Key="StatisticheStoricoListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="StatisticheStoricoCardBorderStyle"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource AppListContainerBorderStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppDataGridHoverRowBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppCurrentRowBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StatisticheDataGridHeaderStyle"
+               TargetType="{x:Type DataGridColumnHeader}"
+               BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+            <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="StatisticheDataGridCellStyle" TargetType="{x:Type DataGridCell}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style x:Key="StatisticheDataGridRowStyle" TargetType="{x:Type DataGridRow}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontSize" Value="13" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppDataGridHoverRowBrush}" />
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AppCurrentRowBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StatisticheDataGridStyle" TargetType="{x:Type DataGrid}">
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="CanUserDeleteRows" Value="False" />
+            <Setter Property="CanUserResizeRows" Value="False" />
+            <Setter Property="CanUserResizeColumns" Value="True" />
+            <Setter Property="CanUserSortColumns" Value="True" />
+            <Setter Property="CanUserReorderColumns" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="RowHeaderWidth" Value="0" />
+            <Setter Property="GridLinesVisibility" Value="Horizontal" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
+            <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
+            <Setter Property="ColumnHeaderStyle" Value="{StaticResource StatisticheDataGridHeaderStyle}" />
+            <Setter Property="CellStyle" Value="{StaticResource StatisticheDataGridCellStyle}" />
+            <Setter Property="RowStyle" Value="{StaticResource StatisticheDataGridRowStyle}" />
+            <Setter Property="materialDesign:DataGridAssist.SelectedCellBorderBrush" Value="Transparent" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{DynamicResource AppMainWindowBackdropBrush}">
+        <Ellipse Width="360" Height="360" HorizontalAlignment="Right" VerticalAlignment="Top"
+                 Margin="0,-150,-100,0" Fill="{DynamicResource AppBackdropOrbPrimaryBrush}" IsHitTestVisible="False" />
+        <Ellipse Width="420" Height="420" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                 Margin="-150,0,0,-220" Fill="{DynamicResource AppBackdropOrbSecondaryBrush}" IsHitTestVisible="False" />
+        <Ellipse Width="220" Height="220" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                 Margin="0,0,120,56" Fill="{DynamicResource AppBackdropOrbTertiaryBrush}" IsHitTestVisible="False" />
+
+        <materialDesign:Card Style="{StaticResource StatisticheShellCardStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <materialDesign:Card Grid.Row="0" Style="{StaticResource AppSectionCardStyle}">
+                    <Grid Margin="14,12"
+                          MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="54" Height="54" Margin="0,0,14,0"
+                                CornerRadius="18"
+                                Background="{DynamicResource AppAccentSoftBrush}">
+                            <iconPacks:PackIconMaterial Kind="ChartTimelineVariant"
+                                                        Width="28"
+                                                        Height="28"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{DynamicResource AppAccentDeepBrush}" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Statistiche adunanze"
+                                       Style="{StaticResource AppAccentPageTitleTextStyle}" />
+                            <TextBlock Text="Storico completo, confronti per tipo, parti critiche e dettaglio di ogni sessione."
+                                       Margin="0,6,0,0"
+                                       Style="{StaticResource AppMainSupportTextStyle}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top">
+                            <Button Margin="0,0,8,0"
+                                    Click="BtnAggiorna_Click"
+                                    Style="{StaticResource AppSecondaryButtonStyle}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <iconPacks:PackIconMaterial Kind="Refresh" Width="16" Height="16" Margin="0,0,8,0" />
+                                    <TextBlock Text="Aggiorna" VerticalAlignment="Center" />
+                                    </StackPanel>
+                            </Button>
+
+                            <Button Margin="0,0,8,0"
+                                    Click="BtnMassimizzaRipristina_Click"
+                                    Style="{StaticResource AppChromeIconButtonStyle}"
+                                    ToolTip="{Binding TestoPulsanteFinestra}">
+                                <iconPacks:PackIconMaterial Kind="{Binding IconaPulsanteFinestra}"
+                                                            Width="18"
+                                                            Height="18" />
+                            </Button>
+
+                            <Button Click="BtnChiudi_Click"
+                                    Style="{StaticResource AppCloseToolButtonStyle}">
+                                <iconPacks:PackIconMaterial Kind="Close" Width="18" Height="18" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+
+                <materialDesign:Card Grid.Row="1" Style="{StaticResource AppSectionCardStyle}">
+                    <Grid Margin="16,12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Quadro rapido"
+                                       Style="{StaticResource AppSectionHeaderTextStyle}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding RangeStoricoText}"
+                                       VerticalAlignment="Center"
+                                       Style="{StaticResource AppMutedCaptionTextStyle}" />
+                        </Grid>
+
+                        <ItemsControl Grid.Row="1"
+                                      Margin="0,14,0,0"
+                                      ItemsSource="{Binding MetrichePanoramica}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="180"
+                                            Margin="0,0,12,12"
+                                            Padding="14"
+                                            Style="{StaticResource AppPanelBorderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Titolo}"
+                                                       Style="{StaticResource AppMetricLabelTextStyle}" />
+                                            <TextBlock Text="{Binding Valore}"
+                                                       Margin="0,6,0,0"
+                                                       Foreground="{DynamicResource AppAccentDeepBrush}"
+                                                       Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                            <TextBlock Text="{Binding Descrizione}"
+                                                       Margin="0,4,0,0"
+                                                       TextWrapping="Wrap"
+                                                       Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </materialDesign:Card>
+
+                <materialDesign:Card Grid.Row="2" Style="{StaticResource AppSectionCardStyle}">
+                    <Grid Margin="14">
+                        <Grid Visibility="{Binding ContenutoStoricoVisibility}">
+                            <TabControl Background="Transparent"
+                                        BorderThickness="0"
+                                        ItemContainerStyle="{StaticResource StatistichePrimaryTabItemStyle}"
+                                        materialDesign:ColorZoneAssist.Mode="Standard">
+                                <TabItem>
+                                    <TabItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="ViewDashboardOutline" Width="18" Height="18" Margin="0,0,8,0" />
+                                            <TextBlock Text="Panoramica" />
+                                        </StackPanel>
+                                    </TabItem.Header>
+
+                                    <ScrollViewer Margin="0,10,0,0"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <Grid Margin="14">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1.5*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Margin="0,0,14,0"
+                                                    Padding="18"
+                                                    Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock Text="Andamento ultime 10 adunanze"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <TextBlock Text="Ogni colonna mostra il ritardo o l'anticipo finale rispetto alla scaletta programmata."
+                                                               Margin="0,6,0,0"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                </StackPanel>
+
+                                                <Grid Grid.Row="1">
+                                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                                  VerticalScrollBarVisibility="Disabled"
+                                                                  Visibility="{Binding AndamentoGraficoVisibility}">
+                                                        <ItemsControl Margin="0,18,0,0"
+                                                                      ItemsSource="{Binding AndamentoUltimeAdunanze}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <StackPanel Orientation="Horizontal" />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Border Width="88"
+                                                                            Margin="0,0,12,0"
+                                                                            Padding="10"
+                                                                            Style="{StaticResource AppInsetPanelBorderStyle}">
+                                                                        <Grid>
+                                                                            <Grid.RowDefinitions>
+                                                                                <RowDefinition Height="Auto" />
+                                                                                <RowDefinition Height="*" />
+                                                                                <RowDefinition Height="Auto" />
+                                                                                <RowDefinition Height="Auto" />
+                                                                            </Grid.RowDefinitions>
+
+                                                                            <TextBlock Text="{Binding EtichettaBreve}"
+                                                                                       HorizontalAlignment="Center"
+                                                                                       Style="{StaticResource AppMetricLabelTextStyle}" />
+
+                                                                            <Grid Grid.Row="1" Height="170" Margin="0,10,0,8">
+                                                                                <Grid.RowDefinitions>
+                                                                                    <RowDefinition Height="*" />
+                                                                                    <RowDefinition Height="*" />
+                                                                                </Grid.RowDefinitions>
+                                                                                <Border Grid.RowSpan="2" Height="1" VerticalAlignment="Center"
+                                                                                        Background="{DynamicResource AppSubtleBorderBrush}" />
+                                                                                <Rectangle Grid.Row="0"
+                                                                                           Width="20"
+                                                                                           RadiusX="4"
+                                                                                           RadiusY="4"
+                                                                                           Height="{Binding AltezzaRitardo}"
+                                                                                           VerticalAlignment="Bottom"
+                                                                                           Fill="{DynamicResource AppDangerBrush}" />
+                                                                                <Rectangle Grid.Row="1"
+                                                                                           Width="20"
+                                                                                           RadiusX="4"
+                                                                                           RadiusY="4"
+                                                                                           Height="{Binding AltezzaAnticipo}"
+                                                                                           VerticalAlignment="Top"
+                                                                                           Fill="{DynamicResource AppAccentBrush}" />
+                                                                            </Grid>
+
+                                                                            <TextBlock Grid.Row="2"
+                                                                                       Text="{Binding ScostamentoText}"
+                                                                                       HorizontalAlignment="Center"
+                                                                                       FontWeight="SemiBold" />
+                                                                            <TextBlock Grid.Row="3"
+                                                                                       Margin="0,6,0,0"
+                                                                                       Text="{Binding TipoText}"
+                                                                                       TextAlignment="Center"
+                                                                                       TextWrapping="Wrap"
+                                                                                       Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                        </Grid>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </ScrollViewer>
+
+                                                    <StackPanel VerticalAlignment="Center"
+                                                                HorizontalAlignment="Center"
+                                                                Visibility="{Binding AndamentoGraficoVuotoVisibility}">
+                                                        <iconPacks:PackIconMaterial Kind="ChartTimelineVariant"
+                                                                                    Width="42"
+                                                                                    Height="42"
+                                                                                    HorizontalAlignment="Center"
+                                                                                    Foreground="{DynamicResource AppMutedTextBrush}" />
+                                                        <TextBlock Text="Lo storico non contiene ancora abbastanza dati per il grafico andamento."
+                                                                   Margin="0,10,0,0"
+                                                                   TextAlignment="Center"
+                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                                </Grid>
+                                            </Border>
+
+                                            <Border Grid.Column="1"
+                                                    Padding="18"
+                                                    Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock Text="Punti chiave"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <TextBlock Text="I riferimenti migliori per capire subito come sta andando lo storico."
+                                                               Margin="0,6,0,0"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                </StackPanel>
+
+                                                <ItemsControl Grid.Row="1"
+                                                              Margin="0,14,0,0"
+                                                              ItemsSource="{Binding PuntiChiavePanoramica}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Margin="0,0,0,12"
+                                                                    Padding="14"
+                                                                    Style="{StaticResource AppInsetPanelBorderStyle}">
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding Titolo}"
+                                                                               Style="{StaticResource AppMetricLabelTextStyle}" />
+                                                                    <TextBlock Text="{Binding Valore}"
+                                                                               Margin="0,6,0,0"
+                                                                               Foreground="{DynamicResource AppAccentDeepBrush}"
+                                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                                    <TextBlock Text="{Binding Descrizione}"
+                                                                               Margin="0,4,0,0"
+                                                                               TextWrapping="Wrap"
+                                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                </StackPanel>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </TabItem>
+
+                                <TabItem>
+                                    <TabItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="CompareHorizontal" Width="18" Height="18" Margin="0,0,8,0" />
+                                            <TextBlock Text="Confronti" />
+                                        </StackPanel>
+                                    </TabItem.Header>
+
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <StackPanel Margin="14">
+                                            <Border Padding="12"
+                                                    Margin="0,0,0,14"
+                                                    Style="{StaticResource AppInsetPanelBorderStyle}">
+                                                <WrapPanel>
+                                                    <Border Margin="0,0,10,8" Style="{StaticResource StatisticheLegendChipBorderStyle}" ToolTip="Sessioni concluse entro il tempo programmato.">
+                                                        <TextBlock Text="In orario" Style="{StaticResource AppChipTextStyle}" />
+                                                    </Border>
+                                                    <Border Margin="0,0,10,8" Style="{StaticResource StatisticheLegendChipBorderStyle}" ToolTip="Scostamento positivo = ritardo. Scostamento negativo = anticipo.">
+                                                        <TextBlock Text="Scostamento +/-" Style="{StaticResource AppChipTextStyle}" />
+                                                    </Border>
+                                                    <Border Margin="0,0,10,8" Style="{StaticResource StatisticheLegendChipBorderStyle}" ToolTip="Parti concluse con timer sotto zero.">
+                                                        <TextBlock Text="Parti fuori tempo" Style="{StaticResource AppChipTextStyle}" />
+                                                    </Border>
+                                                    <TextBlock Margin="0,2,0,0"
+                                                               VerticalAlignment="Center"
+                                                               Text="{Binding LegendaConfronti}"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                </WrapPanel>
+                                            </Border>
+
+                                            <Border Padding="18" Margin="0,0,0,14" Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="Percentuale adunanze in orario per tipo"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <ItemsControl Grid.Row="1"
+                                                                  Margin="0,16,0,0"
+                                                                  ItemsSource="{Binding PercentualiInOrarioPerTipo}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,0,0,18"
+                                                                      ToolTip="{Binding TooltipText}">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="220" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <StackPanel>
+                                                                        <TextBlock Text="{Binding Titolo}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                        <TextBlock Text="{Binding Descrizione}"
+                                                                                   Margin="0,4,0,0"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                    </StackPanel>
+                                                                    <Grid Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                                        <Border Height="12" Background="{DynamicResource AppSurfaceStrongBrush}" CornerRadius="4" />
+                                                                        <Border Height="12"
+                                                                                Width="{Binding LarghezzaBarra}"
+                                                                                HorizontalAlignment="Left"
+                                                                                Background="{DynamicResource AppAccentBrush}"
+                                                                                CornerRadius="4" />
+                                                                    </Grid>
+                                                                    <TextBlock Grid.Column="2"
+                                                                               Margin="18,0,0,0"
+                                                                               MinWidth="96"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{Binding ValoreText}"
+                                                                               TextAlignment="Right"
+                                                                               Foreground="{DynamicResource AppAccentDeepBrush}"
+                                                                               FontWeight="SemiBold" />
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Grid>
+                                            </Border>
+
+                                            <Border Padding="18" Margin="0,0,0,14" Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="Media ritardo o anticipo per tipo"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <ItemsControl Grid.Row="1"
+                                                                  Margin="0,16,0,0"
+                                                                  ItemsSource="{Binding MediaScostamentoPerTipo}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,0,0,18"
+                                                                      ToolTip="{Binding TooltipText}">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="220" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <StackPanel>
+                                                                        <TextBlock Text="{Binding Titolo}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                        <TextBlock Text="{Binding Descrizione}"
+                                                                                   Margin="0,4,0,0"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                    </StackPanel>
+                                                                    <Grid Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                                        <Border Height="12" Background="{DynamicResource AppSurfaceStrongBrush}" CornerRadius="4" />
+                                                                        <Border x:Name="scostamentoBar"
+                                                                                Height="12"
+                                                                                Width="{Binding LarghezzaBarra}"
+                                                                                HorizontalAlignment="Left"
+                                                                                Background="{DynamicResource AppAccentBrush}"
+                                                                                CornerRadius="4" />
+                                                                    </Grid>
+                                                                    <TextBlock Grid.Column="2"
+                                                                               Margin="18,0,0,0"
+                                                                               MinWidth="110"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{Binding ValoreText}"
+                                                                               TextAlignment="Right"
+                                                                               FontWeight="SemiBold" />
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Grid>
+                                            </Border>
+
+                                            <Border Padding="18" Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="Media parti fuori tempo per tipo"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <ItemsControl Grid.Row="1"
+                                                                  Margin="0,16,0,0"
+                                                                  ItemsSource="{Binding MediaPartiFuoriTempoPerTipo}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,0,0,18"
+                                                                      ToolTip="{Binding TooltipText}">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="220" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <StackPanel>
+                                                                        <TextBlock Text="{Binding Titolo}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                        <TextBlock Text="{Binding Descrizione}"
+                                                                                   Margin="0,4,0,0"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                    </StackPanel>
+                                                                    <Grid Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                                        <Border Height="12" Background="{DynamicResource AppSurfaceStrongBrush}" CornerRadius="4" />
+                                                                        <Border Height="12"
+                                                                                Width="{Binding LarghezzaBarra}"
+                                                                                HorizontalAlignment="Left"
+                                                                                Background="{DynamicResource AppAccentDeepBrush}"
+                                                                                CornerRadius="4" />
+                                                                    </Grid>
+                                                                    <TextBlock Grid.Column="2"
+                                                                               Margin="18,0,0,0"
+                                                                               MinWidth="96"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{Binding ValoreText}"
+                                                                               TextAlignment="Right"
+                                                                               Foreground="{DynamicResource AppAccentDeepBrush}"
+                                                                               FontWeight="SemiBold" />
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </TabItem>
+
+                                <TabItem>
+                                    <TabItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="AlertCircleOutline" Width="18" Height="18" Margin="0,0,8,0" />
+                                            <TextBlock Text="Parti critiche" />
+                                        </StackPanel>
+                                    </TabItem.Header>
+
+                                    <ScrollViewer Margin="0,10,0,0"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <Grid Margin="14">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="14" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0" Padding="18" Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="Top 5 parti che piu spesso sforano"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <TextBlock Text="Quante volte la stessa parte e andata sotto zero nello storico."
+                                                               Margin="0,6,0,0"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                </StackPanel>
+                                                <Grid Grid.Row="1">
+                                                    <ItemsControl Margin="0,16,0,0"
+                                                                  Visibility="{Binding TopFrequenzaVisibility}"
+                                                                  ItemsSource="{Binding Top5PartiPiuSpessoFuoriTempo}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,0,0,18"
+                                                                      ToolTip="{Binding TooltipText}">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="210" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <StackPanel>
+                                                                        <TextBlock Text="{Binding Titolo}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                        <TextBlock Text="{Binding Descrizione}"
+                                                                                   Margin="0,4,0,0"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                    </StackPanel>
+                                                                    <Grid Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                                        <Border Height="12" Background="{DynamicResource AppSurfaceStrongBrush}" CornerRadius="4" />
+                                                                        <Border Height="12"
+                                                                                Width="{Binding LarghezzaBarra}"
+                                                                                HorizontalAlignment="Left"
+                                                                                Background="{DynamicResource AppDangerBrush}"
+                                                                                CornerRadius="4" />
+                                                                    </Grid>
+                                                                    <TextBlock Grid.Column="2"
+                                                                               Margin="18,0,0,0"
+                                                                               MinWidth="92"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{Binding ValoreText}"
+                                                                               TextAlignment="Right"
+                                                                               Foreground="{DynamicResource AppDangerBrush}"
+                                                                               FontWeight="SemiBold" />
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <StackPanel VerticalAlignment="Center"
+                                                                HorizontalAlignment="Center"
+                                                                Visibility="{Binding TopFrequenzaVuotoVisibility}">
+                                                        <iconPacks:PackIconMaterial Kind="ShieldCheckOutline"
+                                                                                    Width="40"
+                                                                                    Height="40"
+                                                                                    HorizontalAlignment="Center"
+                                                                                    Foreground="{DynamicResource AppMutedTextBrush}" />
+                                                        <TextBlock Text="Nessuna parte e ancora andata fuori tempo nello storico registrato."
+                                                                   Margin="0,10,0,0"
+                                                                   TextAlignment="Center"
+                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                                </Grid>
+                                            </Border>
+
+                                            <Border Grid.Column="2" Padding="18" Style="{StaticResource AppPanelBorderStyle}">
+                                                <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="Top 5 parti con sforamento medio piu alto"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <TextBlock Text="Le parti che mediamente accumulano piu ritardo quando vanno fuori tempo."
+                                                               Margin="0,6,0,0"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                </StackPanel>
+                                                <Grid Grid.Row="1">
+                                                    <ItemsControl Margin="0,16,0,0"
+                                                                  Visibility="{Binding TopMedioVisibility}"
+                                                                  ItemsSource="{Binding Top5PartiSforamentoMedio}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Grid Margin="0,0,0,18"
+                                                                      ToolTip="{Binding TooltipText}">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="210" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <StackPanel>
+                                                                        <TextBlock Text="{Binding Titolo}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                        <TextBlock Text="{Binding Descrizione}"
+                                                                                   Margin="0,4,0,0"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                    </StackPanel>
+                                                                    <Grid Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                                        <Border Height="12" Background="{DynamicResource AppSurfaceStrongBrush}" CornerRadius="4" />
+                                                                        <Border Height="12"
+                                                                                Width="{Binding LarghezzaBarra}"
+                                                                                HorizontalAlignment="Left"
+                                                                                Background="{DynamicResource AppAccentDeepBrush}"
+                                                                                CornerRadius="4" />
+                                                                    </Grid>
+                                                                    <TextBlock Grid.Column="2"
+                                                                               Margin="18,0,0,0"
+                                                                               MinWidth="92"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{Binding ValoreText}"
+                                                                               TextAlignment="Right"
+                                                                               Foreground="{DynamicResource AppAccentDeepBrush}"
+                                                                               FontWeight="SemiBold" />
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <StackPanel VerticalAlignment="Center"
+                                                                HorizontalAlignment="Center"
+                                                                Visibility="{Binding TopMedioVuotoVisibility}">
+                                                        <iconPacks:PackIconMaterial Kind="ShieldCheckOutline"
+                                                                                    Width="40"
+                                                                                    Height="40"
+                                                                                    HorizontalAlignment="Center"
+                                                                                    Foreground="{DynamicResource AppMutedTextBrush}" />
+                                                        <TextBlock Text="Nessuna media sforamento disponibile perche non ci sono ritardi registrati sulle parti."
+                                                                   Margin="0,10,0,0"
+                                                                   TextAlignment="Center"
+                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </TabItem>
+
+                                <TabItem>
+                                    <TabItem.Header>
+                                        <StackPanel Orientation="Horizontal">
+                                            <iconPacks:PackIconMaterial Kind="History" Width="18" Height="18" Margin="0,0,8,0" />
+                                            <TextBlock Text="Storico dettagliato" />
+                                        </StackPanel>
+                                    </TabItem.Header>
+
+                                    <Grid Margin="14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="360" MinWidth="320" />
+                                            <ColumnDefinition Width="14" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Grid.Column="0" Padding="12" Style="{StaticResource AppPanelBorderStyle}">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="Sessioni salvate"
+                                                               Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                    <TextBlock Text="Seleziona una sessione per vedere numeri, pause, cambi e modifiche."
+                                                               Margin="0,6,0,0"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                </StackPanel>
+
+                                                <Border Grid.Row="1"
+                                                        Margin="0,16,0,0"
+                                                        Padding="6"
+                                                        Style="{StaticResource AppListContainerBorderStyle}">
+                                                    <ListBox x:Name="StoricoListBox"
+                                                             ItemsSource="{Binding StoricoSessioni}"
+                                                             SelectedItem="{Binding SessioneSelezionata, Mode=TwoWay}"
+                                                             SelectionChanged="StoricoListBox_SelectionChanged"
+                                                             Background="Transparent"
+                                                             BorderThickness="0"
+                                                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                             ItemContainerStyle="{StaticResource StatisticheStoricoListBoxItemStyle}">
+                                                        <ListBox.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Padding="14"
+                                                                        ToolTip="{Binding TooltipText}"
+                                                                        Style="{StaticResource StatisticheStoricoCardBorderStyle}">
+                                                                    <Grid>
+                                                                        <Grid.RowDefinitions>
+                                                                            <RowDefinition Height="Auto" />
+                                                                            <RowDefinition Height="Auto" />
+                                                                            <RowDefinition Height="Auto" />
+                                                                        </Grid.RowDefinitions>
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*" />
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding Titolo}"
+                                                                                       Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                            <Border Grid.Column="1"
+                                                                                    Padding="10,6"
+                                                                                    Style="{StaticResource AppChipBorderStyle}">
+                                                                                <TextBlock Text="{Binding Badge}"
+                                                                                           Style="{StaticResource AppChipTextStyle}" />
+                                                                            </Border>
+                                                                        </Grid>
+                                                                        <TextBlock Grid.Row="1"
+                                                                                   Margin="0,6,0,0"
+                                                                                   Text="{Binding Sottotitolo}"
+                                                                                   TextWrapping="Wrap"
+                                                                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                                        <Grid Grid.Row="2" Margin="0,10,0,0">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*" />
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding RiepilogoParti}"
+                                                                                       Style="{StaticResource AppMetricLabelTextStyle}" />
+                                                                            <TextBlock Grid.Column="1"
+                                                                                       Text="{Binding ScostamentoText}"
+                                                                                       Foreground="{Binding ScostamentoBrush}"
+                                                                                       FontWeight="SemiBold" />
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ListBox.ItemTemplate>
+                                                    </ListBox>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+
+                                        <Grid Grid.Column="2">
+                                            <Grid Visibility="{Binding DettaglioSessioneVisibility}">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <Border Padding="16" Margin="0,0,0,14" MaxHeight="270" Style="{StaticResource AppPanelBorderStyle}">
+                                                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                                                  HorizontalScrollBarVisibility="Disabled">
+                                                        <StackPanel>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding DettaglioTitolo}"
+                                                                           Style="{StaticResource AppSectionHeaderTextStyle}" />
+                                                                <TextBlock Text="{Binding DettaglioSottotitolo}"
+                                                                           Margin="0,6,0,0"
+                                                                           Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                            </StackPanel>
+                                                            <Border Grid.Column="1"
+                                                                    Padding="10,6"
+                                                                    VerticalAlignment="Top"
+                                                                    Style="{StaticResource AppChipBorderStyle}">
+                                                                <TextBlock Text="{Binding DettaglioBadge}"
+                                                                           Style="{StaticResource AppChipTextStyle}" />
+                                                            </Border>
+                                                        </Grid>
+
+                                                        <WrapPanel Margin="0,14,0,0">
+                                                            <Border Margin="0,0,10,10" Padding="10,6" Style="{StaticResource AppChipBorderStyle}">
+                                                                <TextBlock Text="{Binding DettaglioMotivoChiusura}" Style="{StaticResource AppChipTextStyle}" />
+                                                            </Border>
+                                                            <Border Margin="0,0,10,10" Padding="10,6" Style="{StaticResource AppChipBorderStyle}">
+                                                                <TextBlock Text="{Binding DettaglioParteCritica}" Style="{StaticResource AppChipTextStyle}" />
+                                                            </Border>
+                                                            <Border Margin="0,0,10,10" Padding="10,6" Style="{StaticResource AppChipBorderStyle}">
+                                                                <TextBlock Text="{Binding DettaglioStatoScaletta}" Style="{StaticResource AppChipTextStyle}" />
+                                                            </Border>
+                                                        </WrapPanel>
+
+                                                        <Border Margin="0,2,0,0"
+                                                                Padding="10,8"
+                                                                Style="{StaticResource AppInsetPanelBorderStyle}">
+                                                            <WrapPanel>
+                                                                <Border Margin="0,0,10,8" Style="{StaticResource StatisticheLegendChipBorderStyle}" ToolTip="Differenza finale rispetto al programmato: positivo = ritardo, negativo = anticipo.">
+                                                                    <TextBlock Text="Scostamento +/-" Style="{StaticResource AppChipTextStyle}" />
+                                                                </Border>
+                                                                <Border Margin="0,0,10,8" Style="{StaticResource StatisticheLegendChipBorderStyle}" ToolTip="Tempo totale trascorso sotto zero sulle parti che hanno sforato.">
+                                                                    <TextBlock Text="Sotto zero" Style="{StaticResource AppChipTextStyle}" />
+                                                                </Border>
+                                                                <Border Margin="0,0,10,8" Style="{StaticResource StatisticheLegendChipBorderStyle}" ToolTip="Quante volte il timer e stato fermato e poi riavviato.">
+                                                                    <TextBlock Text="Pause / riprese" Style="{StaticResource AppChipTextStyle}" />
+                                                                </Border>
+                                                                <TextBlock Margin="0,2,0,0"
+                                                                           VerticalAlignment="Center"
+                                                                           Text="{Binding LegendaStoricoDettaglio}"
+                                                                           Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                                            </WrapPanel>
+                                                        </Border>
+
+                                                        <ItemsControl Margin="0,10,0,0"
+                                                                      ItemsSource="{Binding MetricheSessioneSelezionata}">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <WrapPanel />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Border Width="176"
+                                                                            Margin="0,0,12,12"
+                                                                            Padding="12"
+                                                                            ToolTip="{Binding TooltipText}"
+                                                                            Style="{StaticResource AppInsetPanelBorderStyle}">
+                                                                        <StackPanel>
+                                                                            <TextBlock Text="{Binding Titolo}" Style="{StaticResource AppMetricLabelTextStyle}" />
+                                                                            <TextBlock Text="{Binding Valore}"
+                                                                                       Margin="0,6,0,0"
+                                                                                       Foreground="{DynamicResource AppAccentDeepBrush}"
+                                                                                       Style="{StaticResource AppSubtitleTextBlockStyle}" />
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                        </StackPanel>
+                                                    </ScrollViewer>
+                                                </Border>
+
+                                                <TabControl Grid.Row="1"
+                                                             Background="Transparent"
+                                                             BorderThickness="0"
+                                                             ItemContainerStyle="{StaticResource StatisticheSecondaryTabItemStyle}"
+                                                             MinHeight="320"
+                                                             materialDesign:ColorZoneAssist.Mode="Standard">
+                                                    <TabItem Header="Parti">
+                                                        <DataGrid ItemsSource="{Binding PartiDettaglio}"
+                                                                  Style="{StaticResource StatisticheDataGridStyle}"
+                                                                  FrozenColumnCount="3"
+                                                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                            <DataGrid.Resources>
+                                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource StatisticheDataGridTextStyle}" />
+                                                            </DataGrid.Resources>
+                                                            <DataGrid.Columns>
+                                                                <DataGridTextColumn Header="Ordini" Binding="{Binding OrdiniDisplay}" Width="92" />
+                                                                <DataGridTextColumn Header="N." Binding="{Binding NumeroParte}" Width="54" />
+                                                                <DataGridTextColumn Header="Parte" Binding="{Binding NomeParte}" Width="230" />
+                                                                <DataGridTextColumn Header="Tipo" Binding="{Binding TipoParte}" Width="120" />
+                                                                <DataGridTextColumn Header="Prevista" Binding="{Binding PrevistaDisplay}" Width="92" />
+                                                                <DataGridTextColumn Header="Reale" Binding="{Binding DurataReale}" Width="92" />
+                                                                <DataGridTextColumn Header="Delta" Binding="{Binding DeltaDisplay}" Width="92" />
+                                                                <DataGridTextColumn Header="Fuori tempo" Binding="{Binding FuoriTempo}" Width="88" />
+                                                                <DataGridTextColumn Header="Sotto zero" Binding="{Binding TempoSottoZero}" Width="94" />
+                                                                <DataGridTextColumn Header="Stato" Binding="{Binding StatoParte}" Width="140" />
+                                                                <DataGridTextColumn Header="Ora inizio" Binding="{Binding OraInizio}" Width="140" />
+                                                                <DataGridTextColumn Header="Ora fine" Binding="{Binding OraFine}" Width="140" />
+                                                            </DataGrid.Columns>
+                                                        </DataGrid>
+                                                    </TabItem>
+
+                                                    <TabItem Header="Pause">
+                                                        <DataGrid ItemsSource="{Binding PauseDettaglio}"
+                                                                  Style="{StaticResource StatisticheDataGridStyle}">
+                                                            <DataGrid.Resources>
+                                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource StatisticheDataGridTextStyle}" />
+                                                            </DataGrid.Resources>
+                                                            <DataGrid.Columns>
+                                                                <DataGridTextColumn Header="Motivo" Binding="{Binding Motivo}" Width="160" />
+                                                                <DataGridTextColumn Header="Timer fermo dalle" Binding="{Binding Inizio}" Width="176" />
+                                                                <DataGridTextColumn Header="Riparte alle" Binding="{Binding Fine}" Width="176" />
+                                                                <DataGridTextColumn Header="Stop totale" Binding="{Binding Durata}" Width="110" />
+                                                            </DataGrid.Columns>
+                                                        </DataGrid>
+                                                    </TabItem>
+
+                                                    <TabItem Header="Cambi parte">
+                                                        <DataGrid ItemsSource="{Binding CambiDettaglio}"
+                                                                  Style="{StaticResource StatisticheDataGridStyle}">
+                                                            <DataGrid.Resources>
+                                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource StatisticheDataGridTextStyle}" />
+                                                            </DataGrid.Resources>
+                                                            <DataGrid.Columns>
+                                                                <DataGridTextColumn Header="Quando" Binding="{Binding Ora}" Width="176" />
+                                                                <DataGridTextColumn Header="Tipo cambio" Binding="{Binding Tipo}" Width="160" />
+                                                                <DataGridTextColumn Header="Da parte" Binding="{Binding PartePrecedente}" Width="220" />
+                                                                <DataGridTextColumn Header="A parte" Binding="{Binding ParteSuccessiva}" Width="220" />
+                                                                <DataGridTextColumn Header="Posizione" Binding="{Binding Indici}" Width="96" />
+                                                            </DataGrid.Columns>
+                                                        </DataGrid>
+                                                    </TabItem>
+
+                                                    <TabItem Header="Modifiche">
+                                                        <DataGrid ItemsSource="{Binding ModificheDettaglio}"
+                                                                  Style="{StaticResource StatisticheDataGridStyle}">
+                                                            <DataGrid.Resources>
+                                                                <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource StatisticheDataGridTextStyle}" />
+                                                            </DataGrid.Resources>
+                                                            <DataGrid.Columns>
+                                                                <DataGridTextColumn Header="Quando" Binding="{Binding Ora}" Width="176" />
+                                                                <DataGridTextColumn Header="Parte" Binding="{Binding Parte}" Width="220" />
+                                                                <DataGridTextColumn Header="Nome: prima -> dopo" Binding="{Binding NomeCambio}" Width="280" />
+                                                                <DataGridTextColumn Header="Durata: prima -> dopo" Binding="{Binding DurataCambio}" Width="180" />
+                                                                <DataGridTextColumn Header="Ordine" Binding="{Binding Ordine}" Width="96" />
+                                                            </DataGrid.Columns>
+                                                        </DataGrid>
+                                                    </TabItem>
+                                                </TabControl>
+                                            </Grid>
+
+                                            <StackPanel VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"
+                                                        Visibility="{Binding DettaglioSessioneVuotoVisibility}">
+                                                <iconPacks:PackIconMaterial Kind="FileChartOutline"
+                                                                            Width="44"
+                                                                            Height="44"
+                                                                            HorizontalAlignment="Center"
+                                                                            Foreground="{DynamicResource AppMutedTextBrush}" />
+                                                <TextBlock Text="Seleziona una sessione dallo storico per aprire il dettaglio completo."
+                                                           Margin="0,10,0,0"
+                                                           TextAlignment="Center"
+                                                           Style="{StaticResource AppMutedCaptionTextStyle}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </TabItem>
+                            </TabControl>
+                        </Grid>
+
+                        <StackPanel VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Visibility="{Binding StatoVuotoVisibility}">
+                            <Border Width="72"
+                                    Height="72"
+                                    CornerRadius="24"
+                                    Background="{DynamicResource AppAccentSoftBrush}">
+                                <iconPacks:PackIconMaterial Kind="DatabaseOutline"
+                                                            Width="38"
+                                                            Height="38"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Foreground="{DynamicResource AppAccentDeepBrush}" />
+                            </Border>
+                            <TextBlock Text="Nessuna statistica disponibile"
+                                       Margin="0,18,0,0"
+                                       HorizontalAlignment="Center"
+                                       Style="{StaticResource AppSectionHeaderTextStyle}" />
+                            <TextBlock Text="Le statistiche appariranno qui dopo le prime adunanze concluse e salvate automaticamente."
+                                       Margin="0,8,0,0"
+                                       TextAlignment="Center"
+                                       Style="{StaticResource AppMutedCaptionTextStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </materialDesign:Card>
+
+                <materialDesign:Card Grid.Row="3" Style="{StaticResource AppBottomSectionCardStyle}">
+                    <Grid Margin="16,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Archivio locale statistiche"
+                                       Style="{StaticResource AppMetricLabelTextStyle}" />
+                            <TextBlock Text="{Binding PercorsoArchivio}"
+                                       Margin="0,4,0,0"
+                                       TextTrimming="CharacterEllipsis"
+                                       Style="{StaticResource AppMutedCaptionTextStyle}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding NotaFooter}"
+                                   Style="{StaticResource AppMutedCaptionTextStyle}" />
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</Window>
+
+
+
+
