@@ -34,7 +34,7 @@
                         Margin="0,0,12,0"
                         Click="BtnChiudiIcona_Click"
                         ToolTip="Chiudi">
-                    <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{StaticResource AppAccentBrush}"/>
+                    <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{DynamicResource AppAccentBrush}"/>
                 </Button>
 
                 <TextBlock x:Name="lblTitolo"
@@ -60,7 +60,7 @@
                            TextWrapping="Wrap"
                            Margin="0,8,0,0"
                            FontSize="13"
-                           Foreground="#EF5350"
+                           Foreground="{DynamicResource AppInputErrorBrush}"
                            Visibility="Collapsed"/>
             </StackPanel>
 
@@ -71,14 +71,14 @@
 
                 <Button x:Name="BtnPredefinito1" 
                         Content="Cancel" 
-                        MinWidth="120"
+                        MinWidth="132"
                         Style="{StaticResource AppSecondaryButtonStyle}"
                         materialDesign:ButtonAssist.CornerRadius="15"
                         Margin="0,0,8,0" Click="BtnPredefinito1_Click"/>
 
                 <Button x:Name="BtnPredefinito2" 
                         Content="OK" 
-                        MinWidth="120"
+                        MinWidth="132"
                         Style="{StaticResource AppPrimaryButtonStyle}"
                         Click="BtnPredefinito2_Click"/>
 
@@ -87,3 +87,4 @@
         </Grid>
     </materialDesign:Card>
 </Window>
+

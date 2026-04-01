@@ -1,34 +1,36 @@
-﻿using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.View;
 using System;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using InTempo.Classes.NonAbstract;
+using InTempo.Classes.Utilities;
+using InTempo.Classes.Utilities.Theming;
+using InTempo.Classes.View;
 
 namespace InTempo
 {
     public partial class MainWindow : Window
     {
-        public Adunanza DatiAdunanza { get; set; } = new Adunanza();
-        public TimerLogics LogicTimer { get; set; }
+        private readonly FinestraTimer _finestratimer;
+        private PlayerMusicale player;
         private bool _isPaused = true;
 
-        private FinestraTimer _finestratimer;
+        public Adunanza DatiAdunanza { get; set; }
 
+        public TimerLogics LogicTimer { get; set; }
 
-        // Proprietà per cambiare l'icona Play/Pausa
         public string IconaStatoTimer
         {
-            get { return (string)GetValue(IconaStatoTimerProperty); }
-            set { SetValue(IconaStatoTimerProperty, value); }
+            get => (string)GetValue(IconaStatoTimerProperty);
+            set => SetValue(IconaStatoTimerProperty, value);
         }
+
         public static readonly DependencyProperty IconaStatoTimerProperty =
             DependencyProperty.Register("IconaStatoTimer", typeof(string), typeof(MainWindow), new PropertyMetadata("Play"));
 
@@ -36,14 +38,17 @@ namespace InTempo
         {
             InitializeComponent();
             SourceInitialized += MainWindow_SourceInitialized;
+
+            DatiAdunanza = new Adunanza(App.Settings);
+            LogicTimer = new TimerLogics(DatiAdunanza, App.Settings);
+            player = new PlayerMusicale(LogicTimer, App.Settings);
+
             AvviaOrologio();
-            LogicTimer = new TimerLogics(DatiAdunanza);
             DataContext = this;
+            AggiornaStatoNavigazioneParti();
 
-            //Creiamo la finestra secondaria iniziando con l'orologio
-            _finestratimer = new FinestraTimer(Orologio, LogicTimer);
+            _finestratimer = new FinestraTimer(Orologio, LogicTimer, App.Settings);
             _finestratimer.Show();
-
         }
 
         private void MainWindow_SourceInitialized(object? sender, EventArgs e)
@@ -54,9 +59,11 @@ namespace InTempo
         private void HideCaptionIcon()
         {
             IntPtr hwnd = new WindowInteropHelper(this).Handle;
-            if (hwnd == IntPtr.Zero) return;
+            if (hwnd == IntPtr.Zero)
+            {
+                return;
+            }
 
-            // Rimuove l'icona dalla title bar senza mostrare la placeholder stock.
             IntPtr exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
             IntPtr newStyle = (IntPtr)(exStyle.ToInt64() | WS_EX_DLGMODALFRAME);
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, newStyle);
@@ -70,41 +77,61 @@ namespace InTempo
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            bool needsBackgroundRefresh = false;
+
             try
             {
-                await DatiAdunanza.SelectedAdunanza();
+                await DatiAdunanza.SelectedAdunanza(preferCacheOnly: true);
+                needsBackgroundRefresh = !DatiAdunanza.LastLoadIsCurrentWeek;
+                LogicTimer.AggiornaGrafica();
                 RichiediCanticoInizialeSeNecessario();
+                AggiornaStatoNavigazioneParti();
             }
             catch (Exception ex)
             {
                 DatiAdunanza.Parti.Clear();
                 DatiAdunanza.Current = null;
+                needsBackgroundRefresh = true;
                 LogicTimer.AggiornaGrafica();
+                AggiornaStatoNavigazioneParti();
                 LogStartupError(ex);
-                FinestraPopUP errore = new FinestraPopUP(
-                    "Errore caricamento",
-                    "Impossibile caricare i dati dell'adunanza dal web. Controlla la connessione e riprova.",
-                    1);
-                errore.ShowDialog();
             }
             finally
             {
+                Caricamento();
+            }
+
+            if (needsBackgroundRefresh)
+            {
+                _ = AggiornaAdunanzaDaWebInBackgroundAsync();
                 Caricamento();
             }
         }
 
         private void BtnAvanti_Click(object sender, RoutedEventArgs e)
         {
+            if (_isPaused || DatiAdunanza.Current == null)
+            {
+                return;
+            }
+
             DatiAdunanza.Avanti();
             CheckCantico();
             LogicTimer.AggiornaGrafica();
+            AggiornaStatoNavigazioneParti();
         }
 
         private void BtnIndietro_Click(object sender, RoutedEventArgs e)
         {
+            if (_isPaused || DatiAdunanza.Current == null)
+            {
+                return;
+            }
+
             DatiAdunanza.Indietro();
             CheckCantico();
             LogicTimer.AggiornaGrafica();
+            AggiornaStatoNavigazioneParti();
         }
 
         public bool CheckCantico()
@@ -113,16 +140,14 @@ namespace InTempo
 
             if (current?.TipoParte == "Cantico")
             {
-                _finestratimer.CambiaVista(3, current.NomeParte, System.Windows.Media.Brushes.Yellow);
+                _finestratimer.CambiaVista(VistaPresentazione.SoloScritta, current.NomeParte, System.Windows.Media.Brushes.Yellow);
                 btnCommentoSchermo.IsEnabled = false;
                 return true;
             }
-            else
-            {
-                _finestratimer.CambiaVista(1, "", System.Windows.Media.Brushes.White);
-                btnCommentoSchermo.IsEnabled = true;
-                return false;
-            }
+
+            _finestratimer.CambiaVista(VistaPresentazione.SoloTimer, string.Empty, System.Windows.Media.Brushes.White);
+            btnCommentoSchermo.IsEnabled = true;
+            return false;
         }
 
         private void BtnPausaRiprendi_Click(object sender, RoutedEventArgs e)
@@ -137,31 +162,29 @@ namespace InTempo
             txtTimer.Visibility = Visibility.Visible;
         }
 
-
-        // --- GESTIONE MENU SEMPLIFICATA ---
-
-        // Funzione helper per recuperare la riga cliccata
         private Parte? GetParteFromButton(object sender)
         {
-            if (sender is Button btn && btn.Tag is Parte parte)
-            {
-                return parte;
-            }
-            return null;
+            return sender is Button btn && btn.Tag is Parte parte ? parte : null;
         }
 
         private void MenuItemReset_Click(object sender, RoutedEventArgs e)
         {
-            var parte = GetParteFromButton(sender);
-            if (parte != null) LogicTimer.ResetTimerPreciso(parte);
+            Parte? parte = GetParteFromButton(sender);
+            if (parte != null)
+            {
+                LogicTimer.ResetTimerPreciso(parte);
+            }
         }
 
         private void MenuItemAggiungi_Click(object sender, RoutedEventArgs e)
         {
-            var parteSelezionata = GetParteFromButton(sender);
-            if (parteSelezionata == null) return;
+            Parte? parteSelezionata = GetParteFromButton(sender);
+            if (parteSelezionata == null)
+            {
+                return;
+            }
 
-            bool wasRunning = TimerLogics.IsRunning;
+            bool wasRunning = LogicTimer.IsRunning;
             LogicTimer.StopTimer();
 
             int indice = DatiAdunanza.Parti.IndexOf(parteSelezionata);
@@ -173,44 +196,37 @@ namespace InTempo
                 LogicTimer.AggiornaGrafica();
             }
 
-            if (wasRunning) LogicTimer.StartTimer();
+            if (wasRunning)
+            {
+                LogicTimer.StartTimer();
+            }
         }
 
-        private void MenuItemEllimina_Click(object sender, RoutedEventArgs e)
+        private void MenuItemElimina_Click(object sender, RoutedEventArgs e)
         {
-            var parteSelezionata = GetParteFromButton(sender);
-            if(DatiAdunanza.Parti.Count == 1)
+            Parte? parteSelezionata = GetParteFromButton(sender);
+            if (DatiAdunanza.Parti.Count == 1 || parteSelezionata == null)
             {
                 return;
             }
-            if (parteSelezionata == null)
-            {
-                return; 
-            }
 
-            bool wasRunning = TimerLogics.IsRunning;
+            bool wasRunning = LogicTimer.IsRunning;
             LogicTimer.StopTimer();
-
             LogicTimer.RegistraRimozioneParte(parteSelezionata);
 
             if (parteSelezionata == DatiAdunanza.Current)
             {
-                 
                 if (DatiAdunanza.Parti[0] == DatiAdunanza.Current)
                 {
-                   DatiAdunanza.Avanti();
+                    DatiAdunanza.Avanti();
                 }
                 else
                 {
                     DatiAdunanza.Indietro();
                 }
-                DatiAdunanza.Parti.Remove(parteSelezionata);
-            }
-            else
-            {
-                DatiAdunanza.Parti.Remove(parteSelezionata);
             }
 
+            DatiAdunanza.Parti.Remove(parteSelezionata);
             LogicTimer.AggiornaGrafica();
             CheckCantico();
 
@@ -222,10 +238,13 @@ namespace InTempo
 
         private void MenuItemModifica_Click(object sender, RoutedEventArgs e)
         {
-            var parteSelezionata = GetParteFromButton(sender);
-            if (parteSelezionata == null) return;
+            Parte? parteSelezionata = GetParteFromButton(sender);
+            if (parteSelezionata == null)
+            {
+                return;
+            }
 
-            bool wasRunning = TimerLogics.IsRunning;
+            bool wasRunning = LogicTimer.IsRunning;
             LogicTimer.StopTimer();
 
             ModificaParte finestra = new ModificaParte(parteSelezionata);
@@ -237,13 +256,12 @@ namespace InTempo
                 {
                     TimeSpan differenzaTempo = finestra.ParteCopia.TempoParte - parteSelezionata.TempoParte;
 
-                    var target = DatiAdunanza.Parti[index];
+                    Parte target = DatiAdunanza.Parti[index];
                     target.NumeroParte = finestra.ParteCopia.NumeroParte;
                     target.NomeParte = finestra.ParteCopia.NomeParte;
                     target.TempoParte = finestra.ParteCopia.TempoParte;
                     target.TipoParte = finestra.ParteCopia.TipoParte;
                     target.ColoreParte = finestra.ParteCopia.ColoreParte;
-
                     target.TempoScorrevole += differenzaTempo;
                 }
             }
@@ -259,47 +277,47 @@ namespace InTempo
 
         public void Caricamento()
         {
-            if(WebPartsLoader.IsLoading)
-            {
-                prgbar.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                prgbar.Visibility = Visibility.Collapsed;
-            }
+            bool hasLoadedParts = DatiAdunanza.Parti.Count > 0;
+            bool shouldShowLoading = WebPartsLoader.IsLoading && !hasLoadedParts;
+            Visibility visibility = shouldShowLoading ? Visibility.Visible : Visibility.Collapsed;
+            loadingOverlay.Visibility = visibility;
+            prgbar.Visibility = shouldShowLoading ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Impostazioni finestra = new Impostazioni(LogicTimer);
-            finestra.Owner = this;
+            string themeStateBefore = CreateThemeStateSnapshot();
+            Impostazioni finestra = new Impostazioni(LogicTimer, App.Settings)
+            {
+                Owner = this
+            };
 
             if (finestra.ShowDialog() == true)
             {
                 _finestratimer.ApplicaMonitorScelto();
+                if (!string.Equals(themeStateBefore, CreateThemeStateSnapshot(), StringComparison.Ordinal))
+                {
+                    RicreaPlayerMusicale();
+                }
+
                 SincronizzaStatoVisuale();
             }
         }
 
-        // Logica orologio
-        DispatcherTimer Orologio {  get; set; } = new DispatcherTimer(DispatcherPriority.Render);
+        private DispatcherTimer Orologio { get; } = new DispatcherTimer(DispatcherPriority.Send);
+
         private void AvviaOrologio()
         {
-          
-            Orologio.Interval = TimeSpan.FromMilliseconds(100);
-
+            Orologio.Interval = TimeSpan.FromSeconds(1);
             Orologio.Tick += Timer_Tick;
             txtTimer.Visibility = Visibility.Collapsed;
             txtOrologio.Visibility = Visibility.Visible;
             Orologio.Start();
         }
 
-
-
         private void Timer_Tick(object? sender, EventArgs e)
         {
             DateTime now = DateTime.Now;
-
             bool devePartire = LogicTimer.CalcolaStatoOrologio(now, _isPaused);
 
             if (devePartire)
@@ -308,99 +326,143 @@ namespace InTempo
             }
         }
 
-        // UNICO metodo che gestisce tutto: UI + orologio + timer adunanza + stato/icona
         private void SetStatoAdunanza(bool avvia)
         {
             if (avvia)
             {
-                // Se è già avviata, non fare nulla
-                if (!_isPaused) return;
+                if (!_isPaused)
+                {
+                    return;
+                }
 
                 _isPaused = false;
                 IconaStatoTimer = "Pause";
 
-                // Passo da orologio -> timer adunanza
                 Orologio.Stop();
-                _finestratimer.CambiaVista(1, "", System.Windows.Media.Brushes.White); // Passo alla vista timer
+                _finestratimer.CambiaVista(VistaPresentazione.SoloTimer, string.Empty, System.Windows.Media.Brushes.White);
                 txtOrologio.Visibility = Visibility.Collapsed;
                 txtTimer.Visibility = Visibility.Visible;
                 btnCommentoSchermo.IsEnabled = true;
                 LogicTimer.StartTimer();
                 CheckCantico();
+                AggiornaStatoNavigazioneParti();
+                return;
             }
-            else
+
+            if (_isPaused)
             {
-                // Se è già ferma, non fare nulla
-                if (_isPaused) return;
-                
-                FinestraPopUP Avvertimento = new FinestraPopUP("Attenzione", "Sei sicuro di voler fermare il timer? \nL'adunanza verrà conclusa e resettata.",2);
-                Avvertimento.ShowDialog();
-                if(Avvertimento.DialogResult != true)
-                {
-                    return;
-                }
-
-                _isPaused = true;
-                IconaStatoTimer = "Play";
-
-                // Stop = adunanza conclusa => stop + reset completo
-                LogicTimer.StopTimer();
-                LogicTimer.ResetCompleto();
-                _finestratimer.CambiaVista(4, "", System.Windows.Media.Brushes.White);
-
-                // Torno a orologio
-                txtTimer.Visibility = Visibility.Collapsed;
-                txtOrologio.Visibility = Visibility.Visible;
-                btnCommentoSchermo.IsEnabled = false;
-
-                Orologio.Start();
+                return;
             }
+
+            FinestraPopUP avvertimento = new FinestraPopUP(
+                "Attenzione",
+                "Sei sicuro di voler fermare il timer? \nL'adunanza verrà conclusa e resettata.",
+                ConfigurazionePulsantiPopup.ConfermaAnnulla);
+            avvertimento.ShowDialog();
+            if (avvertimento.DialogResult != true)
+            {
+                return;
+            }
+
+            _isPaused = true;
+            IconaStatoTimer = "Play";
+
+            LogicTimer.StopTimer();
+            LogicTimer.ResetCompleto();
+            _finestratimer.CambiaVista(VistaPresentazione.Orologio, string.Empty, System.Windows.Media.Brushes.White);
+
+            txtTimer.Visibility = Visibility.Collapsed;
+            txtOrologio.Visibility = Visibility.Visible;
+            btnCommentoSchermo.IsEnabled = false;
+
+            Orologio.Start();
+            AggiornaStatoNavigazioneParti();
+        }
+
+        private void AggiornaStatoNavigazioneParti()
+        {
+            bool adunanzaAvviata = !_isPaused && DatiAdunanza.Current != null && DatiAdunanza.Parti.Count > 0;
+            BtnIndietro.IsEnabled = adunanzaAvviata;
+            BtnAvanti.IsEnabled = adunanzaAvviata;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(_finestratimer != null)
-            {
-                _finestratimer.Close();
-            }
-           
-            if(player != null)
-            {
-                player.Close();
-            }
-            
+            _finestratimer?.Close();
+            player?.Close();
         }
 
         private void btnCommentoSchermo_Click(object sender, RoutedEventArgs e)
         {
-            FinestraPopUP MessaggioOratore = new FinestraPopUP("Messaggi","Tutto Schermo","Parziale", _finestratimer);
-            MessaggioOratore.Owner = this;
-            MessaggioOratore.Show();
+            FinestraPopUP messaggioOratore = new FinestraPopUP("Messaggi", "Tutto Schermo", "Parziale", _finestratimer)
+            {
+                Owner = this
+            };
+            messaggioOratore.Show();
         }
-        PlayerMusicale player = new PlayerMusicale();
+
         private void btnMusica_Click(object sender, RoutedEventArgs e)
         {
+            player.Owner ??= this;
             player.Show();
+        }
+
+        private void RicreaPlayerMusicale()
+        {
+            bool wasVisible = player.IsVisible;
+            Window? previousOwner = player.Owner;
+
+            player.Close();
+            player = new PlayerMusicale(LogicTimer, App.Settings)
+            {
+                Owner = previousOwner ?? this
+            };
+
+            if (wasVisible)
+            {
+                player.Show();
+            }
+        }
+
+        private string CreateThemeStateSnapshot()
+        {
+            string themeKey = ThemeManager.GetThemeOrDefault(App.Settings.TemaSelezionato, App.Settings.TemaPersonalizzato).Key;
+            string customPalette = JsonSerializer.Serialize(App.Settings.TemaPersonalizzato ?? ThemeManager.CreateDefaultCustomTheme());
+            return $"{themeKey}|{customPalette}";
         }
 
         private static void LogStartupError(Exception ex)
         {
+            AppLogger.LogError("Errore durante il caricamento iniziale dell'adunanza.", ex);
+        }
+
+        private async Task AggiornaAdunanzaDaWebInBackgroundAsync()
+        {
+            string? canticoInizialeManuale = GetCanticoInizialeManualeCorrente();
+
             try
             {
-                string logDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "InTempo",
-                    "logs");
-                Directory.CreateDirectory(logDir);
-
-                string logPath = Path.Combine(logDir, "startup-errors.log");
-                string entry =
-                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex.GetType().FullName}: {ex.Message}{Environment.NewLine}{ex}{Environment.NewLine}";
-                File.AppendAllText(logPath, entry + Environment.NewLine);
+                await DatiAdunanza.SelectedAdunanza();
+                RipristinaCanticoInizialeManuale(canticoInizialeManuale);
+                LogicTimer.AggiornaGrafica();
+                AggiornaStatoNavigazioneParti();
             }
-            catch
+            catch (Exception ex)
             {
-                // non bloccare mai la UI per errori di logging
+                LogStartupError(ex);
+
+                if (DatiAdunanza.Parti.Count == 0)
+                {
+                    FinestraPopUP errore = new FinestraPopUP(
+                        "Errore caricamento",
+                        "Impossibile caricare i dati dell'adunanza dal web e non era disponibile alcuna cache locale.",
+                        ConfigurazionePulsantiPopup.Ok);
+                    errore.ShowDialog();
+                }
+            }
+            finally
+            {
+                Caricamento();
             }
         }
 
@@ -419,14 +481,46 @@ namespace InTempo
                 "Inserisci il numero del cantico iniziale per questa adunanza.",
                 "Annulla",
                 "Conferma",
-                true);
-
-            richiestaCantico.Owner = this;
+                true)
+            {
+                Owner = this
+            };
 
             if (richiestaCantico.ShowDialog() == true && richiestaCantico.NumeroInserito.HasValue)
             {
                 canticoIniziale.NomeParte = $"Cantico {richiestaCantico.NumeroInserito.Value}";
                 LogicTimer.AggiornaGrafica();
+            }
+        }
+
+        private string? GetCanticoInizialeManualeCorrente()
+        {
+            Parte? canticoIniziale = DatiAdunanza.Parti
+                .FirstOrDefault(parte => parte.NumeroParte == 1 && string.Equals(parte.TipoParte, ParteFactory.TypeCantico, StringComparison.OrdinalIgnoreCase));
+
+            if (canticoIniziale == null
+                || string.Equals(canticoIniziale.NomeParte, "Cantico (iniziale)", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return canticoIniziale.NomeParte;
+        }
+
+        private void RipristinaCanticoInizialeManuale(string? nomeCantico)
+        {
+            if (string.IsNullOrWhiteSpace(nomeCantico))
+            {
+                return;
+            }
+
+            Parte? canticoIniziale = DatiAdunanza.Parti
+                .FirstOrDefault(parte => parte.NumeroParte == 1 && string.Equals(parte.TipoParte, ParteFactory.TypeCantico, StringComparison.OrdinalIgnoreCase));
+
+            if (canticoIniziale != null
+                && string.Equals(canticoIniziale.NomeParte, "Cantico (iniziale)", StringComparison.OrdinalIgnoreCase))
+            {
+                canticoIniziale.NomeParte = nomeCantico;
             }
         }
 
@@ -436,7 +530,7 @@ namespace InTempo
 
             if (_isPaused)
             {
-                _finestratimer.CambiaVista(4, "", System.Windows.Media.Brushes.White);
+                _finestratimer.CambiaVista(VistaPresentazione.Orologio, string.Empty, System.Windows.Media.Brushes.White);
                 btnCommentoSchermo.IsEnabled = false;
                 txtTimer.Visibility = Visibility.Collapsed;
                 txtOrologio.Visibility = Visibility.Visible;

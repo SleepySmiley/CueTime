@@ -1,10 +1,6 @@
-﻿using InTempo.Classes.Abstract;
-using InTempo.Classes.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Text;
+using InTempo.Classes.Abstract;
+using InTempo.Classes.Utilities;
 
 namespace InTempo.Classes.NonAbstract
 {
@@ -14,20 +10,28 @@ namespace InTempo.Classes.NonAbstract
 
         public async Task LoadAsync()
         {
-            var loaded = await WebPartsLoader.CaricaInfrasettimanaleAsync();
-            Parti = loaded;
+            ApplyLoadedParts(await WebPartsLoader.CaricaInfrasettimanaleAsync());
         }
 
-       
-        public Infrasettimanale() : base(new TimeSpan(1,45,0), 14)
+        public void LoadFromCache()
         {
+            ApplyLoadedParts(WebPartsLoader.CaricaInfrasettimanaleDaCache());
         }
 
         public Parte this[int i]
         {
-            get { return Parti[i]; }
-            set { Parti[i] = value; }
+            get => Parti[i];
+            set => Parti[i] = value;
         }
 
+        private void ApplyLoadedParts(ObservableCollection<Parte> loaded)
+        {
+            Parti.Clear();
+
+            foreach (Parte parte in loaded)
+            {
+                Parti.Add(parte);
+            }
+        }
     }
 }

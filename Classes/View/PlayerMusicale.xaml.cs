@@ -1,6 +1,3 @@
-﻿using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Utilities;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,21 +7,31 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.Win32;
+using InTempo.Classes.Utilities;
+using InTempo.Classes.Utilities.Impostazioni;
 
 namespace InTempo.Classes.View
 {
     public partial class PlayerMusicale : Window
     {
-        private MediaPlayer _player = new MediaPlayer();
-        private DispatcherTimer _timer = new DispatcherTimer(DispatcherPriority.Render);
-        private List<string> _percorsiBrani = new List<string>();
+        private readonly MediaPlayer _player = new MediaPlayer();
+        private readonly DispatcherTimer _timer = new DispatcherTimer(DispatcherPriority.Send);
+        private readonly TimerLogics _timerLogics;
+        private readonly ImpostazioniAdunanze _settings;
+        private readonly List<string> _percorsiBrani = new List<string>();
         private int _indiceCorrente = -1;
-        private bool _inRiproduzione = false;
-        private bool _staTrascinandoSlider = false;
+        private bool _inRiproduzione;
+        private bool _staTrascinandoSlider;
+        private bool _suppressSelectionChanged;
+        private bool _initialFolderLoaded;
 
-        public PlayerMusicale()
+        public PlayerMusicale(TimerLogics timerLogics, ImpostazioniAdunanze settings)
         {
             InitializeComponent();
+            _timerLogics = timerLogics;
+            _settings = settings;
+
             SliderVolume.ValueChanged += SliderVolume_ValueChanged;
             _player.MediaOpened += Player_MediaOpened;
             _player.MediaEnded += Player_MediaEnded;
@@ -35,11 +42,10 @@ namespace InTempo.Classes.View
             SliderVolume.Value = 1;
             _player.Volume = SliderVolume.Value;
 
-            SliderProgresso.PreviewMouseLeftButtonDown += (s, e) => _staTrascinandoSlider = true;
+            SliderProgresso.PreviewMouseLeftButtonDown += (_, _) => _staTrascinandoSlider = true;
             SliderProgresso.PreviewMouseLeftButtonUp += SliderProgresso_MouseUp;
-
             ListBrani.SelectionChanged += ListBrani_SelectionChanged;
-            CaricaCartellaMusica(App.Settings.PercorsoCartellaMusica);
+            Loaded += async (_, _) => await LoadInitialFolderAsync();
         }
 
         private void SliderVolume_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -50,49 +56,74 @@ namespace InTempo.Classes.View
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed)
+            {
                 DragMove();
+            }
         }
 
         private void BtnChiudi_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            Hide();
         }
 
-        private void BtnApriCartella_Click(object sender, RoutedEventArgs e)
+        private async void BtnApriCartella_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new Microsoft.Win32.OpenFolderDialog
+            OpenFolderDialog dialog = new OpenFolderDialog
             {
                 Title = "Seleziona la cartella con le tracce audio"
             };
 
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog() != true)
             {
-                string cartellaSelezionata = dialog.FolderName;
-                App.Settings.PercorsoCartellaMusica = cartellaSelezionata;
-
-                if (!TryCaricaCartellaMusica(cartellaSelezionata))
-                {
-                    SvuotaPlayer();
-                    FinestraPopUP Avviso = new FinestraPopUP("Attenzione", "Non sono stati trovati file audio supportati in questa cartella.", 1);
-                    Avviso.ShowDialog();
-                }
+                return;
             }
+
+            string cartellaSelezionata = dialog.FolderName;
+            bool caricata = await TryCaricaCartellaMusicaAsync(cartellaSelezionata, selezionaPrimoBrano: true);
+
+            if (caricata)
+            {
+                _settings.PercorsoCartellaMusica = cartellaSelezionata;
+                return;
+            }
+
+            SvuotaPlayer();
+            FinestraPopUP avviso = new FinestraPopUP(
+                "Attenzione",
+                "Non sono stati trovati file audio supportati in questa cartella locale.",
+                ConfigurazionePulsantiPopup.Ok);
+            avviso.ShowDialog();
         }
 
-        private void CaricaCartellaMusica(string cartellaSelezionata)
+        private async Task LoadInitialFolderAsync()
         {
-            if (!TryCaricaCartellaMusica(cartellaSelezionata))
+            if (_initialFolderLoaded)
+            {
+                return;
+            }
+
+            _initialFolderLoaded = true;
+
+            if (!await TryCaricaCartellaMusicaAsync(_settings.PercorsoCartellaMusica, selezionaPrimoBrano: true))
+            {
                 SvuotaPlayer();
+            }
         }
 
         private void RiproduciBrano(int indice)
         {
-            if (indice < 0 || indice >= _percorsiBrani.Count) return;
-
-            if(TimerLogics.IsRunning)
+            if (indice < 0 || indice >= _percorsiBrani.Count)
             {
-                FinestraPopUP Avviso = new FinestraPopUP("Attenzione", "Non è possibile riprodurre un brano mentre il timer è attivo. Per favore, ferma il timer prima di cambiare brano.", 1);
-                Avviso.ShowDialog();
+                return;
+            }
+
+            if (_timerLogics.IsRunning)
+            {
+                FinestraPopUP avviso = new FinestraPopUP(
+                    "Attenzione",
+                    "Non è possibile riprodurre un brano mentre il timer è attivo. Per favore, ferma il timer prima di cambiare brano.",
+                    ConfigurazionePulsantiPopup.Ok);
+                avviso.ShowDialog();
                 return;
             }
 
@@ -104,7 +135,9 @@ namespace InTempo.Classes.View
             TxtTempoTotale.Text = "00:00";
 
             _indiceCorrente = indice;
+            _suppressSelectionChanged = true;
             ListBrani.SelectedIndex = indice;
+            _suppressSelectionChanged = false;
 
             _player.Open(new Uri(_percorsiBrani[indice]));
             _player.Play();
@@ -118,51 +151,80 @@ namespace InTempo.Classes.View
 
         private void BtnPlayPausa_Click(object sender, RoutedEventArgs e)
         {
-            
-
-            if (_percorsiBrani.Count == 0) return;
+            if (_percorsiBrani.Count == 0)
+            {
+                return;
+            }
 
             if (_inRiproduzione)
             {
                 _player.Pause();
                 IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
                 _inRiproduzione = false;
+                return;
             }
-            else if(!TimerLogics.IsRunning) 
+
+            if (_timerLogics.IsRunning)
             {
-                _player.Play();
-                IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Pause;
-                _inRiproduzione = true;
+                FinestraPopUP avviso = new FinestraPopUP(
+                    "Attenzione",
+                    "Non è possibile riprodurre la musica mentre il timer è attivo. Per favore, ferma il timer prima di riprodurre la musica.",
+                    ConfigurazionePulsantiPopup.Ok);
+                avviso.ShowDialog();
+                return;
             }
-            else
+
+            int indiceDaRiprodurre = _indiceCorrente >= 0 ? _indiceCorrente : 0;
+            if (_player.Source == null)
             {
-                FinestraPopUP Avviso = new FinestraPopUP("Attenzione", "Non è possibile riprodurre la musica mentre il timer è attivo. Per favore, ferma il timer prima di riprodurre la musica.", 1);
-                Avviso.ShowDialog();
+                RiproduciBrano(indiceDaRiprodurre);
+                return;
             }
+
+            _player.Play();
+            IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Pause;
+            _inRiproduzione = true;
         }
 
         private void BtnPrecedente_Click(object sender, RoutedEventArgs e)
         {
-            if (_percorsiBrani.Count == 0) return;
+            if (_percorsiBrani.Count == 0)
+            {
+                return;
+            }
 
             int nuovoIndice = _indiceCorrente - 1;
-            if (nuovoIndice < 0) nuovoIndice = _percorsiBrani.Count - 1;
+            if (nuovoIndice < 0)
+            {
+                nuovoIndice = _percorsiBrani.Count - 1;
+            }
 
             RiproduciBrano(nuovoIndice);
         }
 
         private void BtnSuccessivo_Click(object sender, RoutedEventArgs e)
         {
-            if (_percorsiBrani.Count == 0) return;
+            if (_percorsiBrani.Count == 0)
+            {
+                return;
+            }
 
             int nuovoIndice = _indiceCorrente + 1;
-            if (nuovoIndice >= _percorsiBrani.Count) nuovoIndice = 0;
+            if (nuovoIndice >= _percorsiBrani.Count)
+            {
+                nuovoIndice = 0;
+            }
 
             RiproduciBrano(nuovoIndice);
         }
 
         private void ListBrani_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (_suppressSelectionChanged)
+            {
+                return;
+            }
+
             if (ListBrani.SelectedIndex != -1 && ListBrani.SelectedIndex != _indiceCorrente)
             {
                 RiproduciBrano(ListBrani.SelectedIndex);
@@ -191,7 +253,7 @@ namespace InTempo.Classes.View
                 TxtTempoTrascorso.Text = _player.Position.ToString(@"mm\:ss");
             }
 
-            if (TimerLogics.IsRunning)
+            if (_timerLogics.IsRunning)
             {
                 _player.Stop();
                 _inRiproduzione = false;
@@ -199,12 +261,10 @@ namespace InTempo.Classes.View
                 return;
             }
 
-            if (TimerLogics.CheckTimerPreAdunanza)
+            if (_timerLogics.CheckTimerPreAdunanza)
             {
                 GestisciStopGraduale();
-                return;
             }
-
         }
 
         private void SliderProgresso_MouseUp(object sender, MouseButtonEventArgs e)
@@ -213,22 +273,20 @@ namespace InTempo.Classes.View
             {
                 _player.Position = TimeSpan.FromSeconds(SliderProgresso.Value);
             }
-            _staTrascinandoSlider = false;
 
-            
+            _staTrascinandoSlider = false;
         }
 
         private void GestisciStopGraduale()
         {
             if (!_inRiproduzione || _player.Source == null || SliderVolume.Value <= 0)
             {
-                TimerLogics.CheckTimerPreAdunanza = false;
+                _timerLogics.CheckTimerPreAdunanza = false;
                 _player.Volume = SliderVolume.Value;
                 return;
             }
 
             double stepVolume = SliderVolume.Value / 30.0;
-
             _player.Volume = Math.Max(0, _player.Volume - stepVolume);
 
             if (_player.Volume <= 0)
@@ -236,28 +294,31 @@ namespace InTempo.Classes.View
                 _player.Stop();
                 _inRiproduzione = false;
                 IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
-
                 SliderProgresso.Value = 0;
                 TxtTempoTrascorso.Text = "00:00";
                 _player.Volume = SliderVolume.Value;
-                TimerLogics.CheckTimerPreAdunanza = false;
+                _timerLogics.CheckTimerPreAdunanza = false;
             }
         }
 
-        private bool TryCaricaCartellaMusica(string cartellaSelezionata)
+        private async Task<bool> TryCaricaCartellaMusicaAsync(string cartellaSelezionata, bool selezionaPrimoBrano)
         {
-            if (string.IsNullOrWhiteSpace(cartellaSelezionata) || !Directory.Exists(cartellaSelezionata))
+            if (!IsPercorsoCartellaValido(cartellaSelezionata))
+            {
                 return false;
+            }
 
             string[] fileTrovati;
             try
             {
-                fileTrovati = Directory.GetFiles(cartellaSelezionata)
-                    .Where(IsAudioSupportato)
-                    .ToArray();
+                fileTrovati = await Task.Run(() =>
+                    Directory.EnumerateFiles(cartellaSelezionata)
+                        .Where(IsAudioSupportato)
+                        .ToArray());
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.LogError($"Errore durante la scansione della cartella musicale '{cartellaSelezionata}'.", ex);
                 return false;
             }
 
@@ -271,13 +332,43 @@ namespace InTempo.Classes.View
             }
 
             if (_percorsiBrani.Count == 0)
+            {
                 return false;
+            }
 
-            RiproduciBrano(0);
-            _player.Pause();
+            _indiceCorrente = 0;
+            TxtBranoCorrente.Text = ListBrani.Items[0].ToString();
+
+            if (selezionaPrimoBrano)
+            {
+                _suppressSelectionChanged = true;
+                ListBrani.SelectedIndex = 0;
+                _suppressSelectionChanged = false;
+            }
+
+            _player.Stop();
+            _player.Close();
             _inRiproduzione = false;
             IconaPlayPausa.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Play;
+            SliderProgresso.Value = 0;
+            TxtTempoTrascorso.Text = "00:00";
+            TxtTempoTotale.Text = "00:00";
             return true;
+        }
+
+        private static bool IsPercorsoCartellaValido(string cartellaSelezionata)
+        {
+            if (string.IsNullOrWhiteSpace(cartellaSelezionata))
+            {
+                return false;
+            }
+
+            if (cartellaSelezionata.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return Directory.Exists(cartellaSelezionata);
         }
 
         private void SvuotaPlayer()

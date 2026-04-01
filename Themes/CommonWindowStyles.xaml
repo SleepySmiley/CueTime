@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
@@ -14,8 +14,13 @@
     <SolidColorBrush x:Key="AppAccentSoftBrush" Color="#FFF6E6D8" />
     <SolidColorBrush x:Key="AppAccentDeepBrush" Color="#FF51362A" />
     <SolidColorBrush x:Key="AppDangerBrush" Color="#FFCC4B4B" />
+    <SolidColorBrush x:Key="AppDangerSoftBrush" Color="#14CC4B4B" />
     <SolidColorBrush x:Key="AppOverlayBrush" Color="#7A0E1724" />
     <SolidColorBrush x:Key="AppCurrentRowBrush" Color="#FFF6EBDD" />
+    <SolidColorBrush x:Key="AppToolbarTrayBackgroundBrush" Color="#E6FFF9F2" />
+    <SolidColorBrush x:Key="AppDataGridHoverRowBrush" Color="#55FFFFFF" />
+    <SolidColorBrush x:Key="AppLoadingOverlayBackgroundBrush" Color="#F2FFF8F2" />
+    <SolidColorBrush x:Key="AppInputErrorBrush" Color="#FFEF5350" />
     <SolidColorBrush x:Key="AppPresentationMessageBrush" Color="#E7F0FB" />
 
     <LinearGradientBrush x:Key="AppPresentationBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
@@ -62,7 +67,7 @@
         <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
         <Setter Property="TextOptions.TextRenderingMode" Value="Auto" />
         <Setter Property="FontFamily" Value="{DynamicResource MaterialDesignFont}" />
-        <Setter Property="Background" Value="{StaticResource AppWindowBackgroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppWindowBackgroundBrush}" />
         <Setter Property="UseLayoutRounding" Value="True" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
@@ -85,7 +90,7 @@
     <Style x:Key="AppPresentationWindowStyle"
            TargetType="{x:Type Window}"
            BasedOn="{StaticResource AppBaseWindowStyle}">
-        <Setter Property="Background" Value="{StaticResource AppPresentationBackgroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppPresentationBackgroundBrush}" />
         <Setter Property="ResizeMode" Value="NoResize" />
         <Setter Property="WindowStyle" Value="None" />
     </Style>
@@ -95,7 +100,7 @@
            BasedOn="{StaticResource AppBaseWindowStyle}">
         <Setter Property="WindowStyle" Value="None" />
         <Setter Property="AllowsTransparency" Value="True" />
-        <Setter Property="Background" Value="{StaticResource AppOverlayBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppOverlayBrush}" />
         <Setter Property="Topmost" Value="True" />
         <Setter Property="ShowInTaskbar" Value="False" />
         <Setter Property="ResizeMode" Value="NoResize" />
@@ -106,8 +111,8 @@
            BasedOn="{StaticResource {x:Type materialDesign:Card}}">
         <Setter Property="Margin" Value="24" />
         <Setter Property="UniformCornerRadius" Value="30" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
     </Style>
@@ -117,8 +122,8 @@
            BasedOn="{StaticResource {x:Type materialDesign:Card}}">
         <Setter Property="Margin" Value="14,14,14,0" />
         <Setter Property="UniformCornerRadius" Value="24" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceMutedBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
     </Style>
@@ -128,8 +133,8 @@
            BasedOn="{StaticResource {x:Type materialDesign:Card}}">
         <Setter Property="Margin" Value="14" />
         <Setter Property="UniformCornerRadius" Value="24" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceMutedBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
     </Style>
@@ -139,45 +144,54 @@
            BasedOn="{StaticResource {x:Type materialDesign:Card}}">
         <Setter Property="Margin" Value="0" />
         <Setter Property="UniformCornerRadius" Value="0" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceStrongBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceStrongBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1,1,1,0" />
         <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
     </Style>
 
     <Style x:Key="AppHeroPanelBorderStyle" TargetType="{x:Type Border}">
-        <Setter Property="Background" Value="{StaticResource AppHeroSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppHeroSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="28" />
-        <Setter Property="Padding" Value="28" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-    </Style>
-
-    <Style x:Key="AppPanelBorderStyle" TargetType="{x:Type Border}">
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="CornerRadius" Value="26" />
         <Setter Property="Padding" Value="22" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <Style x:Key="AppInsetPanelBorderStyle" TargetType="{x:Type Border}">
-        <Setter Property="Background" Value="{StaticResource AppInsetSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+    <Style x:Key="AppPanelBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="22" />
-        <Setter Property="Padding" Value="20" />
+        <Setter Property="Padding" Value="18" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppInsetPanelBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource AppInsetSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="Padding" Value="16" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
     <Style x:Key="AppChipBorderStyle" TargetType="{x:Type Border}">
-        <Setter Property="Background" Value="{StaticResource AppAccentSoftBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="999" />
-        <Setter Property="Padding" Value="12,7" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="AppToolbarTrayBorderStyle" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource AppToolbarTrayBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="8" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
@@ -188,9 +202,9 @@
         <Setter Property="Height" Value="36" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="14" />
     </Style>
@@ -201,21 +215,37 @@
         <Setter Property="Width" Value="46" />
         <Setter Property="Height" Value="46" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="16" />
+    </Style>
+
+    <Style x:Key="AppToolbarIconButtonStyle"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource MaterialDesignToolButton}">
+        <Setter Property="Width" Value="42" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource AppAccentDeepBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="14" />
     </Style>
 
     <Style x:Key="AppPillOutlineButtonStyle"
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
-        <Setter Property="Background" Value="{StaticResource AppAccentSoftBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppAccentSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+        <Setter Property="MinHeight" Value="44" />
         <Setter Property="Padding" Value="18,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
     </Style>
@@ -223,9 +253,13 @@
     <Style x:Key="AppDangerOutlinedButtonStyle"
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-        <Setter Property="Foreground" Value="{StaticResource AppDangerBrush}" />
-        <Setter Property="Background" Value="#14CC4B4B" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppDangerBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppDangerBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppDangerSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppDangerBrush}" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="Padding" Value="18,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
     </Style>
@@ -234,9 +268,12 @@
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignRaisedButton}">
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="{StaticResource AppAccentDeepBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppAccentDeepBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppAccentDeepBrush}" />
+        <Setter Property="MinHeight" Value="44" />
         <Setter Property="Padding" Value="20,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
     </Style>
@@ -244,10 +281,13 @@
     <Style x:Key="AppSecondaryButtonStyle"
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
+        <Setter Property="MinHeight" Value="44" />
         <Setter Property="Padding" Value="18,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
     </Style>
@@ -255,7 +295,10 @@
     <Style x:Key="AppSubtleFlatButtonStyle"
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignFlatButton}">
-        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
+        <Setter Property="MinHeight" Value="40" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="14,10" />
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="16" />
@@ -264,30 +307,30 @@
     <Style x:Key="AppTransportPrimaryButtonStyle"
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignFloatingActionButton}">
-        <Setter Property="Width" Value="76" />
-        <Setter Property="Height" Value="76" />
+        <Setter Property="Width" Value="72" />
+        <Setter Property="Height" Value="72" />
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="{StaticResource AppAccentDeepBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppAccentDeepBrush}" />
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="28" />
+        <Setter Property="Background" Value="{DynamicResource AppAccentDeepBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppAccentDeepBrush}" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="26" />
     </Style>
 
     <Style x:Key="AppTransportSecondaryButtonStyle"
            TargetType="{x:Type Button}"
            BasedOn="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}">
-        <Setter Property="Width" Value="56" />
-        <Setter Property="Height" Value="56" />
-        <Setter Property="Foreground" Value="{StaticResource AppAccentDeepBrush}" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Width" Value="52" />
+        <Setter Property="Height" Value="52" />
+        <Setter Property="Foreground" Value="{DynamicResource AppAccentDeepBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="20" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
     </Style>
 
     <Style x:Key="AppWindowTitleTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="22" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
@@ -295,7 +338,7 @@
     <Style x:Key="AppAccentWindowTitleTextStyle"
            TargetType="{x:Type TextBlock}"
            BasedOn="{StaticResource AppWindowTitleTextStyle}">
-        <Setter Property="Foreground" Value="{StaticResource AppAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppAccentBrush}" />
     </Style>
 
     <Style x:Key="AppPageTitleTextStyle"
@@ -307,25 +350,25 @@
     <Style x:Key="AppAccentPageTitleTextStyle"
            TargetType="{x:Type TextBlock}"
            BasedOn="{StaticResource AppPageTitleTextStyle}">
-        <Setter Property="Foreground" Value="{StaticResource AppAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppAccentBrush}" />
     </Style>
 
     <Style x:Key="AppMainEyebrowTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
     </Style>
 
     <Style x:Key="AppMainHeroTitleTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="34" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
     <Style x:Key="AppMainSupportTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="15" />
-        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="LineHeight" Value="24" />
     </Style>
@@ -333,26 +376,26 @@
     <Style x:Key="AppSectionHeaderTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="22" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
     <Style x:Key="AppMetricLabelTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
     </Style>
 
     <Style x:Key="AppMetricValueTextStyle" TargetType="{x:Type TextBlock}">
-        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontSize" Value="42" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
     </Style>
 
     <Style x:Key="AppChipTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppAccentDeepBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppAccentDeepBrush}" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
@@ -360,19 +403,19 @@
            TargetType="{x:Type TextBlock}"
            BasedOn="{StaticResource MaterialDesignSubtitle2TextBlock}">
         <Setter Property="Opacity" Value="1" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
     <Style x:Key="AppSectionCaptionTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
     </Style>
 
     <Style x:Key="AppMutedCaptionTextStyle" TargetType="{x:Type TextBlock}">
         <Setter Property="Opacity" Value="0.95" />
-        <Setter Property="Foreground" Value="{StaticResource AppMutedTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppMutedTextBrush}" />
     </Style>
 
     <Style x:Key="AppDialogBodyTextStyle" TargetType="{x:Type TextBlock}">
@@ -380,7 +423,7 @@
         <Setter Property="Opacity" Value="0.95" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="LineHeight" Value="23" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
     </Style>
 
     <Style x:Key="AppDialogInputTextBoxStyle"
@@ -389,17 +432,17 @@
         <Setter Property="FontSize" Value="15" />
         <Setter Property="Opacity" Value="0.98" />
         <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="Foreground" Value="{StaticResource AppTextPrimaryBrush}" />
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppTextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBorderBrush}" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="MinHeight" Value="72" />
         <Setter Property="Padding" Value="12,10" />
     </Style>
 
     <Style x:Key="AppListContainerBorderStyle" TargetType="{x:Type Border}">
-        <Setter Property="Background" Value="{StaticResource AppSurfaceBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource AppSubtleBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource AppSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppSubtleBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="18" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
@@ -413,6 +456,7 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="TextAlignment" Value="Center" />
         <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="Foreground" Value="{StaticResource AppPresentationMessageBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppPresentationMessageBrush}" />
     </Style>
 </ResourceDictionary>
+

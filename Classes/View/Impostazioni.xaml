@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InTempo.Classes.View"
         xmlns:utilMonitors="clr-namespace:InTempo.Classes.Utilities.Monitors"
+        xmlns:utilTheme="clr-namespace:InTempo.Classes.Utilities.Theming"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Style="{StaticResource AppBorderlessDialogWindowStyle}"
-        Title="Impostazioni" Height="500" Width="600"
+        Title="Impostazioni" Height="610" Width="720"
         WindowStartupLocation="CenterOwner"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
@@ -22,13 +23,9 @@
             </Grid.RowDefinitions>
 
             <materialDesign:Card Grid.Row="0" Style="{StaticResource AppSectionCardStyle}">
-                <Grid Margin="16">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <iconPacks:PackIconMaterial Kind="Cog" Width="24" Height="24" VerticalAlignment="Center" Foreground="{StaticResource AppAccentBrush}"/>
-                        <TextBlock Text="Opzioni"
-                                   Margin="16,0,0,0"
-                                   Style="{StaticResource AppAccentPageTitleTextStyle}"/>
-                    </StackPanel>
+                <Grid Margin="14,10">
+                    <TextBlock Text="Impostazioni"
+                               Style="{StaticResource AppAccentWindowTitleTextStyle}"/>
                 </Grid>
             </materialDesign:Card>
 
@@ -74,11 +71,113 @@
                             </StackPanel>
                         </TabItem.Header>
                         <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
                             <StackPanel>
-                                <TextBlock Text="Tema Grafico" Margin="0,0,0,10" Style="{StaticResource AppSectionCaptionTextStyle}"/>
-                                <RadioButton Content="Tema Chiaro" IsChecked="True" Margin="0,5"/>
-                                <RadioButton Content="Tema Scuro" Margin="0,5"/>
+                                <TextBlock Text="Tema Applicazione"
+                                           Margin="0,0,0,4"
+                                           Style="{StaticResource AppSectionCaptionTextStyle}"/>
+                                <TextBlock Text="Scegli una palette completa. Se selezioni Personalizzato si apre l’editor dedicato con anteprima live."
+                                           Margin="0,0,0,14"
+                                           Style="{StaticResource AppMutedCaptionTextStyle}"/>
                             </StackPanel>
+
+                            <ListBox x:Name="LstTemi"
+                                     Grid.Row="1"
+                                     MinHeight="0"
+                                     VerticalAlignment="Stretch"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ItemsSource="{Binding TemiDisponibili}"
+                                     SelectedValuePath="Key"
+                                     SelectionChanged="LstTemi_SelectionChanged"
+                                     PreviewKeyDown="LstTemi_PreviewKeyDown"
+                                     PreviewMouseLeftButtonUp="LstTemi_PreviewMouseLeftButtonUp"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.Resources>
+                                    <Style x:Key="ThemeListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="0,0,0,10"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderBrush" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+
+                                    <Style x:Key="ThemeCardBorderStyle"
+                                           TargetType="{x:Type Border}"
+                                           BasedOn="{StaticResource AppListContainerBorderStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AppDataGridHoverRowBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AppCurrentRowBrush}"/>
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AppAccentBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBox.Resources>
+                                <ListBox.ItemContainerStyle>
+                                    <StaticResource ResourceKey="ThemeListBoxItemStyle"/>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="14"
+                                                Style="{StaticResource ThemeCardBorderStyle}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="72"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid Width="54"
+                                                      Height="54"
+                                                      VerticalAlignment="Center">
+                                                    <Ellipse Width="38"
+                                                             Height="38"
+                                                             HorizontalAlignment="Left"
+                                                             VerticalAlignment="Top"
+                                                             Fill="{Binding PreviewBackdropBrush}"/>
+                                                    <Ellipse Width="38"
+                                                             Height="38"
+                                                             HorizontalAlignment="Right"
+                                                             VerticalAlignment="Bottom"
+                                                             Fill="{Binding PreviewSurfaceBrush}"/>
+                                                    <Ellipse Width="22"
+                                                             Height="22"
+                                                             HorizontalAlignment="Center"
+                                                             VerticalAlignment="Center"
+                                                             Fill="{Binding PreviewAccentBrush}"/>
+                                                </Grid>
+
+                                                <StackPanel Grid.Column="1"
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               Style="{StaticResource AppSubtitleTextBlockStyle}"/>
+                                                    <TextBlock Text="{Binding Description}"
+                                                               Margin="0,4,0,0"
+                                                               TextWrapping="Wrap"
+                                                               Style="{StaticResource AppMutedCaptionTextStyle}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </Grid>
                     </TabItem>
 
@@ -169,33 +268,42 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="16"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <TextBox x:Name="TxtNomeSalvataggio" 
-                                             materialDesign:HintAssist.Hint="Nome adunanza da salvare" 
-                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
-                                             VerticalAlignment="Bottom" 
-                                             Margin="0,0,16,0"/>
+                                              materialDesign:HintAssist.Hint="Nome adunanza da salvare" 
+                                              Style="{StaticResource MaterialDesignFloatingHintTextBox}" 
+                                              VerticalAlignment="Center"/>
 
-                                    <Button x:Name="BtnSalvaAdunanza" Grid.Column="1" 
-                                            Content="Salva" 
-                                            Style="{StaticResource AppSecondaryButtonStyle}" 
-                                            Margin="0,0,8,0" 
-                                            VerticalAlignment="Bottom" Click="BtnSalvaAdunanza_Click"/>
+                                    <StackPanel Grid.Column="2"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Center">
+                                        <Button x:Name="BtnSalvaAdunanza"
+                                                Content="Salva"
+                                                MinWidth="80"
+                                                Padding="14,8"
+                                                Style="{StaticResource AppSecondaryButtonStyle}"
+                                                Margin="0,0,8,0"
+                                                Click="BtnSalvaAdunanza_Click"/>
 
-                                    <Button x:Name="BtnCaricaAdunanza" Grid.Column="3" 
-                                            Content="Carica Selezionata" 
-                                            Style="{StaticResource AppPrimaryButtonStyle}" 
-                                            VerticalAlignment="Bottom" Click="BtnCaricaAdunanza_Click"/>
+                                        <Button x:Name="BtnEliminaAdunanza"
+                                                Content="Elimina"
+                                                MinWidth="80"
+                                                Padding="14,8"
+                                                Style="{StaticResource AppDangerOutlinedButtonStyle}"
+                                                Margin="0,0,8,0"
+                                                Click="BtnEliminaAdunanza_Click"/>
 
-                                    <Button x:Name="BtnEliminaAdunanza" Grid.Column="2" 
-                                            Content="Elimina" 
-                                            Style="{StaticResource AppDangerOutlinedButtonStyle}"
-                                            Margin="8,0,0,0"
-                                            VerticalAlignment="Bottom" Click="BtnEliminaAdunanza_Click"/>
+                                        <Button x:Name="BtnCaricaAdunanza"
+                                                Content="Carica Selezionata"
+                                                MinWidth="146"
+                                                Padding="16,8"
+                                                Style="{StaticResource AppPrimaryButtonStyle}"
+                                                Click="BtnCaricaAdunanza_Click"/>
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
 
@@ -207,14 +315,15 @@
 
                                 <TextBlock Grid.Row="0" Text="Adunanze Salvate" Style="{StaticResource AppSubtitleTextBlockStyle}" Margin="0,0,0,8"/>
 
-                                <Border Grid.Row="1" Style="{StaticResource AppListContainerBorderStyle}">
+                                <Border Grid.Row="1" Style="{StaticResource AppListContainerBorderStyle}" Padding="6">
                                     <ListView x:Name="ListAdunanzeSalvate"
+                                              MinHeight="280"
                                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                                               MouseDoubleClick="ListAdunanzeSalvate_MouseDoubleClick">
                                         <ListView.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Margin="4">
-                                                    <iconPacks:PackIconMaterial Kind="FileDocumentOutline" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{StaticResource AppAccentBrush}"/>
+                                                    <iconPacks:PackIconMaterial Kind="FileDocumentOutline" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource AppAccentBrush}"/>
                                                     <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
                                                 </StackPanel>
                                             </DataTemplate>
@@ -231,10 +340,11 @@
                 <Grid Margin="16">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Annulla" Click="BtnAnnulla_Click" Style="{StaticResource AppSubtleFlatButtonStyle}" Margin="0,0,8,0"/>
-                        <Button Content="Salva" Click="BtnSalva_Click" Width="110" Height="42" Style="{StaticResource AppPrimaryButtonStyle}"/>
+                        <Button Content="Salva" Click="BtnSalva_Click" Width="110" Style="{StaticResource AppPrimaryButtonStyle}"/>
                     </StackPanel>
                 </Grid>
             </materialDesign:Card>
         </Grid>
     </materialDesign:Card>
 </Window>
+

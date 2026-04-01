@@ -1,94 +1,139 @@
-﻿using InTempo.Classes.NonAbstract;
-using InTempo.Classes.Utilities;
-using InTempo.Classes.Utilities.Impostazioni;
-using InTempo.Classes.Utilities.Monitors;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using InTempo.Classes.NonAbstract;
+using InTempo.Classes.Utilities;
+using InTempo.Classes.Utilities.Impostazioni;
+using InTempo.Classes.Utilities.Monitors;
+using InTempo.Classes.Utilities.Theming;
+using MonitorInfo = InTempo.Classes.Utilities.Monitors.Monitor;
 
 namespace InTempo.Classes.View
 {
-    public partial class Impostazioni : Window
+    public partial class Impostazioni : Window, INotifyPropertyChanged
     {
-        public TimerLogics Logiche { get; set; }
+        private readonly ImpostazioniAdunanze _settings;
+        private readonly ImpostazioniAdunanze _workingSettings;
+        private bool _suppressThemeSelectionChanged;
+        private string _lastThemeSelectionKey = ThemeManager.DefaultThemeKey;
+        private CustomThemePalette _workingCustomThemePalette = ThemeManager.CreateDefaultCustomTheme();
 
-        public Impostazioni(TimerLogics Logichepassate)
+        public TimerLogics Logiche { get; }
+
+        public IReadOnlyList<AppThemeDefinition> TemiDisponibili { get; private set; } = Array.Empty<AppThemeDefinition>();
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public Impostazioni(TimerLogics logichePassate, ImpostazioniAdunanze settings)
         {
             InitializeComponent();
-            this.DataContext = this;
-            TimePickerFine.SelectedTime = App.Settings.FineSettimana.OraInizio;
-            TimePickerInfra.SelectedTime = App.Settings.Infrasettimanale.OraInizio;
+            DataContext = this;
+
+            Logiche = logichePassate;
+            _settings = settings;
+            _workingSettings = settings.Clone();
+            _workingCustomThemePalette = _workingSettings.TemaPersonalizzato?.Clone() ?? ThemeManager.CreateDefaultCustomTheme();
+            _workingCustomThemePalette.Normalizza();
+
+            TimePickerFine.SelectedTime = _workingSettings.FineSettimana.OraInizio;
+            TimePickerInfra.SelectedTime = _workingSettings.Infrasettimanale.OraInizio;
             SelezioneGiorno();
             SelezionaMonitorScelto();
-            Logiche = Logichepassate;
             AggiornaListaSalvataggi();
             CaricaDateSorvegliante();
+            AggiornaTemiDisponibili();
+            CaricaTemaSelezionato();
         }
 
         private void BtnSalva_Click(object sender, RoutedEventArgs e)
         {
-            if (!PrendiGiorno(CmbGiornoInfra.SelectedItem as ComboBoxItem, "Infrasettimanale"))
+            if (!PrendiGiorni())
+            {
                 return;
-
-            if (!PrendiGiorno(CmbGiornoFine.SelectedItem as ComboBoxItem, "Fine Settimana"))
-                return;
+            }
 
             if (!PrendiOrario())
+            {
                 return;
+            }
 
             if (!SalvaMonitor())
+            {
                 return;
+            }
 
             if (!RaccogliDateSorvegliante())
+            {
                 return;
+            }
 
-            this.DialogResult = true;
-            this.Close();
+            if (!SalvaTemaSelezionato())
+            {
+                return;
+            }
+
+            _settings.CopyFrom(_workingSettings);
+            SettingsStore.Save(_settings);
+            DialogResult = true;
+            Close();
         }
 
         private void BtnAnnulla_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
         }
 
-        public bool PrendiGiorno(ComboBoxItem? cmbGiorno, string tipoAdunanza)
+        private bool PrendiGiorni()
         {
-            if (cmbGiorno == null)
+            if (!TryGetDayOfWeekFromCombo(CmbGiornoInfra.SelectedItem as ComboBoxItem, "Infrasettimanale", out DayOfWeek giornoInfra))
             {
-                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", $"Seleziona il giorno per l'adunanza {tipoAdunanza}.", 1);
-                Errore.ShowDialog();
                 return false;
             }
 
-            switch (cmbGiorno.Tag)
+            if (!TryGetDayOfWeekFromCombo(CmbGiornoFine.SelectedItem as ComboBoxItem, "Fine Settimana", out DayOfWeek giornoFine))
             {
-                case "1":
-                    App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Monday;
-                    break;
-                case "2":
-                    App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Tuesday;
-                    break;
-                case "3":
-                    App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Wednesday;
-                    break;
-                case "4":
-                    App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Thursday;
-                    break;
-                case "5":
-                    App.Settings.Infrasettimanale.GiornoSettimana = DayOfWeek.Friday;
-                    break;
-                case "6":
-                    App.Settings.FineSettimana.GiornoSettimana = DayOfWeek.Saturday;
-                    break;
-                case "0":
-                    App.Settings.FineSettimana.GiornoSettimana = DayOfWeek.Sunday;
-                    break;
+                return false;
             }
 
+            _workingSettings.Infrasettimanale.GiornoSettimana = giornoInfra;
+            _workingSettings.FineSettimana.GiornoSettimana = giornoFine;
+            return true;
+        }
+
+        private bool TryGetDayOfWeekFromCombo(ComboBoxItem? cmbGiorno, string tipoAdunanza, out DayOfWeek giornoSettimana)
+        {
+            giornoSettimana = DayOfWeek.Sunday;
+
+            if (cmbGiorno == null)
+            {
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Dati mancanti",
+                    $"Seleziona il giorno per l'adunanza {tipoAdunanza}.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
+                return false;
+            }
+
+            if (!int.TryParse(cmbGiorno.Tag?.ToString(), out int tag) || tag < 0 || tag > 6)
+            {
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Dati non validi",
+                    $"Il giorno selezionato per l'adunanza {tipoAdunanza} non è valido.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
+                return false;
+            }
+
+            giornoSettimana = (DayOfWeek)tag;
             return true;
         }
 
@@ -96,20 +141,26 @@ namespace InTempo.Classes.View
         {
             if (TimePickerInfra.SelectedTime == null)
             {
-                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona l'orario per l'Infrasettimanale.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Dati mancanti",
+                    "Seleziona l'orario per l'Infrasettimanale.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return false;
             }
 
             if (TimePickerFine.SelectedTime == null)
             {
-                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona l'orario per il Fine Settimana.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Dati mancanti",
+                    "Seleziona l'orario per il Fine Settimana.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return false;
             }
 
-            App.Settings.Infrasettimanale.OraInizio = (DateTime)TimePickerInfra.SelectedTime;
-            App.Settings.FineSettimana.OraInizio = (DateTime)TimePickerFine.SelectedTime;
+            _workingSettings.Infrasettimanale.OraInizio = (DateTime)TimePickerInfra.SelectedTime;
+            _workingSettings.FineSettimana.OraInizio = (DateTime)TimePickerFine.SelectedTime;
 
             return true;
         }
@@ -118,10 +169,7 @@ namespace InTempo.Classes.View
         {
             foreach (ComboBoxItem item in CmbGiornoFine.Items)
             {
-                if (!int.TryParse(item.Tag?.ToString(), out int tag))
-                    continue;
-
-                if (tag == (int)App.Settings.FineSettimana.GiornoSettimana)
+                if (int.TryParse(item.Tag?.ToString(), out int tag) && tag == (int)_workingSettings.FineSettimana.GiornoSettimana)
                 {
                     CmbGiornoFine.SelectedItem = item;
                     break;
@@ -130,10 +178,7 @@ namespace InTempo.Classes.View
 
             foreach (ComboBoxItem item in CmbGiornoInfra.Items)
             {
-                if (!int.TryParse(item.Tag?.ToString(), out int tag))
-                    continue;
-
-                if (tag == (int)App.Settings.Infrasettimanale.GiornoSettimana)
+                if (int.TryParse(item.Tag?.ToString(), out int tag) && tag == (int)_workingSettings.Infrasettimanale.GiornoSettimana)
                 {
                     CmbGiornoInfra.SelectedItem = item;
                     break;
@@ -143,9 +188,9 @@ namespace InTempo.Classes.View
 
         public void SelezionaMonitorScelto()
         {
-            string nomeMonitorSalvato = App.Settings.MonitorScelto?.Nome ?? string.Empty;
+            string nomeMonitorSalvato = _workingSettings.MonitorScelto?.Nome ?? string.Empty;
 
-            foreach (var monitor in GestoreMonitor.Monitors)
+            foreach (MonitorInfo monitor in GestoreMonitor.Monitors)
             {
                 if (monitor.Nome == nomeMonitorSalvato)
                 {
@@ -163,22 +208,23 @@ namespace InTempo.Classes.View
 
         public bool SalvaMonitor()
         {
-            if (cmbSchermi.SelectedItem is Utilities.Monitors.Monitor monitorSelezionato)
+            if (cmbSchermi.SelectedItem is MonitorInfo monitorSelezionato)
             {
-                App.Settings.MonitorScelto = monitorSelezionato;
+                _workingSettings.MonitorScelto = monitorSelezionato.Clone();
                 return true;
             }
-            else
-            {
-                FinestraPopUP Errore = new FinestraPopUP("Errore", "Seleziona un monitor valido prima di salvare.", 1);
-                Errore.ShowDialog();
-                return false;
-            }
+
+            FinestraPopUP errore = new FinestraPopUP(
+                "Errore",
+                "Seleziona un monitor valido prima di salvare.",
+                ConfigurazionePulsantiPopup.Ok);
+            errore.ShowDialog();
+            return false;
         }
 
         private void btnIdentifica_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var monitor in GestoreMonitor.Monitors)
+            foreach (MonitorInfo monitor in GestoreMonitor.Monitors)
             {
                 string numeroVero = Regex.Match(monitor.Nome, @"\d+").Value;
 
@@ -187,12 +233,13 @@ namespace InTempo.Classes.View
                     numeroVero = "?";
                 }
 
-                FinestraIdentifica fin = new FinestraIdentifica(numeroVero);
-
-                fin.Left = monitor.AreaTotale.Left;
-                fin.Top = monitor.AreaTotale.Top;
-                fin.Width = monitor.AreaTotale.Width;
-                fin.Height = monitor.AreaTotale.Height;
+                FinestraIdentifica fin = new FinestraIdentifica(numeroVero)
+                {
+                    Left = monitor.AreaTotale.Left,
+                    Top = monitor.AreaTotale.Top,
+                    Width = monitor.AreaTotale.Width,
+                    Height = monitor.AreaTotale.Height
+                };
 
                 fin.Show();
             }
@@ -202,7 +249,7 @@ namespace InTempo.Classes.View
         {
             if (e.ButtonState == MouseButtonState.Pressed)
             {
-                this.DragMove();
+                DragMove();
             }
         }
 
@@ -212,8 +259,11 @@ namespace InTempo.Classes.View
 
             if (string.IsNullOrEmpty(nomefile))
             {
-                FinestraPopUP Errore = new FinestraPopUP("Attenzione", "Inserisci un nome per il salvataggio.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Attenzione",
+                    "Inserisci un nome per il salvataggio.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return;
             }
 
@@ -221,15 +271,21 @@ namespace InTempo.Classes.View
 
             if (successo)
             {
-                FinestraPopUP Successo = new FinestraPopUP("Completato", $"Adunanza '{nomefile}' salvata con successo!", 1);
-                Successo.ShowDialog();
+                FinestraPopUP successoPopup = new FinestraPopUP(
+                    "Completato",
+                    $"Adunanza '{nomefile}' salvata con successo!",
+                    ConfigurazionePulsantiPopup.Ok);
+                successoPopup.ShowDialog();
                 TxtNomeSalvataggio.Clear();
                 AggiornaListaSalvataggi();
             }
             else
             {
-                FinestraPopUP Errore = new FinestraPopUP("Errore", "Si è verificato un problema durante il salvataggio.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Errore",
+                    "Si è verificato un problema durante il salvataggio.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
             }
         }
 
@@ -242,8 +298,11 @@ namespace InTempo.Classes.View
         {
             if (ListAdunanzeSalvate.SelectedItem == null)
             {
-                FinestraPopUP Errore = new FinestraPopUP("Attenzione", "Seleziona un'adunanza dalla lista prima di caricare.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Attenzione",
+                    "Seleziona un'adunanza dalla lista prima di caricare.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return;
             }
 
@@ -252,27 +311,25 @@ namespace InTempo.Classes.View
 
         private void ListAdunanzeSalvate_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (ListAdunanzeSalvate.SelectedItem == null)
+            if (ListAdunanzeSalvate.SelectedItem != null)
             {
-                return;
+                CaricaAdunanzaSelezionata();
             }
-
-            CaricaAdunanzaSelezionata();
         }
 
         private void CaricaAdunanzaSelezionata()
         {
             string nomeFile = ListAdunanzeSalvate.SelectedItem as string ?? string.Empty;
-            Adunanza? adunanzaCaricata = Utilities.GestoreSalvataggi.CaricaAdunanza(nomeFile);
+            Adunanza? adunanzaCaricata = GestoreSalvataggi.CaricaAdunanza(nomeFile);
 
             if (adunanzaCaricata != null)
             {
-                bool wasRunning = TimerLogics.IsRunning;
+                bool wasRunning = Logiche.IsRunning;
                 Logiche.StopTimer();
 
                 Logiche.AdunanzaCorrente.Parti.Clear();
 
-                foreach (var parte in adunanzaCaricata.Parti)
+                foreach (Parte parte in adunanzaCaricata.Parti)
                 {
                     Logiche.AdunanzaCorrente.Parti.Add(parte);
                 }
@@ -281,8 +338,8 @@ namespace InTempo.Classes.View
                 Logiche.AdunanzaCorrente.TempoConsumatoPartiRimosse = adunanzaCaricata.TempoConsumatoPartiRimosse;
                 Logiche.AdunanzaCorrente.NormalizzaTracciamentoResiduo();
 
-                var current = Logiche.AdunanzaCorrente.Parti.FirstOrDefault(p => p.IsCurrent)
-                              ?? Logiche.AdunanzaCorrente.Parti.FirstOrDefault();
+                Parte? current = Logiche.AdunanzaCorrente.Parti.FirstOrDefault(p => p.IsCurrent)
+                                 ?? Logiche.AdunanzaCorrente.Parti.FirstOrDefault();
 
                 Logiche.AdunanzaCorrente.Current = current;
                 Logiche.AggiornaGrafica();
@@ -292,25 +349,33 @@ namespace InTempo.Classes.View
                     Logiche.StartTimer();
                 }
 
-                FinestraPopUP Successo = new FinestraPopUP("Completato", $"Adunanza '{nomeFile}' caricata con successo!", 1);
-                Successo.ShowDialog();
+                FinestraPopUP successo = new FinestraPopUP(
+                    "Completato",
+                    $"Adunanza '{nomeFile}' caricata con successo!",
+                    ConfigurazionePulsantiPopup.Ok);
+                successo.ShowDialog();
 
-                this.DialogResult = true;
-                this.Close();
+                DialogResult = true;
+                Close();
+                return;
             }
-            else
-            {
-                FinestraPopUP Errore = new FinestraPopUP("Errore", "Impossibile caricare il file selezionato.", 1);
-                Errore.ShowDialog();
-            }
+
+            FinestraPopUP errorePopup = new FinestraPopUP(
+                "Errore",
+                "Impossibile caricare il file selezionato.",
+                ConfigurazionePulsantiPopup.Ok);
+            errorePopup.ShowDialog();
         }
 
         private void BtnEliminaAdunanza_Click(object sender, RoutedEventArgs e)
         {
             if (ListAdunanzeSalvate.SelectedItem == null)
             {
-                FinestraPopUP Errore = new FinestraPopUP("Attenzione", "Seleziona un'adunanza dalla lista prima di eliminare.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Attenzione",
+                    "Seleziona un'adunanza dalla lista prima di eliminare.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return;
             }
 
@@ -320,16 +385,20 @@ namespace InTempo.Classes.View
 
             if (eliminato)
             {
-                FinestraPopUP Successo = new FinestraPopUP("Eliminata", $"L'adunanza '{nomeFile}' è stata eliminata.", 1);
-                Successo.ShowDialog();
-
+                FinestraPopUP successo = new FinestraPopUP(
+                    "Eliminata",
+                    $"L'adunanza '{nomeFile}' è stata eliminata.",
+                    ConfigurazionePulsantiPopup.Ok);
+                successo.ShowDialog();
                 AggiornaListaSalvataggi();
+                return;
             }
-            else
-            {
-                FinestraPopUP Errore = new FinestraPopUP("Errore", "Impossibile eliminare il file selezionato.", 1);
-                Errore.ShowDialog();
-            }
+
+            FinestraPopUP errorePopup = new FinestraPopUP(
+                "Errore",
+                "Impossibile eliminare il file selezionato.",
+                ConfigurazionePulsantiPopup.Ok);
+            errorePopup.ShowDialog();
         }
 
         private bool RaccogliDateSorvegliante()
@@ -339,36 +408,31 @@ namespace InTempo.Classes.View
 
             if (data1 == null || data2 == null)
             {
-                FinestraPopUP Errore = new FinestraPopUP("Dati mancanti", "Seleziona entrambe le date per le visite del sorvegliante.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Dati mancanti",
+                    "Seleziona entrambe le date per le visite del sorvegliante.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return false;
             }
-            else if (data1 > data2)
+
+            if (data1 > data2)
             {
-                FinestraPopUP Errore = new FinestraPopUP("Dati non validi", "La prima data non può essere successiva alla seconda data.", 1);
-                Errore.ShowDialog();
+                FinestraPopUP errore = new FinestraPopUP(
+                    "Dati non validi",
+                    "La prima data non può essere successiva alla seconda data.",
+                    ConfigurazionePulsantiPopup.Ok);
+                errore.ShowDialog();
                 return false;
             }
-            else
-            {
-                DateTime lunedi1 = ToMonday(data1.Value);
-                DateTime lunedi2 = ToMonday(data2.Value);
 
-                App.Settings.DateVisitaSorvegliante ??= ImpostazioniAdunanze.CreateDefaultDateVisitaSorvegliante();
-                if (App.Settings.DateVisitaSorvegliante.Length < 2)
-                {
-                    App.Settings.DateVisitaSorvegliante = ImpostazioniAdunanze.CreateDefaultDateVisitaSorvegliante();
-                }
+            DateTime lunedi1 = ToMonday(data1.Value);
+            DateTime lunedi2 = ToMonday(data2.Value);
 
-                App.Settings.DateVisitaSorvegliante[0] = lunedi1;
-                App.Settings.DateVisitaSorvegliante[1] = lunedi2;
-
-                DatePrimaVisita.SelectedDate = lunedi1;
-                DateSecondaVisita.SelectedDate = lunedi2;
-                return true;
-            }
-
-
+            _workingSettings.DateVisitaSorvegliante = new[] { lunedi1, lunedi2 };
+            DatePrimaVisita.SelectedDate = lunedi1;
+            DateSecondaVisita.SelectedDate = lunedi2;
+            return true;
         }
 
         private static DateTime ToMonday(DateTime date)
@@ -379,7 +443,7 @@ namespace InTempo.Classes.View
 
         private void CaricaDateSorvegliante()
         {
-            var dateVisita = App.Settings.DateVisitaSorvegliante ?? Array.Empty<DateTime>();
+            DateTime[] dateVisita = _workingSettings.DateVisitaSorvegliante ?? Array.Empty<DateTime>();
 
             DatePrimaVisita.SelectedDate =
                 dateVisita.Length > 0 && ImpostazioniAdunanze.IsDataVisitaValida(dateVisita[0])
@@ -390,6 +454,123 @@ namespace InTempo.Classes.View
                 dateVisita.Length > 1 && ImpostazioniAdunanze.IsDataVisitaValida(dateVisita[1])
                     ? dateVisita[1]
                     : null;
+        }
+
+        private void AggiornaTemiDisponibili()
+        {
+            TemiDisponibili = ThemeManager.GetAvailableThemes(_workingCustomThemePalette);
+            OnPropertyChanged(nameof(TemiDisponibili));
+        }
+
+        private void CaricaTemaSelezionato()
+        {
+            string temaSelezionato = ThemeManager.GetThemeOrDefault(_workingSettings.TemaSelezionato, _workingCustomThemePalette).Key;
+            ImpostaTemaSelezionatoSenzaEventi(temaSelezionato);
+            _lastThemeSelectionKey = temaSelezionato;
+        }
+
+        private void ImpostaTemaSelezionatoSenzaEventi(string themeKey)
+        {
+            _suppressThemeSelectionChanged = true;
+            LstTemi.SelectedValue = themeKey;
+            _suppressThemeSelectionChanged = false;
+        }
+
+        private bool SalvaTemaSelezionato()
+        {
+            _workingCustomThemePalette.Normalizza();
+            _workingSettings.TemaPersonalizzato = _workingCustomThemePalette.Clone();
+            string temaSelezionato = LstTemi.SelectedValue as string ?? ThemeManager.DefaultThemeKey;
+            string temaRichiesto = ThemeManager.GetThemeOrDefault(temaSelezionato, _workingSettings.TemaPersonalizzato).Key;
+            _workingSettings.TemaSelezionato = ThemeManager.ApplyTheme(temaRichiesto, _workingSettings.TemaPersonalizzato);
+            return true;
+        }
+
+        private void LstTemi_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressThemeSelectionChanged)
+            {
+                return;
+            }
+
+            string temaSelezionato = LstTemi.SelectedValue as string ?? ThemeManager.DefaultThemeKey;
+            if (!string.Equals(temaSelezionato, ThemeManager.CustomThemeKey, StringComparison.OrdinalIgnoreCase))
+            {
+                _lastThemeSelectionKey = temaSelezionato;
+            }
+        }
+
+        private void AggiornaEditorTemaPersonalizzato()
+        {
+            string temaSelezionato = LstTemi.SelectedValue as string ?? ThemeManager.DefaultThemeKey;
+            bool isCustomThemeSelected = string.Equals(temaSelezionato, ThemeManager.CustomThemeKey, StringComparison.OrdinalIgnoreCase);
+
+            if (!isCustomThemeSelected)
+            {
+                _lastThemeSelectionKey = temaSelezionato;
+                return;
+            }
+
+            ThemeCustomizerWindow finestra = new ThemeCustomizerWindow(_workingCustomThemePalette.Clone())
+            {
+                Owner = this
+            };
+
+            bool? risultato = finestra.ShowDialog();
+            if (risultato == true)
+            {
+                _workingCustomThemePalette = finestra.ResultPalette.Clone();
+                _workingCustomThemePalette.Normalizza();
+                _workingSettings.TemaPersonalizzato = _workingCustomThemePalette.Clone();
+                AggiornaTemiDisponibili();
+                ImpostaTemaSelezionatoSenzaEventi(ThemeManager.CustomThemeKey);
+                _lastThemeSelectionKey = ThemeManager.CustomThemeKey;
+                return;
+            }
+
+            string temaRipristino = ThemeManager.GetThemeOrDefault(_lastThemeSelectionKey, _workingCustomThemePalette).Key;
+            ImpostaTemaSelezionatoSenzaEventi(temaRipristino);
+        }
+
+        private void LstTemi_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            bool shouldOpenCustomEditor =
+                TryGetThemeListItemFromOriginalSource(e.OriginalSource, out ListBoxItem? clickedItem)
+                && clickedItem.IsSelected
+                && clickedItem.DataContext is AppThemeDefinition theme
+                && string.Equals(theme.Key, ThemeManager.CustomThemeKey, StringComparison.OrdinalIgnoreCase);
+
+            if (shouldOpenCustomEditor)
+            {
+                AggiornaEditorTemaPersonalizzato();
+            }
+        }
+
+        private void LstTemi_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if ((e.Key == Key.Enter || e.Key == Key.Space)
+                && string.Equals(LstTemi.SelectedValue as string, ThemeManager.CustomThemeKey, StringComparison.OrdinalIgnoreCase))
+            {
+                AggiornaEditorTemaPersonalizzato();
+                e.Handled = true;
+            }
+        }
+
+        private static bool TryGetThemeListItemFromOriginalSource(object originalSource, [NotNullWhen(true)] out ListBoxItem? listBoxItem)
+        {
+            DependencyObject? source = originalSource as DependencyObject;
+            while (source != null && source is not ListBoxItem)
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            listBoxItem = source as ListBoxItem;
+            return listBoxItem != null;
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -34,7 +34,7 @@
                             Margin="0,0,12,0"
                             Click="BtnChiudiIcona_Click"
                             ToolTip="Chiudi">
-                        <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{StaticResource AppAccentBrush}"/>
+                        <materialDesign:PackIcon Kind="Close" Width="30" Height="30" Foreground="{DynamicResource AppAccentBrush}"/>
                     </Button>
 
                     <TextBlock x:Name="lblTitolo"
@@ -116,3 +116,4 @@
         </Grid>
     </materialDesign:Card>
 </Window>
+

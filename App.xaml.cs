@@ -2,6 +2,7 @@
 using System.Data;
 using System.Windows;
 using InTempo.Classes.Utilities.Impostazioni;
+using InTempo.Classes.Utilities.Theming;
 
 namespace InTempo
 {
@@ -16,13 +17,13 @@ namespace InTempo
         {
             base.OnStartup(e);
 
-            // Carico le impostazioni dal file
             Settings = SettingsStore.Load();
+            Settings.TemaSelezionato = ThemeManager.ApplyTheme(Settings.TemaSelezionato, Settings.TemaPersonalizzato);
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            // Salvo le impostazioni su file
+            Settings.TemaSelezionato = ThemeManager.ApplyTheme(Settings.TemaSelezionato, Settings.TemaPersonalizzato);
             SettingsStore.Save(Settings);
 
             base.OnExit(e);
