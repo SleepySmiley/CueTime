@@ -447,26 +447,34 @@ namespace CueTime.Classes.View
             _player.Volume = SliderVolume.Value;
         }
 
-        private void PopupVolumeContent_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+
+        private bool _ignoreNextVolumeButtonClick;
+
+        private void BtnVolume_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (PopupVolumeContent.IsVisible)
+            if (PopupVolume.IsOpen)
             {
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    Keyboard.Focus(PopupVolumeContent);
-                }), DispatcherPriority.Input);
+                _ignoreNextVolumeButtonClick = true;
+                PopupVolume.IsOpen = false;
+                e.Handled = true;
             }
         }
 
-        private void PopupVolumeContent_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void BtnVolume_Click(object sender, RoutedEventArgs e)
         {
-            Dispatcher.BeginInvoke(new Action(() =>
+            if (_ignoreNextVolumeButtonClick)
             {
-                if (!PopupVolumeContent.IsKeyboardFocusWithin)
-                {
-                    PopupVolume.IsPopupOpen = false;
-                }
-            }), DispatcherPriority.Background);
+                _ignoreNextVolumeButtonClick = false;
+                return;
+            }
+
+            PopupVolume.IsOpen = !PopupVolume.IsOpen;
+        }
+
+        private void PopupVolume_Closed(object sender, EventArgs e)
+        {
+            Mouse.Capture(null);
+            Keyboard.ClearFocus();
         }
 
         private static bool IsAudioSupportato(string filePath)

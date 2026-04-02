@@ -1,3 +1,15 @@
 <Solution>
-  <Project Path="CueTime.csproj" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="../CueTimeBuild/CueTimeBuild.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5" Id="4d59aea6-d02f-4380-971e-e5996467150f">
+    <Deploy />
+  </Project>
+  <Project Path="CueTime.csproj">
+    <Platform Solution="Release|x64" Project="x64" />
+  </Project>
 </Solution>
