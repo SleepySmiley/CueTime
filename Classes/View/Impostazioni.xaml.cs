@@ -55,30 +55,32 @@ namespace CueTime.Classes.View
 
         private void BtnSalva_Click(object sender, RoutedEventArgs e)
         {
-            if (!PrendiGiorni())
-            {
+            if (!TryGetGiorno(CmbGiornoInfra.SelectedItem as ComboBoxItem, "Infrasettimanale", out DayOfWeek giornoInfra))
                 return;
-            }
 
-            if (!PrendiOrario())
-            {
+            if (!TryGetGiorno(CmbGiornoFine.SelectedItem as ComboBoxItem, "Fine Settimana", out DayOfWeek giornoFine))
                 return;
-            }
 
-            if (!SalvaMonitor())
-            {
+            if (!TryGetOrari(out DateTime orarioInfra, out DateTime orarioFine))
                 return;
-            }
 
-            if (!RaccogliDateSorvegliante())
-            {
+            if (!TryGetMonitor(out MonitorInfo monitorSelezionato))
                 return;
-            }
+
+            if (!TryGetDateSorvegliante(out DateTime[] dateVisitaSorvegliante))
+                return;
 
             if (!SalvaTemaSelezionato())
             {
                 return;
             }
+
+            _workingSettings.Infrasettimanale.GiornoSettimana = giornoInfra;
+            _workingSettings.FineSettimana.GiornoSettimana = giornoFine;
+            _workingSettings.Infrasettimanale.OraInizio = orarioInfra;
+            _workingSettings.FineSettimana.OraInizio = orarioFine;
+            _workingSettings.MonitorScelto = monitorSelezionato.Clone();
+            _workingSettings.DateVisitaSorvegliante = dateVisitaSorvegliante;
 
             _settings.CopyFrom(_workingSettings);
             SettingsStore.Save(_settings);
@@ -92,21 +94,9 @@ namespace CueTime.Classes.View
             Close();
         }
 
-        private bool PrendiGiorni()
+        public bool TryGetGiorno(ComboBoxItem? cmbGiorno, string tipoAdunanza, out DayOfWeek giornoSettimana)
         {
-            if (!TryGetDayOfWeekFromCombo(CmbGiornoInfra.SelectedItem as ComboBoxItem, "Infrasettimanale", out DayOfWeek giornoInfra))
-            {
-                return false;
-            }
-
-            if (!TryGetDayOfWeekFromCombo(CmbGiornoFine.SelectedItem as ComboBoxItem, "Fine Settimana", out DayOfWeek giornoFine))
-            {
-                return false;
-            }
-
-            _workingSettings.Infrasettimanale.GiornoSettimana = giornoInfra;
-            _workingSettings.FineSettimana.GiornoSettimana = giornoFine;
-            return true;
+            return TryGetDayOfWeekFromCombo(cmbGiorno, tipoAdunanza, out giornoSettimana);
         }
 
         private bool TryGetDayOfWeekFromCombo(ComboBoxItem? cmbGiorno, string tipoAdunanza, out DayOfWeek giornoSettimana)
@@ -137,8 +127,11 @@ namespace CueTime.Classes.View
             return true;
         }
 
-        public bool PrendiOrario()
+        public bool TryGetOrari(out DateTime orarioInfra, out DateTime orarioFine)
         {
+            orarioInfra = DateTime.MinValue;
+            orarioFine = DateTime.MinValue;
+
             if (TimePickerInfra.SelectedTime == null)
             {
                 FinestraPopUP errore = new FinestraPopUP(
@@ -159,8 +152,8 @@ namespace CueTime.Classes.View
                 return false;
             }
 
-            _workingSettings.Infrasettimanale.OraInizio = (DateTime)TimePickerInfra.SelectedTime;
-            _workingSettings.FineSettimana.OraInizio = (DateTime)TimePickerFine.SelectedTime;
+            orarioInfra = (DateTime)TimePickerInfra.SelectedTime;
+            orarioFine = (DateTime)TimePickerFine.SelectedTime;
 
             return true;
         }
@@ -206,14 +199,15 @@ namespace CueTime.Classes.View
             }
         }
 
-        public bool SalvaMonitor()
+        public bool TryGetMonitor(out MonitorInfo monitorSelezionato)
         {
-            if (cmbSchermi.SelectedItem is MonitorInfo monitorSelezionato)
+            if (cmbSchermi.SelectedItem is MonitorInfo monitor)
             {
-                _workingSettings.MonitorScelto = monitorSelezionato.Clone();
+                monitorSelezionato = monitor;
                 return true;
             }
 
+            monitorSelezionato = ImpostazioniAdunanze.CreateDefaultMonitor();
             FinestraPopUP errore = new FinestraPopUP(
                 "Errore",
                 "Seleziona un monitor valido prima di salvare.",
@@ -411,10 +405,17 @@ namespace CueTime.Classes.View
             errorePopup.ShowDialog();
         }
 
-        private bool RaccogliDateSorvegliante()
+        private bool TryGetDateSorvegliante(out DateTime[] dateVisitaSorvegliante)
         {
+            dateVisitaSorvegliante = ImpostazioniAdunanze.CreateDefaultDateVisitaSorvegliante();
+
             DateTime? data1 = DatePrimaVisita.SelectedDate;
             DateTime? data2 = DateSecondaVisita.SelectedDate;
+
+            if (data1 == null && data2 == null)
+            {
+                return true;
+            }
 
             if (data1 == null || data2 == null)
             {
@@ -435,11 +436,10 @@ namespace CueTime.Classes.View
                 errore.ShowDialog();
                 return false;
             }
-
             DateTime lunedi1 = ToMonday(data1.Value);
             DateTime lunedi2 = ToMonday(data2.Value);
 
-            _workingSettings.DateVisitaSorvegliante = new[] { lunedi1, lunedi2 };
+            dateVisitaSorvegliante = new[] { lunedi1, lunedi2 };
             DatePrimaVisita.SelectedDate = lunedi1;
             DateSecondaVisita.SelectedDate = lunedi2;
             return true;
